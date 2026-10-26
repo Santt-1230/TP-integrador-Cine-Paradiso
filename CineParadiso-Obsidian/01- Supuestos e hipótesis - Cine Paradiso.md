@@ -50,7 +50,7 @@
 
 | ID | Supuesto | Impacta en | Estado | Notas |
 | --- | --- | --- | --- | --- |
-| S-01 | Hay dos roles: cliente, administrador y publico. | Tabla usuario, seguridad | Propuesto | |
+| S-01 | Hay tres roles: cliente, administrador y publico. | Tabla usuario, seguridad | Propuesto | |
 | S-02 | El cliente se registra solo, y el registro público nunca puede crear administradores. | `/api/auth/registro` | Propuesto | |
 | S-03 | El administrador viene cargado en el script inicial de datos. | Script SQL | Propuesto | |
 | S-04 | El email es único por usuario. | Tabla usuario, registro | Propuesto | |
