@@ -40,7 +40,7 @@
 | S-02 | El cliente se registra solo, y el registro público nunca puede crear administradores. | `/api/auth/registro` |
 | S-03 | El administrador viene cargado en el script inicial de datos. | Script SQL |
 | S-04 | El email es único por usuario. | Tabla usuario, registro |
-| S-05 | La autenticación es por token (a confirmar contra sesiones) y las contraseñas se guardan solo como hash. | Login, todos los endpoints |
+| S-05 | La autenticación es por token (a confirmar) y las contraseñas se guardan solo como hash. | Login, todos los endpoints |
 | S-06 | Los permisos se comprueban siempre en el backend; ocultar un botón en el front no protege nada. | Decorador de roles |
 | S-07 | Para comprar hay que iniciar sesión; la cartelera y las funciones se pueden ver sin cuenta. | Endpoints públicos |
 
@@ -145,3 +145,6 @@
 | P-05 | Que consideraciones hay que tener en base al tamaño/alcance del cine |
 | P-06 | Consulta sobre estacionamiento y el espacio del mismo. Discutir |
 | P-07 | En caso de que se elija la misma butaca al mismo tiempo por dos usuarios al mismo tiempo, que pasa? |
+| P-08 | ¿Limite de cantidad de admins? |
+| P-09 | ¿Se ingresa edad mediante form o con dni y con este se averigua edad con renaper? |
+| P-10 | ¿Cuanto tiempo dura la sesion abierta? |
