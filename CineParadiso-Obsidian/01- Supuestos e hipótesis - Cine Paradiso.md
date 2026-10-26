@@ -26,7 +26,7 @@
 | --- | --- |
 | Hipótesis sin verificar | 5 |
 | Hipótesis verificadas | 0 |
-| Pendientes de decidir | 7 |
+| Pendientes de decidir | 10 |
 
 ---
 
