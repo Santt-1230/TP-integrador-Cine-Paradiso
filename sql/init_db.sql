@@ -22,5 +22,15 @@ estado BOOLEAN NOT NULL DEFAULT TRUE,
 FOREIGN KEY(id_local) REFERENCES locales(id_local)
 )CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS usuarios (
+    id_usuario INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(150) NOT NULL,
+    email VARCHAR(200) NOT NULL UNIQUE,
+    contrasena_hash VARCHAR(255) NOT NULL,
+    rol ENUM('cliente', 'administrador') NOT NULL DEFAULT 'cliente',
+    activo BOOLEAN NOT NULL DEFAULT TRUE,
+    fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+)CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
 
 
