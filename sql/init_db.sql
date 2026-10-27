@@ -46,4 +46,19 @@ CREATE TABLE IF NOT EXISTS usuarios (
 )CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 
+INSERT INTO locales (nombre, direccion) VALUES
+    ('Paradiso Centro', 'Calle Falsa 123'),
+    ('Paradiso Norte', 'Avenida Ejemplo 456'),
+    ('Paradiso Sur', 'Calle de Prueba 789');
+
+INSERT INTO salas (id_local, numero_sala, capacidad) VALUES
+    (1, 1, 6),
+    (2, 1, 6);
+
+INSERT INTO butacas (id_sala, fila, numero) VALUES
+    (1, 'A', 1), (1, 'A', 2), (1, 'A', 3),
+    (1, 'B', 1), (1, 'B', 2), (1, 'B', 3),
+    (2, 'A', 1), (2, 'A', 2), (2, 'A', 3),
+    (2, 'B', 1), (2, 'B', 2), (2, 'B', 3);
+
 
