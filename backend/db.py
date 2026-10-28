@@ -3,7 +3,7 @@ import mysql.connector
 
 
 def obtener_conexion():
-    variables = ("DB_HOST", "DB_NAME", "DB_USER", "DB_PASSWORD")
+    variables = ("DB_HOST", "DB_PORT", "DB_NAME", "DB_USER", "DB_PASSWORD")
     faltantes = [variable for variable in variables if not os.getenv(variable)]
     if faltantes:
         raise ConnectionError(f"Faltan variables de conexion: {', '.join(faltantes)}")
