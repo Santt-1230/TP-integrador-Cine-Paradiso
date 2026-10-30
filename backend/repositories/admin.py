@@ -2,18 +2,67 @@ from db import obtener_conexion
 
 
 def obtener_usuarios():
-    
-    try: 
-        conexion = obtener_conexion()
+
+    conexion = obtener_conexion()
+    cursor = None
+
+    try:
         cursor = conexion.cursor(dictionary=True)
 
-        cursor.execute("""SELECT id_usuario, nombre, email, rol FROM usuario""") #No agrego contrasena por temas de seguridad
+        cursor.execute("""
+            SELECT id_usuario, nombre, email, rol
+            FROM usuario
+        """)
 
-        usuarios = cursor.fetchall() #.fetchall se utiliza para recuperar todas las filas restantes del resultado de una consulta SQL ejecutada previamente
-
+        return cursor.fetchall()
 
     finally:
-        cursor.close()
+        if cursor:
+            cursor.close()
+
         conexion.close()
 
-    return usuarios
+
+
+def obtener_usuario_por_id(id):
+    conexion = obtener_conexion()
+    cursor = None
+
+    try:
+        cursor = conexion.cursor(dictionary=True)
+
+        cursor.execute("""
+            SELECT id_usuario, nombre, email, rol
+            FROM usuario
+            WHERE id_usuario = %s
+        """, (id,))
+
+        return cursor.fetchone()
+
+    finally:
+        if cursor:
+            cursor.close()
+
+        conexion.close()
+
+
+def actualizar_usuario(id, nombre, email, rol):
+    conexion = obtener_conexion()
+    cursor = None
+
+    try:
+        cursor = conexion.cursor()
+
+        cursor.execute("""
+            UPDATE usuario
+            SET nombre = %s, email = %s, rol = %s
+            WHERE id_usuario = %s
+        """, (nombre, email, rol, id))
+
+        conexion.commit()
+
+    finally:
+        if cursor:
+            cursor.close()
+
+        conexion.close()

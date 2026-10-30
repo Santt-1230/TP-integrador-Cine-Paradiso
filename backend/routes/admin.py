@@ -1,37 +1,35 @@
-from flask import Blueprint, jsonify 
+from flask import Blueprint, jsonify, request 
+from backend.repositories import admin 
 
-admin_bp = Blueprint("bloqueos", __name__)
+admin_bp = Blueprint("admin", __name__)
 
 
 @admin_bp.route("/api/admin/usuarios", methods=["GET"])
 def get_usuarios():
-    usuarios = admin_service.obtener_usuarios()
+    usuarios = admin.obtener_usuarios()
     return jsonify(usuarios), 200
 
-@admin_bp.route("/api/admin/usuarios/<int:id>", methods = ["GET"])
+
+@admin_bp.route("/api/admin/usuarios/<int:id>/editar", methods = ["GET"])
 def get_usuario(id):
-    pass
+    usuario = admin.obtener_usuario_por_id(id)
+    if usuario:
+        return jsonify(usuario), 200
+    else:
+        return jsonify({"error": "Usuario no encontrado"}), 404
 
-@admin_bp.route("/api/admin/usuarios/<int:id>", methods = ["PATCH"])
+
+
+@admin_bp.route("/api/admin/usuarios/<int:id>/editar", methods = ["PATCH"])
 def update_usuario(id):
-    pass
+    data = request.get_json()
+    nombre = data.get("nombre")
+    email = data.get("email")
+    rol = data.get("rol")
 
-@admin_bp.route("/estadisticas/ocupacion", methods=["GET"])
-def get_estadisticas_ocupacion():
-    pass
+    if not nombre or not email or not rol:
+        return jsonify({"error": "Faltan datos requeridos"}), 400
 
-@admin_bp.route("/estadisticas/ventas", methods=["GET"])
-def get_estadisticas_ventas():
-    pass
+    admin.actualizar_usuario(id, nombre, email, rol)
+    return jsonify({"message": "Usuario actualizado correctamente"}), 200
 
-@admin_bp.route("/estadisticas/ventas_por_genero", methods=["GET"])
-def get_estadisticas_ventas_por_genero():
-    pass
-
-@admin_bp.route("/estadisticas/cancelaciones", methods=["GET"])
-def get_estadisticas_cancelaciones():
-    pass
-
-@admin_bp.route("/estadisticas/franjas_horarias", methods=["GET"]) #horarios que se pasan las peliculas, no los horarios de las funciones
-def get_estadisticas_franjas_horarias():
-    pass
