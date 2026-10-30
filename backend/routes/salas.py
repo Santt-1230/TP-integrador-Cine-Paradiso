@@ -19,12 +19,29 @@ def obtener_salas():
         return jsonify(error.args[0]), 400
     
     except (RuntimeError, mysql.connector.Error):
-        respuesta = ut.construir_error_api(
-            code=const.ERROR_CODE_DATABASE_ERROR,
-            message='No se pudieron listar las salas',
-            description='Ocurrio un problema al consultar la base de datos'
-        )
-        return jsonify(respuesta), 500
+        return jsonify(ut.construir_error_db()), 500
+
+@salas_bp.route('/salas<id_salas>', methods=['GET'])
+def obtener_sala_id(id_sala):
+    try:
+        sala = salas_services.listar_sala_id(id_sala)
+
+        if sala is None:
+            error = ut.construir_error_api(
+                code=const.ERROR_CODE_SALA_NOT_FOUND,
+                message='Sala no encontrada',
+                description=f"No existe una sala registrada con el ID '{id_sala}'."
+            )
+            return jsonify(error), 404
+        
+        return jsonify({sala:'sala'}), 200
+    
+    except ValueError as error:
+        return jsonify(error.args[0]), 400
+    
+    except (RuntimeError, mysql.connector.Error):
+        return jsonify(ut.construir_error_db()), 500
+
 
     
     

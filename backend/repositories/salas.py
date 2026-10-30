@@ -3,7 +3,7 @@ from db import (
     ejecutar_mutacion
 )
 
-def listar_salas(id_local = None)->list[dict]:
+def listar_salas_por_local(id_local = None)->list[dict]:
     sql = 'SELECT s.* , l.nombre AS nombre_local FROM salas' \
     'INNER JOIN locales l ON l.id_local = s.id_local'
     parametros = ()
@@ -15,5 +15,6 @@ def listar_salas(id_local = None)->list[dict]:
 
 def listar_sala_por_id(id_sala: int)-> dict:
     sql = 'SELECT * FROM salas WHERE id_sala = %s'
-    filas = ejecutar_consulta(sql, (id_sala))
+    filas = ejecutar_consulta(sql, (id_sala,))
+    return filas[0] if filas else None
 

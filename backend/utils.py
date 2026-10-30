@@ -1,4 +1,3 @@
-from flask import jsonify
 import logging
 import constants as const
 
@@ -13,6 +12,13 @@ def construir_error_api(code:str, message:str, description:str, level:str = 'err
             "description" : description
         }]
     }
+
+def construir_error_db():
+    return construir_error_api(
+        code=const.ERROR_CODE_DATABASE_ERROR,
+        message=const.ERROR_MESSAGE_DATABASE_ERROR,
+        description=const.ERROR_DESCRIPTION_DATABASE_ERROR
+    )
 
 def validar_entero_positivo(valor, minimo, nombre):
     if valor is None or str(valor).strip == "":
@@ -36,3 +42,4 @@ def validar_entero_positivo(valor, minimo, nombre):
             description=f"'{nombre}' debe ser mayor o igual a '{minimo}', se recibio {valor}"
         ))
     return valor
+

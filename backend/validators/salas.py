@@ -5,4 +5,11 @@ import constants as const
 def validar_id_local(id_local)->int:
     if id_local is None:
         return None
-    return ut.validar_entero_positivo(id_local, const.ENTERO_POSITIVO_MINIMO, "id_local")
+    return ut.validar_entero_positivo(
+        id_local, const.ENTERO_POSITIVO_MINIMO, 'id_local'
+    )
+
+def validar_id_sala(id_sala)->int:
+    return ut.validar_entero_positivo(
+        id_sala, const.ERROR_CODE_INVALID_MIN_VALUE, 'id_sala'
+    )
