@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block titulo %}Mis compras - Cine Paradiso{% endblock %}
+
+ <main>
+        {% block contenido %}
+<div class="page-with-sidebar">
+    
+    <!-- Columna Izquierda: Sidebar del usuario -->
+    <aside class="user-sidebar">
+        <div class="user-greeting">Bienvenido {{ nombre.upper() }}</div>
+        <nav class="sidebar-menu">
+            <a href="#">PELICULAS VISTAS</a>
+            <a href="#">MIS COMPRAS</a>
+            <a href="#">RESEÑAS</a>
+            <a href="#">CUPONES Y PUNTOS</a>
+            <a href="#">MERCH</a>
+            <a href="#">TU OPINION</a>
+            <a href="#">ARREPENTIMIENTO</a>
+            <a href="#">DAR DE BAJA</a>
+        </nav>
+    </aside>
+    <section>
+        {% block seccion_nav %}
+        <h2>Mis compras</h2>
+        {% endblock %}
+    </section>
+
+</div>
+        {% endblock %}
+</main>
