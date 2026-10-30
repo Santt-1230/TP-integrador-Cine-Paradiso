@@ -32,6 +32,18 @@ def obtener_conexion():
         raise RuntimeError("No se pudo conectar con la base de datos") from error
     return conexion
 
+def ejecutar_consulta(sql:str, parametros : tuple = ())->list[dict]:
+    conexion=obtener_conexion()
+    cursor=None
+    try:
+        cursor = conexion.cursor(dictionary=True)
+        cursor.execute(sql,parametros)
+        return cursor.fetchall()
+    finally:
+        if cursor is not None:
+            cursor.close()
+        conexion.close()
+    
 def ejecutar_mutacion(sql:str, parametros :tuple = ())-> dict:
     conexion=obtener_conexion()
     cursor=None
