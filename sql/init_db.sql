@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS salas(
 	activa BOOLEAN NOT NULL DEFAULT TRUE,
 	FOREIGN KEY(id_local) REFERENCES locales(id_local),
 	CONSTRAINT uq_salas_local_numero UNIQUE (id_local, numero_sala),
-    CONSTRAINT chk_salas_numero CHECK (numero_sala > 0)
+    CONSTRAINT chk_salas_numero CHECK (numero_sala > 0),
 	CONSTRAINT chk_salas_capacidad CHECK (capacidad > 0)
 )CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -46,11 +46,41 @@ CREATE TABLE IF NOT EXISTS usuarios (
 )CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 
+
+
+CREATE TABLE IF NOT EXISTS compras (
+	id_compra INT AUTO_INCREMENT PRIMARY KEY,
+	id_usuario INT NOT NULL,
+	id_funcion INT NOT NULL,
+	estado ENUM('pendiente', 'confirmada', 'cancelada', 'expirada') NOT NULL DEFAULT 'pendiente',
+	fecha_creacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	expira_en DATETIME NOT NULL,
+	fecha_confirmacion DATETIME NOT NULL,
+	total DECIMAL(10,2) NOT NULL DEFAULT 0,
+	numero_factura VARCHAR(30) NULL UNIQUE,
+	fecha_cancelacion DATETIME NULL,
+	motivo_cancelacion ENUM('cliente', ' funcion_cancelada') NULL,
+	monto_reembolsado DECIMAL(10,2) NULL,
+	Foreign Key (id_usuario) REFERENCES usuarios(id_usuario),
+	Foreign Key (id_funcion) REFERENCES funciones(id_usuario)
+);
+
+CREATE TABLE IF NOT EXISTS entradas(
+	id_entrada INT AUTO_INCREMENT PRIMARY KEY,
+	id_compra INT NOT NULL,
+	id_funcion INT NOT NULL,
+	id_butaca INT NOT NULL,
+	precio_unitario DECIMAL(10,2) NOT NULL,
+	estado ENUM('reservada', 'confirmada', 'utilizada', 'cancelada') NOT NULL DEFAULT 'reservada',
+	butaca_ocupada INT GENERATED ALWAYS AS (CASE WHEN estado = 'cancelada' THEN NULL ELSE id_butaca END) STORED,
+	Foreign Key (id_compra) REFERENCES compras(id_compra),
+	Foreign Key (id_funcion) REFERENCES funciones(id_funcion),
+	Foreign Key (id_butaca) REFERENCES butacas(id_butaca),
+);
 INSERT INTO locales (nombre, direccion) VALUES
     ('Paradiso Centro', 'Calle Falsa 123'),
     ('Paradiso Norte', 'Avenida Ejemplo 456'),
     ('Paradiso Sur', 'Calle de Prueba 789');
-
 INSERT INTO salas (id_local, numero_sala, capacidad) VALUES
     (1, 1, 6),
     (2, 1, 6);
