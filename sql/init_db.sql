@@ -72,6 +72,8 @@ CREATE TABLE IF NOT EXISTS entradas(
 	id_butaca INT NOT NULL,
 	precio_unitario DECIMAL(10,2) NOT NULL,
 	estado ENUM('reservada', 'confirmada', 'utilizada', 'cancelada') NOT NULL DEFAULT 'reservada',
+	token_qr VARCHAR(255) NULL UNIQUE,
+    fecha_uso DATETIME NULL,
 	butaca_ocupada INT GENERATED ALWAYS AS (CASE WHEN estado = 'cancelada' THEN NULL ELSE id_butaca END) STORED,
 	Foreign Key (id_compra) REFERENCES compras(id_compra),
 	Foreign Key (id_funcion) REFERENCES funciones(id_funcion),
