@@ -45,9 +45,6 @@ CREATE TABLE IF NOT EXISTS usuarios (
     fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 )CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
-
-
-
 CREATE TABLE IF NOT EXISTS compras (
 	id_compra INT AUTO_INCREMENT PRIMARY KEY,
 	id_usuario INT NOT NULL,
@@ -62,8 +59,9 @@ CREATE TABLE IF NOT EXISTS compras (
 	motivo_cancelacion ENUM('cliente', ' funcion_cancelada') NULL,
 	monto_reembolsado DECIMAL(10,2) NULL,
 	Foreign Key (id_usuario) REFERENCES usuarios(id_usuario),
-	Foreign Key (id_funcion) REFERENCES funciones(id_usuario)
+	Foreign Key (id_funcion) REFERENCES funciones(id_funcion)
 );
+
 
 CREATE TABLE IF NOT EXISTS entradas(
 	id_entrada INT AUTO_INCREMENT PRIMARY KEY,
@@ -75,7 +73,7 @@ CREATE TABLE IF NOT EXISTS entradas(
 	butaca_ocupada INT GENERATED ALWAYS AS (CASE WHEN estado = 'cancelada' THEN NULL ELSE id_butaca END) STORED,
 	Foreign Key (id_compra) REFERENCES compras(id_compra),
 	Foreign Key (id_funcion) REFERENCES funciones(id_funcion),
-	Foreign Key (id_butaca) REFERENCES butacas(id_butaca),
+	Foreign Key (id_butaca) REFERENCES butacas(id_butaca)
 );
 INSERT INTO locales (nombre, direccion) VALUES
     ('Paradiso Centro', 'Calle Falsa 123'),
