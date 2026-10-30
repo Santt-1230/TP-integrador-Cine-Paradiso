@@ -46,6 +46,36 @@ CREATE TABLE IF NOT EXISTS usuarios (
 )CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 
+
+CREATE TABLE IF NOT EXISTS productos (
+	id_producto INT AUTO_INCREMENT PRIMARY KEY,
+	nombre VARCHAR(100) NOT NULL,
+	tipo ENUM('comida', 'bebida', 'estacionamiento', 'vip') NOT NULL,
+	descripcion VARCHAR(255),
+	precio DECIMAL(10,2) NOT NULL CHECK (precio > 0),
+	activo BOOLEAN NOT NULL DEFAULT TRUE
+);
+
+CREATE TABLE IF NOT EXISTS promociones (
+	id_promocion INT AUTO_INCREMENT PRIMARY KEY,
+	nombre VARCHAR(150) NOT NULL,
+	descripcion VARCHAR(300),
+	imagen_url VARCHAR(500),
+	vigente_desde DATE NOT NULL,
+	vigente_hasta DATE NOT NULL,
+	activa BOOLEAN NOT NULL DEFAULT TRUE
+);
+
+CREATE TABLE IF NOT EXISTS compra_productos (
+	id_compra_producto INT AUTO_INCREMENT PRIMARY KEY,
+	id_compra INT NOT NULL,
+	id_producto INT NOT NULL,
+	cantidad INT NOT NULL DEFAULT 1 CHECK (cantidad > 0),
+	precio_unitario DECIMAL(10,2) NOT NULL,
+	FOREIGN KEY (id_compra) REFERENCES compras(id_compra),
+	FOREIGN KEY (id_producto) REFERENCES productos(id_producto)
+);
+
 INSERT INTO locales (nombre, direccion) VALUES
     ('Paradiso Centro', 'Calle Falsa 123'),
     ('Paradiso Norte', 'Avenida Ejemplo 456'),
