@@ -46,6 +46,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
 )CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 
+
 CREATE TABLE IF NOT EXISTS productos (
 	id_producto INT AUTO_INCREMENT PRIMARY KEY,
 	nombre VARCHAR(100) NOT NULL,
@@ -71,8 +72,8 @@ CREATE TABLE IF NOT EXISTS compra_productos (
 	id_producto INT NOT NULL,
 	cantidad INT NOT NULL DEFAULT 1 CHECK (cantidad > 0),
 	precio_unitario DECIMAL(10,2) NOT NULL,
-	FOREIGN KEY id_compra REFERENCES compras(id_compra),
-	FOREIGN KEY id_producto REFERENCES productos(id_producto)
+	FOREIGN KEY (id_compra) REFERENCES compras(id_compra),
+	FOREIGN KEY (id_producto) REFERENCES productos(id_producto)
 );
 
 INSERT INTO locales (nombre, direccion) VALUES
