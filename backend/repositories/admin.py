@@ -17,9 +17,7 @@ def obtener_usuarios():
         return cursor.fetchall()
 
     finally:
-        if cursor:
-            cursor.close()
-
+        cursor.close()
         conexion.close()
 
 
@@ -40,9 +38,7 @@ def obtener_usuario_por_id(id):
         return cursor.fetchone()
 
     finally:
-        if cursor:
-            cursor.close()
-
+        cursor.close()
         conexion.close()
 
 
@@ -62,7 +58,5 @@ def actualizar_usuario(id, nombre, email, rol):
         conexion.commit()
 
     finally:
-        if cursor:
-            cursor.close()
-
+        cursor.close()
         conexion.close()

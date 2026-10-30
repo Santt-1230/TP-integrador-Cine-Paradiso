@@ -1,19 +1,16 @@
 from functools import wraps
-from flask import jsonify
-from flask_jwt_extended import get_jwt
-
+from flask import session, jsonify
 
 
 def requiere_admin(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
 
-        claims = get_jwt()
+        if session.get("id_usuario") is None:
+            return jsonify({"error": "Debés iniciar sesión"}), 401
 
-        if claims.get("rol") != "admin":
-            return jsonify({
-                "error": "No tenés permisos de administrador"
-            }), 403
+        if session.get("rol") != "admin":
+            return jsonify({"error": "No tenés permisos de administrador"}), 403
 
         return func(*args, **kwargs)
 
@@ -26,14 +23,18 @@ def validar_rol(rol):
     return rol in roles_permitidos
 
 
-def validar_actualizacion_usuario(nombre, email, rol):
-    if not nombre or not nombre.strip():
-        return False
+def validar_actualizacion_usuario(nombre=None, email=None, rol=None):
 
-    if not email or not email.strip():
-        return False
+    if nombre is not None:
+        if not nombre.strip():
+            return False
 
-    if not validar_rol(rol):
-        return False
+    if email is not None:
+        if not email.strip():
+            return False
+
+    if rol is not None:
+        if not validar_rol(rol):
+            return False
 
     return True

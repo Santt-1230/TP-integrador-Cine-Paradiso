@@ -1,25 +1,37 @@
 from db import obtener_conexion
 
 
-def obtener_ventas_totales():
+from db import obtener_conexion
+
+
+def obtener_ventas_totales(periodo):
+
+    agrupaciones = {
+        "anual": "YEAR(fecha_confirmacion)",
+        "mensual": "YEAR(fecha_confirmacion), MONTH(fecha_confirmacion)",
+        "diario": "YEAR(fecha_confirmacion), MONTH(fecha_confirmacion), DAY(fecha_confirmacion)"
+    }
+
+    agrupacion = agrupaciones[periodo]
+
     conexion = obtener_conexion()
-    cursor = None
 
     try:
         cursor = conexion.cursor(dictionary=True)
 
-        cursor.execute("""SELECT SUM(ventas) AS ventas_totales
-FROM (
-    SELECT SUM(precio) AS ventas
-    FROM entrada
+        cursor.execute(f"""
+            SELECT
+                YEAR(fecha_confirmacion) AS anio,
+                MONTH(fecha_confirmacion) AS mes,
+                DAY(fecha_confirmacion) AS dia,
+                SUM(total) AS ventas_totales
+            FROM compras
+            WHERE estado = 'confirmada'
+            GROUP BY {agrupacion}
+            ORDER BY anio, mes, dia;
+        """)
 
-    UNION ALL
-
-    SELECT SUM(precio) AS ventas
-    FROM productos
-) AS total;
-            
-            """)
+        return cursor.fetchall()
 
     finally:
         cursor.close()
