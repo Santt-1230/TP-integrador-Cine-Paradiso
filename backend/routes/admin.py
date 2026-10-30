@@ -1,0 +1,35 @@
+from flask import Blueprint, jsonify, request 
+from backend.repositories import admin 
+
+admin_bp = Blueprint("admin", __name__)
+
+
+@admin_bp.route("/api/admin/usuarios", methods=["GET"])
+def get_usuarios():
+    usuarios = admin.obtener_usuarios()
+    return jsonify(usuarios), 200
+
+
+@admin_bp.route("/api/admin/usuarios/<int:id>/editar", methods = ["GET"])
+def get_usuario(id):
+    usuario = admin.obtener_usuario_por_id(id)
+    if usuario:
+        return jsonify(usuario), 200
+    else:
+        return jsonify({"error": "Usuario no encontrado"}), 404
+
+
+
+@admin_bp.route("/api/admin/usuarios/<int:id>/editar", methods = ["PATCH"])
+def update_usuario(id):
+    data = request.get_json()
+    nombre = data.get("nombre")
+    email = data.get("email")
+    rol = data.get("rol")
+
+    if not nombre or not email or not rol:
+        return jsonify({"error": "Faltan datos requeridos"}), 400
+
+    admin.actualizar_usuario(id, nombre, email, rol)
+    return jsonify({"message": "Usuario actualizado correctamente"}), 200
+
