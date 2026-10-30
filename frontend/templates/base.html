@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title> {% block titulo %} Cine Paradiso {% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    {% block estilos_extra %}{% endblock %}
+</head>
+<body>
+<header>
+    <div class="header-principal">
+        <a href="#" class="logo">CINE PARADISO</a>
+
+        <nav class="menu-principal">
+            <details class="desplegable">
+                <summary>Elegí por cine ↓</summary>
+                <ul>
+                    {% for local in locales %}
+                        <li><a href="{{ url_for('elegir_cine', id_local=local.id_local) }}">{{ local.nombre }}</a></li>
+                    {% endfor %}
+                </ul>
+            </details>
+            <a href="#">Elegí por película</a>
+            <span class="cine-actual">
+                <i class="bi bi-geo-alt-fill"></i> {{ session.get('cine_nombre', 'Cine') }}
+            </span>
+        </nav>
+
+        <form class="buscador" action="#" method="get">
+            <input type="search" name="q" placeholder="Buscar película" aria-label="Buscar película">
+        </form>
+
+        {% if session.get('id_usuario') %}
+            <span class="nombre-usuario">{{ session.get('nombre') }} {{ session.get('apellido') }}</span>
+        {% else %}
+            <a href="#" class="usuario" aria-label="Ingresar"><i class="bi bi-person-fill"></i></a>
+        {% endif %}
+    </div>
+
+     {% block menu_secundario %}{% endblock %}
+
+</header>
+
+    <main>
+        {% block contenido %}{% endblock %}
+    </main>
+
+    <footer>
+    <a href="#" class="logo">CINE PARADISO</a>
+
+    <div class="redes">
+        <a href="#" aria-label="X"><i class="bi bi-twitter-x"></i></a>
+        <a href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+        <a href="#" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+    </div>
+
+    <nav class="footer-links">
+        <a href="#">Sobre nosotros</a>
+        <a href="#">Locales</a>
+        <a href="#">Términos y condiciones</a>
+        <a href="#">Política de cookies</a>
+    </nav>
+    </footer>
+</body>
+</html>
