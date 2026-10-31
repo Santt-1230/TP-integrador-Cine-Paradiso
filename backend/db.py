@@ -47,3 +47,19 @@ def ejecutar_mutacion(sql:str, parametros :tuple = ())-> dict:
         if cursor is not None:
             cursor.close()
         conexion.close()
+
+def ejecutar_consulta(consulta, parametros=None):
+    conexion = obtener_conexion()
+    cursor = None
+
+    try:
+        cursor = conexion.cursor(dictionary=True)
+        cursor.execute(consulta, parametros or ())
+        return cursor.fetchall()
+
+    finally:
+        try:
+            if cursor is not None:
+                cursor.close()
+        finally:
+            conexion.close()
