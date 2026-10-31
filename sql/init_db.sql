@@ -76,6 +76,36 @@ CREATE TABLE IF NOT EXISTS compra_productos (
 	FOREIGN KEY (id_producto) REFERENCES productos(id_producto)
 );
 
+
+CREATE TABLE IF NOT EXISTS qr (
+	id_qr INT AUTO_INCREMENT PRIMARY KEY,
+	id_compra INT NOT NULL,
+	id_entrada INT NOT NULL,
+	tipo ENUM('entrada', 'producto', "estacionamiento", "VIP") NOT NULL,
+	token VARCHAR(255) NOT NULL UNIQUE,
+	codigo_manual VARCHAR(50) NOT NULL UNIQUE,
+	estado ENUM('valido', 'usado', 'cancelado') NOT NULL DEFAULT 'valido',
+	fecha_uso DATETIME,
+
+	FOREIGN KEY (id_compra) REFERENCES compras(id_compra),
+	FOREIGN KEY (id_entrada) REFERENCES entradas(id_entrada)
+)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 INSERT INTO locales (nombre, direccion) VALUES
     ('Paradiso Centro', 'Calle Falsa 123'),
     ('Paradiso Norte', 'Avenida Ejemplo 456'),
