@@ -1,4 +1,8 @@
+from backend.routes import validar_qr
 from dotenv import load_dotenv
+import os
+from flask import Flask, jsonify
+from utils import construir_error_api
 
 load_dotenv()
 
@@ -6,10 +10,17 @@ from flask import Flask
 from routes.salas import salas_bp
 from db import obtener_conexion
 
+
+
+
+
+
 app = Flask(__name__)
 
 app.json.ensure_ascii = False
 
+
+app.register_blueprint(validar_qr)
 app.register_blueprint(salas_bp)
 
 
@@ -19,11 +30,7 @@ app.register_blueprint(salas_bp)
 
 if __name__ == '__main__':
     app.run(debug=True)
-import os
-from dotenv import load_dotenv
-from flask import Flask, jsonify
-from routes.usuarios import usuarios_bp
-from utils import construir_error_api
+
 
 load_dotenv() # Lee el archivo .env y carga las variables
 
