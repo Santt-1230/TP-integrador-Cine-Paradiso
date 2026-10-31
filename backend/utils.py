@@ -50,3 +50,23 @@ def login_requerido(funcion):
             return jsonify(error), 401
         return funcion(*args, **kwargs)
     return verificar_sesion
+
+"""
+Verifica si el rol del usuario es admin
+si esta logueado y es admin permite acceder: En caso de no estarlo, 
+anula la peticion y devuelve error 403 (No autorizado)
+"""
+
+def requiere_admin(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+
+        if session.get("id_usuario") is None:
+            return jsonify({"error": "Debés iniciar sesión"}), 401
+
+        if session.get("rol") != "admin":
+            return jsonify({"error": "No tenés permisos de administrador"}), 403
+
+        return func(*args, **kwargs)
+
+    return wrapper

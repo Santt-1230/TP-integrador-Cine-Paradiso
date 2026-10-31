@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request 
 from backend.repositories import admin
-from backend.validators.admin import requiere_admin 
+from utils import requiere_admin
+
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/api/admin")
 
