@@ -4,6 +4,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 ENTERO_POSITIVO_MINIMO = 1
+BUTACAS_POR_FILA = 20
+
 ERROR_MESSAGE_DATABASE_ERROR = 'No se pudo completar la operacion por un problema con la base de datos'
 ERROR_DESCRIPTION_DATABASE_ERROR = 'Ocurrio un problema al consultar la base de datos'
 ERROR_CODE_INVALID_PARAMETER = 'invalid.parameter'

@@ -8,3 +8,9 @@ def listar_salas(id_local=None):
 def listar_sala_id(id_sala):
     id_sala = salas_validator.validar_id_sala(id_sala)
     return salas_repository.listar_sala_por_id(id_sala)
+
+def crear_sala(datos):
+    id_local=salas_validator.validar_id_local(datos.get('id_local'))
+    numero_sala=salas_validator.validar_numero_sala(datos.get('numero_local'))
+    capacidad=salas_validator.validar_capacidad(datos.get('capacidad'))
+    return salas_repository.crear_sala_con_butacas(id_local, numero_sala, capacidad)
