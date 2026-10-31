@@ -157,12 +157,11 @@ def obtener_ocupacion_por_funcion():
     consulta = """
         SELECT
             funcion.id_funcion,
-            pelicula.id_pelicula,
             pelicula.nombre AS pelicula,
-            sala.id_sala,
+            funcion.id_sala,
             funcion.fecha_hora_inicio,
 
-            COUNT(DISTINCT butaca.id_butaca) AS capacidad_total, 
+            COUNT(DISTINCT butaca.id_butaca) AS capacidad_total,
 
             COUNT(DISTINCT entrada.id_butaca) AS espectadores,
 
@@ -177,29 +176,21 @@ def obtener_ocupacion_por_funcion():
         JOIN peliculas pelicula
             ON funcion.id_pelicula = pelicula.id_pelicula
 
-        JOIN salas sala
-            ON funcion.id_sala = sala.id_sala
-
         LEFT JOIN butacas butaca
-            ON sala.id_sala = butaca.id_sala
+            ON funcion.id_sala = butaca.id_sala
 
         LEFT JOIN entradas entrada
             ON funcion.id_funcion = entrada.id_funcion
-            AND entrada.id_butaca = butaca.id_butaca
+            AND butaca.id_butaca = entrada.id_butaca
             AND entrada.estado = 'utilizada'
 
         WHERE funcion.estado = 'finalizada'
 
-        GROUP BY
-            funcion.id_funcion,
-            pelicula.id_pelicula,
-            pelicula.nombre,
-            sala.id_sala,
-            funcion.fecha_hora_inicio
+        GROUP BY funcion.id_funcion
 
         ORDER BY funcion.fecha_hora_inicio DESC;
     """
-
+    #ROUND(...) calcular porcentaje de ocupación
     return ejecutar_consulta(consulta)
 
 
