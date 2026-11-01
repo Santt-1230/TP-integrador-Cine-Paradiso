@@ -53,8 +53,8 @@ def crear_sala(datos):
         )
         return jsonify(respuesta), 400
     try:
-        id_sala = salas_services.crear_sala(datos)
-        return jsonify({'id_sala' : id_sala}), 201
+        sala = salas_services.crear_sala(datos)
+        return jsonify({'sala' : sala}), 201
 
     except ValueError as error:
         return jsonify(error.args[0]), 400
@@ -62,9 +62,75 @@ def crear_sala(datos):
     except (RuntimeError, mysql.connector.Error):
         jsonify(ut.construir_error_db()), 500
 
+@salas_bp.route('/salas/<id_sala>/butacas', methods= ['GET'])
+def obtener_butacas_sala(id_sala):
+    try:
+        butacas = salas_services.obtener_butacas_sala(id_sala)
+        if butacas is None:
+            respuesta = ut.construir_error_api(
+                code=const.ERROR_CODE_SALA_NOT_FOUND,
+                message='Sala no encontrada',
+                description=f"No existe una sala con el id '{id_sala}'."
+            )
+            return jsonify(respuesta), 404
+        
+        return jsonify({'butacas':butacas}), 200
 
+    except ValueError as error:
+        return jsonify(error.args[0]), 400
+
+    except (RuntimeError, mysql.connector.Error):
+        return jsonify(ut.construir_error_db()), 500
+
+
+@salas_bp.route('/salas<id_sala>', methods = ['PATCH'])
+def actualizar_sala(id_sala):
+    body = request.get_json(silent=True)
+    if not isinstance(body, dict):
+        respuesta = ut.construir_error_api(
+            code=const.ERROR_CODE_INVALID_PARAMETER,
+            message='Datos invalidos',
+            description='Envia un JSON con los campos que desees modificar'
+        )
+        return jsonify(respuesta), 400
+    try:
+        sala = salas_services.actualizar_sala(id_sala)
+        return jsonify({'sala':sala}), 200
+
+    except ValueError as error:
+        respuesta = error.args[0]
+        codigo = respuesta['errors'][0]['code']
+
+        if codigo == const.ERROR_CODE_SALA_NOT_FOUND:
+            return jsonify(respuesta), 404
+
+        if codigo == const.ERROR_CODE_SALA_CONFLICT:
+            return jsonify(respuesta), 409
+
+        return jsonify(respuesta), 400
+
+    except (RuntimeError, mysql.connector.Error):
+        return jsonify(ut.construir_error.db()), 500
     
     
+@salas_bp.route('/salas/<id_sala>', methods = ['DELETE'])
+def desactivar_sala(id_sala):
+    try:
+        sala = salas_services.desactivar_sala(id_sala)
+        return jsonify(sala), 200
+
+    except ValueError as error:
+        respuesta = error.args[0]
+        codigo = respuesta['errors'][0]['code']
+
+        if codigo == const.ERROR_CODE_SALA_NOT_FOUND:
+            return jsonify(respuesta), 404
+        
+        return jsonify(respuesta), 400
+        
+    except (RuntimeError, mysql.connector.Error):
+        return jsonify(ut.construir_error.db()), 500
+
 
 
 

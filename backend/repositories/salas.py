@@ -4,6 +4,10 @@ from db import (
 )
 import constants as const
 
+def existe_sala(id_local, numero_sala):
+    sql = 'SELECT id_sala FROM salas WHERE id_local = %s AND numero_sala = %s'
+    return bool(ejecutar_consulta(sql, (id_local, numero_sala)))
+
 def listar_salas_por_local(id_local = None)->list[dict]:
     sql = 'SELECT s.* , l.nombre AS nombre_local FROM salas' \
     'INNER JOIN locales l ON l.id_local = s.id_local'
@@ -27,15 +31,41 @@ def crear_sala(id_local:int, numero_sala:int, capacidad:int):
     
 
 def insertar_butacas(id_sala, capacidad):
-    sql = 'INSERT INTO butacas (id_sala, fila, columna)' \
+    sql = 'INSERT INTO butacas (id_sala, fila, numero)' \
     'VALUES (%s, %s, %s)'
     for i in range(capacidad):
         fila= chr(ord('A') + i // const.BUTACAS_POR_FILA)
-        columna = i % const.BUTACAS_POR_FILA + 1
-        ejecutar_mutacion(sql, (id_sala, fila, columna))
+        numero = i % const.BUTACAS_POR_FILA + 1
+        ejecutar_mutacion(sql, (id_sala, fila, numero))
 
 def crear_sala_con_butacas(id_local, numero_sala, capacidad):
     id_sala = crear_sala(id_local, numero_sala, capacidad)
     insertar_butacas(id_sala, capacidad)
     return id_sala
 
+def obtener_butacas(id_sala):
+    sql = 'SELECT id_butaca, fila, numero, activa FROM butacas' \
+    'WHERE id_sala = %s ORDER BY fila, numero'
+    ejecutar_consulta(sql, (id_sala,))
+
+def actualizar_sala(id_sala, cambios):
+    campos = []
+    parametros = []
+    if 'numero_sala' in cambios:
+        campos.append('numero_sala')
+        parametros.append(cambios['numero_sala'])
+
+    if 'estado' in cambios:
+        campos.append('estado')
+        parametros.append(cambios['estado'])
+
+    parametros.append(id_sala)
+
+    sql = "UPDATE salas SET {', '.join(campos)} WHERE id_sala = %s"
+    ejecutar_mutacion(sql, tuple(parametros))
+    return listar_sala_por_id(id_sala)
+
+def desactivar_sala(id_sala):
+    sql = 'UPDATE salas SET estado = %s WHERE id_sala = %s'
+    ejecutar_mutacion(sql, ('inactiva', id_sala))
+    return listar_sala_por_id(id_sala)
