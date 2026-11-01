@@ -3,7 +3,7 @@ from db import ejecutar_consulta, ejecutar_mutacion
 def crear_usuario(nombre, apellido, email, fecha_nacimiento, contrasena_hash):
     sql = "INSERT INTO usuarios (nombre, apellido, email, fecha_nacimiento, contrasena_hash, rol) VALUES (%s, %s, %s, %s, %s, %s)",
     (nombre, apellido, email, fecha_nacimiento, contrasena_hash, "cliente")
-    resultado = ejecutar_mutacion(sql, (nombre, apellido, email, fecha_nacimiento, contrasena_hash))
+    resultado = ejecutar_mutacion(sql, (nombre, apellido, email, fecha_nacimiento, contrasena_hash, "cliente"))
     return resultado["id"]
 
 
@@ -25,3 +25,31 @@ def actualizar_perfil(id_usuario, nombre, apellido, email):
 def actualizar_contrasena(id_usuario, contrasena_hash):
     sql = "UPDATE usuarios SET contrasena_hash = %s WHERE id_usuario = %s"
     ejecutar_mutacion(sql, (contrasena_hash, id_usuario))
+
+def listar_compras(id_usuario) -> list[dict]:
+    sql = 'SELECT id_compra, id_usuario, id_funcion, fecha_creacion, total, estado ' \
+    'FROM compras WHERE id_usuario = %s AND estado IN (\'confirmada\', \'cancelada\') ' \
+    'ORDER BY fecha_creacion DESC'
+    return ejecutar_consulta(sql, (id_usuario,))
+
+
+def listar_entradas(id_usuario) -> list[dict]:
+    sql = 'SELECT e.id_entrada, e.id_compra, e.id_butaca, b.fila, b.numero, e.estado ' \
+    'FROM entradas e INNER JOIN compras c ON e.id_compra = c.id_compra INNER JOIN butacas b ON e.id_butaca = b.id_butaca ' \
+    'WHERE c.id_usuario = %s'
+    return ejecutar_consulta(sql, (id_usuario,))
+
+
+def listar_servicios(id_usuario) -> list[dict]:
+    sql = 'SELECT cp.id_compra, cp.id_producto AS id_servicio, p.nombre, cp.cantidad, cp.precio_unitario ' \
+    'FROM compra_productos cp INNER JOIN compras c ON cp.id_compra = c.id_compra INNER JOIN productos p ON cp.id_producto = p.id_producto ' \
+    'WHERE c.id_usuario = %s'
+    return ejecutar_consulta(sql, (id_usuario,))
+
+
+def listar_peliculas_vistas(id_usuario) -> list[dict]:
+    sql = 'SELECT DISTINCT p.id_pelicula, p.nombre AS titulo, p.poster_url, p.duracion_min, p.clasificacion ' \
+    'FROM entradas e INNER JOIN compras c ON e.id_compra = c.id_compra INNER JOIN funciones f ON e.id_funcion = f.id_funcion INNER JOIN peliculas p ON f.id_pelicula = p.id_pelicula ' \
+    'WHERE c.id_usuario = %s AND e.estado = \'utilizada\''
+    return ejecutar_consulta(sql, (id_usuario,))
+#Distinct sirve por si el usuario fue a ver 3 veces la misma pelicula, que le devuelva las 3 peliculas en la misma lista
