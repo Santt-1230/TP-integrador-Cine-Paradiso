@@ -4,6 +4,8 @@ load_dotenv()
 
 from flask import Flask
 from routes.salas import salas_bp
+from routes.peliculas import peliculas_bp
+from routes.catalogo_externo import catalogo_externo_bp
 from db import obtener_conexion
 
 app = Flask(__name__)
@@ -11,6 +13,8 @@ app = Flask(__name__)
 app.json.ensure_ascii = False
 
 app.register_blueprint(salas_bp)
+app.register_blueprint(peliculas_bp)
+app.register_blueprint(catalogo_externo_bp)
 
 
 
@@ -23,6 +27,8 @@ import os
 from dotenv import load_dotenv
 from flask import Flask, jsonify
 from routes.usuarios import usuarios_bp
+from routes.peliculas import peliculas_bp
+from routes.catalogo_externo import catalogo_externo_bp
 from utils import construir_error_api
 
 load_dotenv() # Lee el archivo .env y carga las variables
@@ -34,6 +40,8 @@ if not app.secret_key:
     raise RuntimeError("Falta la SECRET_KEY en el .env")
 
 app.register_blueprint(usuarios_bp)
+app.register_blueprint(peliculas_bp)
+app.register_blueprint(catalogo_externo_bp)
 
 
 @app.errorhandler(ConnectionError)
