@@ -5,14 +5,15 @@ SESION_INVALIDA = ("SESION_INVALIDA","Sesion no valida", "La sesion no es valida
 EMAIL_DUPLICADO = ("EMAIL_DUPLICADO", "Email en uso", "El email que quieres usar ya esta en uso")
 
 def usuario_publico(usuario):
+    user_id = usuario.get("id") or usuario.get("id_usuario")
     return {
-        "id_usuario":         usuario["id_usuario"],
-        "nombre":             usuario["nombre"],
-        "apellido":           usuario["apellido"],
-        "email":              usuario["email"],
-        "fecha_nacimiento":   str(usuario["fecha_nacimiento"]), #2007-04-20
-        "rol":                usuario["rol"],
-        "activo":             bool(usuario["activo"]),
+        "id_usuario":       user_id,
+        "nombre":           usuario.get("nombre", ""),
+        "apellido":         usuario.get("apellido", ""),
+        "email":            usuario.get("email", ""),
+        "fecha_nacimiento": str(usuario["fecha_nacimiento"]),
+        "rol":              usuario.get("rol", "cliente"),
+        "activo":           bool(usuario.get("activo", True))
     }
 
 
@@ -31,12 +32,13 @@ def registrar_usuario(nombre, apellido, email, fecha_nacimiento, contrasena):
 
 def autenticar_usuario(email, contrasena):
     usuario = usuarios_repository.buscar_por_email(email.lower())
+    hash_guardado = usuario.get("contrasena") or usuario.get("contrasena_hash") if usuario else None
 
-    if not usuario or not check_password_hash(usuario["contrasena_hash"], contrasena):
-        return None, ("CREDENCIALES_INVALIDAS","Credenciales invalidas","Email o contraseña incorrectos")
+    if not usuario or not hash_guardado or not check_password_hash(hash_guardado, contrasena):
+        return None, ("CREDENCIALES_INVALIDAS", "Credenciales inválidas", "Email o contraseña incorrectos")
 
-    if not usuario["activo"]:
-        return None, ("CUENTA_DESACTIVADA","Cuenta desactivada", "La cuenta está desactivada")
+    if not usuario.get("activo", True):
+        return None, ("CUENTA_DESACTIVADA", "Cuenta desactivada", "La cuenta está desactivada")
 
     return usuario_publico(usuario), None
 
@@ -50,7 +52,7 @@ def obtener_perfil(id_usuario):
 
 def buscar_usuario_activo(id_usuario):
     usuario = usuarios_repository.buscar_por_id(id_usuario)
-    if not usuario or not usuario["activo"]:
+    if not usuario or not usuario.get("activo", True):
         return None
     return usuario
 
@@ -63,15 +65,18 @@ def editar_perfil(id_usuario, nombre, apellido, email):
     if email is not None:
         email = email.lower()
         usuario_propuesto = usuarios_repository.buscar_por_email(email)
-        if usuario_propuesto and usuario_propuesto["id_usuario"] != id_usuario:
-            return None, EMAIL_DUPLICADO 
+        id_propuesto = usuario_propuesto.get("id") or usuario_propuesto.get("id_usuario") if usuario_propuesto else None
+        
+        if usuario_propuesto and id_propuesto != id_usuario:
+            return None, EMAIL_DUPLICADO
 
-    nombre_a_guardar = nombre or usuario["nombre"]
-    apellido_a_guardar = apellido or usuario["apellido"]
-    email_a_guardar = email or usuario["email"]
+    nombre_a_guardar = nombre or usuario.get("nombre")
+    apellido_a_guardar = apellido or usuario.get("apellido")
+    email_a_guardar = email or usuario.get("email")
 
     usuarios_repository.actualizar_perfil(id_usuario, nombre_a_guardar, apellido_a_guardar, email_a_guardar)
     usuario_actualizado = usuarios_repository.buscar_por_id(id_usuario)
+
     return usuario_publico(usuario_actualizado), None
 
 

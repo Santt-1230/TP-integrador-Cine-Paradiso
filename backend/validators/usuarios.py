@@ -38,14 +38,15 @@ def validar_fecha_nacimiento(fecha_nacimiento):
     return None
 
 
-def validar_contrasena(contrasena, repetir_contrasena):
+def validar_contrasena(contrasena, repetir_contrasena=None):
     if len(contrasena) < 8:
         return error_validacion("La contraseña debe contener al menos 8 caracteres")
-    if not repetir_contrasena:
-        return error_validacion("Confirmar/Repetir la contraseña es obligatorio")
-    if contrasena != repetir_contrasena:
-        return error_validacion("Las contraseñas no coinciden")   
-    
+    if repetir_contrasena is not None:
+        if not repetir_contrasena:
+            return error_validacion("Confirmar/Repetir la contraseña es obligatorio")
+        if contrasena != repetir_contrasena:
+            return error_validacion("Las contraseñas no coinciden")
+            
     return None
 
 

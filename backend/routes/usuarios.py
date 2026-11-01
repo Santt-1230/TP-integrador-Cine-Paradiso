@@ -75,7 +75,7 @@ def ver_perfil():
 @login_requerido
 def cambiar_contrasena():
     datos = request.get_json(silent=True)
-    error = usuarios_validator.validar_cambio_contrasena(datos)
+    error = usuarios_validator.validar_contrasena(datos.get("nueva_contrasena"), datos.get("repetir_contrasena"))
     if error:
         return jsonify(construir_error_api(*error)), 400
 
