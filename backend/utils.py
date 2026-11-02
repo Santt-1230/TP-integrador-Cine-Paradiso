@@ -64,7 +64,7 @@ def requiere_admin(func):
         if session.get("id_usuario") is None:
             return jsonify({"error": "Debés iniciar sesión"}), 401
 
-        if session.get("rol") != "admin":
+        if session.get("rol") != "administrador":
             return jsonify({"error": "No tenés permisos de administrador"}), 403
 
         return func(*args, **kwargs)

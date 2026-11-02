@@ -11,7 +11,7 @@ def obtener_usuarios():
 
         cursor.execute("""
             SELECT id_usuario, nombre, email, rol
-            FROM usuario
+            FROM usuarios
         """)
 
         return cursor.fetchall()
@@ -31,7 +31,7 @@ def obtener_usuario_por_id(id):
 
         cursor.execute("""
             SELECT id_usuario, nombre, email, rol
-            FROM usuario
+            FROM usuarios
             WHERE id_usuario = %s
         """, (id,))
 
@@ -50,7 +50,7 @@ def actualizar_usuario(id, nombre, email, rol):
         cursor = conexion.cursor()
 
         cursor.execute("""
-            UPDATE usuario
+            UPDATE usuarios
             SET nombre = %s, email = %s, rol = %s
             WHERE id_usuario = %s
         """, (nombre, email, rol, id))
