@@ -1,6 +1,7 @@
-"""Consultas SQL de peliculas, generos y pelicula_genero."""
+"""Consultas SQL de peliculas, generos y pelicula_genero. No tiene reglas de negocio."""
 from db import ejecutar_consulta, ejecutar_mutacion, transaccion
 
+# "Vigente" = activa y dentro del periodo de cartelera. Las fechas son opcionales: NULL = sin limite.
 VIGENTE = """
     p.activo = 1
     AND (p.cartelera_desde IS NULL OR p.cartelera_desde <= CURDATE())
@@ -13,6 +14,7 @@ CAMPOS_PUBLICOS = """
 
 
 def generos_por_pelicula(ids):
+    """{id_pelicula: [nombres de genero]} con una sola consulta."""
     if not ids:
         return {}
     marcas = ",".join(["%s"] * len(ids))
@@ -30,7 +32,7 @@ def generos_por_pelicula(ids):
     return resultado
 
 
-def listar_vigentes(genero=None, texto=None):
+def listar_vigentes(genero=None, texto=None, limite=None):
     sql = f"SELECT {CAMPOS_PUBLICOS} FROM peliculas p WHERE {VIGENTE}"
     parametros = []
     if genero:
@@ -42,7 +44,10 @@ def listar_vigentes(genero=None, texto=None):
     if texto:
         sql += " AND p.nombre LIKE %s"
         parametros.append(f"%{texto}%")
-    sql += " ORDER BY p.nombre"
+    sql += " ORDER BY p.cartelera_desde DESC, p.nombre"
+    if limite is not None:
+        sql += " LIMIT %s"
+        parametros.append(limite)
     return ejecutar_consulta(sql, tuple(parametros))
 
 
@@ -52,17 +57,6 @@ def buscar_activa(id_pelicula):
         (id_pelicula,),
     )
     return filas[0] if filas else None
-
-
-def listar_cartelera(limite):
-    return ejecutar_consulta(
-        f"""SELECT p.id_pelicula, p.nombre, p.poster_url, p.duracion_min, p.clasificacion
-            FROM peliculas p
-            WHERE {VIGENTE}
-            ORDER BY p.cartelera_desde DESC, p.nombre
-            LIMIT %s""",
-        (limite,),
-    )
 
 
 def listar_admin(estado=None, texto=None):
@@ -92,6 +86,7 @@ def listar_admin(estado=None, texto=None):
 
 
 def buscar_por_id(id_pelicula):
+    """Fila completa (activa o no), o None."""
     filas = ejecutar_consulta(
         """SELECT id_pelicula, id_externo, nombre, sinopsis, poster_url, duracion_min,
                   clasificacion, cartelera_desde, cartelera_hasta, activo
@@ -121,6 +116,7 @@ def obtener_periodo(id_pelicula):
 
 
 def obtener_activo(id_pelicula):
+    """True/False segun `activo`, o None si no existe."""
     filas = ejecutar_consulta("SELECT activo FROM peliculas WHERE id_pelicula = %s", (id_pelicula,))
     return bool(filas[0]["activo"]) if filas else None
 
@@ -131,6 +127,7 @@ def dar_de_baja(id_pelicula):
 
 def crear_con_generos(id_externo, nombre, sinopsis, poster_url, duracion_min, clasificacion,
                       cartelera_desde, cartelera_hasta, activo, nombres_generos):
+    """Inserta la pelicula y sus generos en una sola transaccion (los generos nuevos se crean)."""
     with transaccion() as cur:
         cur.execute(
             """INSERT INTO peliculas (id_externo, nombre, sinopsis, poster_url, duracion_min,
@@ -150,6 +147,11 @@ def crear_con_generos(id_externo, nombre, sinopsis, poster_url, duracion_min, cl
 
 
 def actualizar(id_pelicula, campos, nombres_generos=None):
+    """Actualiza campos y/o reemplaza los generos en una sola transaccion.
+
+    Devuelve la lista de generos inexistentes; si no esta vacia, no se escribio nada.
+    `campos` solo trae columnas de una lista fija (validada), nunca texto del cliente.
+    """
     with transaccion() as cur:
         ids_generos = None
         if nombres_generos is not None:

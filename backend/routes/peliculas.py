@@ -7,6 +7,7 @@ peliculas_bp = Blueprint("peliculas", __name__, url_prefix="/api")
 
 
 def _responder(resultado, error, estado_ok=200, clave=None):
+    """Convierte (resultado, error) del servicio en una respuesta HTTP."""
     if error:
         estado, code, message, description = error
         return jsonify(construir_error_api(code, message, description)), estado
@@ -15,9 +16,11 @@ def _responder(resultado, error, estado_ok=200, clave=None):
 
 @peliculas_bp.get("/peliculas")
 def listar_peliculas():
-    """Vigentes. Filtros opcionales: ?genero=Accion  ?q=texto"""
-    resultado = peliculas_service.listar_vigentes(request.args.get("genero"), request.args.get("q"))
-    return jsonify({"peliculas": resultado}), 200
+    """Peliculas vigentes (la cartelera). Parametros opcionales: ?genero=Accion  ?q=texto  ?limite=N (max. 50)."""
+    return _responder(
+        *peliculas_service.listar_vigentes(
+            request.args.get("genero"), request.args.get("q"), request.args.get("limite")),
+        clave="peliculas")
 
 
 @peliculas_bp.get("/peliculas/<int:id_pelicula>")
@@ -25,14 +28,10 @@ def detalle_pelicula(id_pelicula):
     return _responder(*peliculas_service.obtener_publica(id_pelicula))
 
 
-@peliculas_bp.get("/cartelera")
-def cartelera():
-    return _responder(*peliculas_service.cartelera(request.args.get("limite", 12)), clave="peliculas")
-
-
 @peliculas_bp.get("/admin/peliculas")
 @admin_requerido
 def listar_peliculas_admin():
+    """Catalogo completo. Filtros: ?estado=vigente|proxima|vencida|inactiva  ?q=texto"""
     return _responder(*peliculas_service.listar_admin(request.args.get("estado"), request.args.get("q")),
                       clave="peliculas")
 

@@ -36,8 +36,15 @@ def _completa(id_pelicula):
     return _con_generos([fila])[0] if fila else None
 
 
-def listar_vigentes(genero=None, texto=None):
-    return _con_generos(repo.listar_vigentes(genero, texto))
+# ------------------------------------------------------------------ publico
+def listar_vigentes(genero=None, texto=None, limite_texto=None):
+    """Cartelera: peliculas vigentes. Sin `limite_texto` devuelve todas; con el, un maximo de 50."""
+    limite = None
+    if limite_texto is not None:
+        limite, error = validador.validar_limite(limite_texto)
+        if error:
+            return None, _con_estado(error)
+    return _con_generos(repo.listar_vigentes(genero, texto, limite)), None
 
 
 def obtener_publica(id_pelicula):
@@ -47,17 +54,7 @@ def obtener_publica(id_pelicula):
     return _con_generos([fila])[0], None
 
 
-def cartelera(limite_texto):
-    limite, error = validador.validar_limite(limite_texto)
-    if error:
-        return None, _con_estado(error)
-    filas = repo.listar_cartelera(limite)
-    generos = repo.generos_por_pelicula([f["id_pelicula"] for f in filas])
-    for f in filas:
-        f["generos"] = generos.get(f["id_pelicula"], [])
-    return filas, None
-
-
+# -------------------------------------------------------------------- admin
 def listar_admin(estado=None, texto=None):
     error = validador.validar_estado(estado)
     if error:
@@ -66,6 +63,7 @@ def listar_admin(estado=None, texto=None):
 
 
 def importar(datos):
+    """Importa una pelicula de TMDB. Recibe {"id_externo": "603"} y trae el resto desde TMDB."""
     id_externo, opcionales, error = validador.validar_importacion(datos)
     if error:
         return None, _con_estado(error)
@@ -106,6 +104,7 @@ def importar(datos):
 
 
 def editar(id_pelicula, datos):
+    """Modifica datos o periodo de cartelera. `generos` (lista de nombres) REEMPLAZA los actuales."""
     limpio, generos, error = validador.validar_edicion(datos)
     if error:
         return None, _con_estado(error)
@@ -113,6 +112,8 @@ def editar(id_pelicula, datos):
     actual = repo.obtener_periodo(id_pelicula)
     if not actual:
         return None, _no_encontrada(id_pelicula, solo_activas=False)
+
+    # El periodo resultante (lo enviado + lo que ya habia) tiene que ser coherente.
     desde = a_fecha(limpio.get("cartelera_desde", actual["cartelera_desde"]))
     hasta = a_fecha(limpio.get("cartelera_hasta", actual["cartelera_hasta"]))
     if desde and hasta and hasta < desde:

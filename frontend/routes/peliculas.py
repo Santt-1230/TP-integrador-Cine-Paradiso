@@ -25,10 +25,11 @@ def fecha_ar(valor):
 
 @peliculas_front_bp.get("/")
 def inicio():
-    peliculas = api.get("/api/cartelera", {"limite": POR_PAGINA})["peliculas"]
+    peliculas = api.get("/api/peliculas", {"limite": POR_PAGINA})["peliculas"]
     # Los modulos de Euge (P7). Si su endpoint todavia no existe, la seccion simplemente no se muestra.
+    # Los "productos" del sitio son los servicios del backend (GET /api/servicios).
     promociones = api.get_lista("/api/promociones", "promociones")
-    productos = api.get_lista("/api/productos", "productos")
+    productos = api.get_lista("/api/servicios", "servicios")
     return render_template("inicio.html", peliculas=peliculas, promociones=promociones, productos=productos)
 
 
@@ -58,6 +59,6 @@ def lista():
 @peliculas_front_bp.get("/peliculas/<int:id_pelicula>")
 def detalle(id_pelicula):
     pelicula = api.get(f"/api/peliculas/{id_pelicula}")
-    otras = api.get_lista("/api/cartelera", "peliculas", {"limite": 4})
+    otras = api.get_lista("/api/peliculas", "peliculas", {"limite": 4})
     mas_para_ver = [p for p in otras if p["id_pelicula"] != id_pelicula][:3]
     return render_template("pelicula_detalle.html", p=pelicula, mas=mas_para_ver)
