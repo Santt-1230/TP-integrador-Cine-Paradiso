@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block encabezado %}
+<header class="admin-header">
+    <a href="/admin" class="logo">CINE PARADISO</a>
+    <span>ADMIN</span>
+    <span>PANEL DE ADMINISTRACIÓN</span>
+</header>
+{% endblock %}
+
+{% block contenido %}
+<div class="admin-layaout">
+    <aside class="admin-sidebar">
+        <nav>
+            <a href="/admin">Inicio</a>
+            <a href="/admin/salas">Peliculas</a>
+            <a href="/admin/funciones">Funciones</a>
+            <a href="/admin/locales">Locales y salas</a>
+            <a href="/admin/servicios">Servicios</a>
+            <a href="/admin/estadisticas">Estadisticas</a>
+            <a href="/admin/usuarios"></a>
+        </nav>
+    </aside>
+    <div class="admin-contenido">
+        {% block contenido_admin %}{% endblock %}
+    </div>
+</div>
+{% endblock %}
