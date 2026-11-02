@@ -60,6 +60,7 @@ def ejecutar_mutacion(sql:str, parametros :tuple = ())-> dict:
         if cursor is not None:
             cursor.close()
         conexion.close()
+        conexion.close()
 
 def ejecutar_consulta_uno(sql: str, parametros: tuple = ()) -> dict | None:
     conexion = obtener_conexion()

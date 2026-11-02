@@ -1,3 +1,12 @@
+from flask import Flask
+from routes.cancelaciones import cancelaciones_bp
+
+app = Flask(__name__)
+
+app.register_blueprint(cancelaciones_bp)
+
+if __name__ == "__main__":
+    import os 
 from utils import construir_error_api
 from dotenv import load_dotenv
 from flask import Flask, jsonify
