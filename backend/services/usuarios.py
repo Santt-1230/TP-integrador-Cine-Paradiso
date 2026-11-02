@@ -85,9 +85,9 @@ def cambiar_contrasena(id_usuario, contrasena_actual, contrasena_nueva):
 
     if not usuario:
         return False, SESION_INVALIDA
-    if not check_password_hash(usuario["contrasena_hash"], contrasena_actual): #Si la contraseña (hasheada) no coincide con la contraseña ingresada
+    hash_guardado = usuario.get("contrasena") or usuario.get("contrasena_hash")
+    if not hash_guardado or not check_password_hash(hash_guardado, contrasena_actual):
         return False, ("CONTRASENA_INCORRECTA", "Contraseña incorrecta", "la contraseña ingresada no es correcta")
-
     usuarios_repository.actualizar_contrasena(id_usuario, generate_password_hash(contrasena_nueva))
     return True, None
 
