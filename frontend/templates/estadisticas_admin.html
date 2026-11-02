@@ -1,0 +1,166 @@
+{% extends "base_admin.html" %}
+
+{% block contenido_admin %}
+<section class="estadisticas-admin">
+
+    <header class="estadisticas-admin__encabezado">
+        <div>
+            <p class="estadisticas-admin__migas">ADMINISTRACIÓN / ESTADÍSTICAS</p>
+            <h1>Estadísticas</h1>
+            <p class="estadisticas-admin__descripcion">
+                Un resumen claro de ocupación, ventas y cancelaciones.
+            </p>
+        </div>
+
+        <form class="estadisticas-admin__filtro" method="GET" action="/admin/estadisticas">
+            <label for="periodo">Período</label>
+            <select id="periodo" name="periodo">
+                <option value="7" {% if periodo|string == '7' %}selected{% endif %}>Últimos 7 días</option>
+                <option value="30" {% if periodo|string == '30' or not periodo %}selected{% endif %}>Últimos 30 días</option>
+                <option value="90" {% if periodo|string == '90' %}selected{% endif %}>Últimos 90 días</option>
+                <option value="365" {% if periodo|string == '365' %}selected{% endif %}>Último año</option>
+            </select>
+            <button type="submit">Aplicar</button>
+        </form>
+    </header>
+
+    <section class="estadisticas-admin__indicadores" aria-label="Indicadores principales">
+        <article class="indicador-estadistico">
+            <p class="indicador-estadistico__titulo">Ocupación promedio</p>
+            <p class="indicador-estadistico__valor">
+                {{ ocupacion_promedio|default(0, true) }}%
+            </p>
+            <p class="indicador-estadistico__detalle">Promedio de ocupación de las funciones</p>
+        </article>
+
+        <article class="indicador-estadistico">
+            <p class="indicador-estadistico__titulo">Entradas vendidas</p>
+            <p class="indicador-estadistico__valor">
+                {{ ventas_entradas|default(0, true) }}
+            </p>
+            <p class="indicador-estadistico__detalle">Entradas comercializadas en el período</p>
+        </article>
+
+        <article class="indicador-estadistico">
+            <p class="indicador-estadistico__titulo">Cancelaciones</p>
+            <p class="indicador-estadistico__valor">
+                {{ cancelaciones|default(0, true) }}
+            </p>
+            <p class="indicador-estadistico__detalle">Operaciones canceladas en el período</p>
+        </article>
+    </section>
+
+    <section class="estadisticas-admin__graficos" aria-label="Detalle de estadísticas">
+
+        <article class="panel-estadistico panel-estadistico--ocupacion">
+            <div class="panel-estadistico__encabezado">
+                <div>
+                    <h2>Ocupación por función</h2>
+                    <p>Cada fila muestra la película, el horario y el porcentaje de ocupación.</p>
+                </div>
+            </div>
+
+            {% if ocupacion_por_funcion %}
+                <div class="tabla-barras tabla-barras--ocupacion">
+                    <div class="tabla-barras__cabecera">
+                        <span>PELÍCULA</span>
+                        <span>HORA</span>
+                        <span>OCUPACIÓN</span>
+                        <span>%</span>
+                    </div>
+
+                    {% for funcion in ocupacion_por_funcion %}
+                        {% set porcentaje = funcion.porcentaje|default(0, true)|float %}
+                        <div class="fila-barra fila-barra--ocupacion">
+                            <span class="fila-barra__nombre">{{ funcion.pelicula|default('Película', true) }}</span>
+                            <span class="fila-barra__hora">{{ funcion.hora|default('--:--', true) }}</span>
+                            <div class="fila-barra__pista" role="progressbar"
+                                 aria-label="Ocupación de {{ funcion.pelicula|default('la función', true) }}"
+                                 aria-valuemin="0" aria-valuemax="100"
+                                 aria-valuenow="{{ porcentaje }}">
+                                <span class="fila-barra__relleno fila-barra__relleno--verde"
+                                      style="width: {{ [0, [porcentaje, 100]|min]|max }}%;"></span>
+                            </div>
+                            <span class="fila-barra__valor">{{ porcentaje|round(0)|int }}%</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="panel-estadistico__sin-datos">No hay datos de ocupación para este período.</p>
+            {% endif %}
+        </article>
+
+        <article class="panel-estadistico">
+            <div class="panel-estadistico__encabezado">
+                <div>
+                    <h2>Ventas por género</h2>
+                    <p>Entradas vendidas según el género de la película.</p>
+                </div>
+            </div>
+
+            {% if ventas_por_genero %}
+                <div class="lista-barras">
+                    {% for item in ventas_por_genero %}
+                        {% set porcentaje = item.porcentaje|default(0, true)|float %}
+                        <div class="fila-barra fila-barra--simple">
+                            <div class="fila-barra__datos">
+                                <span class="fila-barra__nombre">{{ item.genero|default('Sin género', true) }}</span>
+                                <span class="fila-barra__valor">{{ item.cantidad|default(0, true) }}</span>
+                            </div>
+                            <div class="fila-barra__pista" role="progressbar"
+                                 aria-label="Ventas de {{ item.genero|default('este género', true) }}"
+                                 aria-valuemin="0" aria-valuemax="100"
+                                 aria-valuenow="{{ porcentaje }}">
+                                <span class="fila-barra__relleno fila-barra__relleno--rojo"
+                                      style="width: {{ [0, [porcentaje, 100]|min]|max }}%;"></span>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="panel-estadistico__sin-datos">No hay ventas por género para mostrar.</p>
+            {% endif %}
+        </article>
+
+        <article class="panel-estadistico">
+            <div class="panel-estadistico__encabezado">
+                <div>
+                    <h2>Franjas horarias más vendidas</h2>
+                    <p>Cantidad de entradas vendidas por horario.</p>
+                </div>
+            </div>
+
+            {% if entradas_por_franja %}
+                <div class="lista-barras">
+                    {% for franja in entradas_por_franja %}
+                        {% set porcentaje = franja.porcentaje|default(0, true)|float %}
+                        <div class="fila-barra fila-barra--simple">
+                            <div class="fila-barra__datos">
+                                <span class="fila-barra__nombre">{{ franja.franja|default('Sin horario', true) }}</span>
+                                <span class="fila-barra__valor">{{ franja.cantidad|default(0, true) }}</span>
+                            </div>
+                            <div class="fila-barra__pista" role="progressbar"
+                                 aria-label="Entradas vendidas en {{ franja.franja|default('esta franja', true) }}"
+                                 aria-valuemin="0" aria-valuemax="100"
+                                 aria-valuenow="{{ porcentaje }}">
+                                <span class="fila-barra__relleno fila-barra__relleno--rojo"
+                                      style="width: {{ [0, [porcentaje, 100]|min]|max }}%;"></span>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="panel-estadistico__sin-datos">No hay datos de ventas por franja horaria.</p>
+            {% endif %}
+        </article>
+
+    </section>
+
+    <p class="estadisticas-admin__nota">
+        Los resultados corresponden al período seleccionado. Los porcentajes de las barras
+        deben ser calculados a partir de los datos del backend.
+    </p>
+
+</section>
+<script src="{{ url_for('static', filename='js/estadisticas.js') }}" defer></script>
+{% endblock %}

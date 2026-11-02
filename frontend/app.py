@@ -1,44 +1,29 @@
 import os
 from dotenv import load_dotenv
-from datetime import date
+from flask import Flask, render_template
 
-load_dotenv() #Lee el archivo .env y carga las variables
+from routes.admin import admin_bp
+from routes.estadisticas import estadisticas_bp
+from routes.peliculas import peliculas_front_bp
+from routes.usuarios import usuarios_bp
 
-from flask import Flask, render_template, session, redirect, url_for
+load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = os.getenv("SECRET_KEY") 
+app.secret_key = os.getenv("SECRET_KEY", "desarrollo")
 
 if not app.secret_key:
     raise RuntimeError("Falta la SECRET_KEY en el .env")
 
-@app.route("/login", methods=["GET", "POST"])
-def login():
-    return render_template("login.html")
+# Registrar todos los blueprints
+app.register_blueprint(admin_bp)
+app.register_blueprint(estadisticas_bp)
+app.register_blueprint(peliculas_front_bp)
+app.register_blueprint(usuarios_bp)
 
-@app.route("/registro", methods=["GET", "POST"])
-def registro():
-    hoy = date.today().isoformat()
-    return render_template("registro.html", fecha_maxima=hoy)
-
-@app.route("/mi-cuenta", methods=["GET", "POST"])
-def mi_cuenta():
-    if not session.get("id_usuario"):
-        return redirect(url_for("login"))
-    return render_template("mi_cuenta.html")
-
-@app.route("/mi-cuenta/correo", methods=["POST"])
-def cambiar_correo():
-    return redirect(url_for("mi_cuenta"))
-
-@app.route("/mi-cuenta/password", methods=["POST"])
-def cambiar_contrasena():
-    return redirect(url_for("mi_cuenta"))
-
-@app.route("/logout", methods=["POST"])
-def logout():
-    session.clear()
-    return redirect(url_for("login"))
+@app.route("/")
+def index():
+    return render_template("index.html")
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000)

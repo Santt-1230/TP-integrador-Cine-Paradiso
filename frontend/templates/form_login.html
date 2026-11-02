@@ -1,5 +1,5 @@
 {# Formulario de login: lo usan el desplegable del header (base.html) y la pagina login.html #}
-<form class="form-login" method="post" action="{{ url_for('login') }}">
+<form class="form-login" method="post" action="{{ url_for('usuarios.login') }}">
     <label>Mail
         <input type="email" name="email" required>
     </label>
@@ -10,5 +10,5 @@
 
     <a class="enlace-chico" href="#">Olvidé mi contraseña</a>
     <button type="submit" class="boton-oscuro">Iniciar sesión</button>
-    <p class="enlace-chico">¿No tenés cuenta? <a href="{{ url_for('registro') }}">Crear cuenta</a></p>
+    <p class="enlace-chico">¿No tenés cuenta? <a href="{{ url_for('usuarios.registro') }}">Crear cuenta</a></p>
 </form>
