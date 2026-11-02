@@ -1,11 +1,12 @@
+import logging
 from flask import Blueprint, jsonify, request
 from services.cancelaciones_service import procesar_cancelacion_cliente
 from validators.cancelaciones_validator import validar_peticion_cancelacion
 
-cancelaciones_bp = Blueprint("cancelaciones", __name__)
+logger = logging.getLogger(__name__)
+cancelaciones_bp = Blueprint("cancelaciones", __name__, url_prefix="/api")
 
-
-@cancelaciones_bp.route("/api/compras/<int:id_compra>", methods=["PATCH"])
+@cancelaciones_bp.route("/compras/<int:id_compra>", methods=["PATCH"])
 def cancelar_compra_route(id_compra: int):
     datos = request.get_json(silent=True)
 
@@ -13,5 +14,5 @@ def cancelar_compra_route(id_compra: int):
     if not es_valido:
         return jsonify({"exito": False, "mensaje": mensaje_error}), 400
 
-    respuesta, status_code = procesar_cancelacion_cliente(id_compra)
+    respuesta, status_code = procesar_cancelacion_cliente(id_compra, datos)
     return jsonify(respuesta), status_code
