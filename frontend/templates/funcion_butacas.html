@@ -4,7 +4,7 @@
 
 {% block contenido %}
 <section class="funciones-pagina">
-    <a href="{{ url_for('pagina_funciones') }}">← Volver a funciones</a>
+    <a href="{{ url_for('funciones_front.pagina_funciones') }}">← Volver a funciones</a>
     <h1>Butacas de la función {{ id_funcion }}</h1>
     <p>Las butacas ocupadas no están disponibles.</p>
     {% if error %}<p class="mensaje-error">{{ error }}</p>{% endif %}
