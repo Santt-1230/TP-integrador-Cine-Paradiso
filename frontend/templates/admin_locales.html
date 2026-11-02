@@ -1,0 +1,59 @@
+{% extends "base_admin.html" %}
+
+{% block title %}Locales y salas - Cine Paradiso{% endblock %}
+
+{% block contenido_admin %}
+
+<div class="pagina-locales-salas">
+    <p class="migas">Administracion / Locales y salas</p>
+    
+    <div class="encabezado-pagina">
+        <div>
+            <h1>Locales y Salas</h1>
+            <p>Organizá los locales y las salas</p>
+        </div>
+    </div>
+
+    <p>{{ locales-lenght }} Locales · {{ salas_configuradas }} Salas configuradas</p>
+
+    {% for local in locales %}
+        <div class="tarjeta-local">
+            <div class="cabecera-local">
+                <div>
+                    <h2>{{ local.nombre }}</h2>
+                    <p>
+                        {{ local.salas|lenght }} Salas ·
+                        {{ local.total_butacas }} butacas en total
+                    </p>
+                </div>
+
+                <a href="{{ url_for('nueva_sala', id_sala=sala.id_sala) }}">Agregar sala</a>
+            </div>
+            <table class="tabla-salas">
+                <thead>
+                    <tr>
+                        <th>Salas</th>
+                        <th>Capacidad</th>
+                        <th>Butacas</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sala in local.salas %}
+                        <tr>
+                            <td>Sala {{ sala.numero_sala }}</td>
+                            <td>{{ sala.capacidad }} butacas</td>
+                            <td>
+                                <button type="button">Editar</button>
+                                <button type="button">Dar de baja</button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p>No hay locales para mostrar</p>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends "base_admin.html" %}
+
+{% block titulo %}Agregar sala - Cine Paradiso{% endblock %}
+
+{% block contenido_admin %}
+<div class="formulario-admin">
+    <p class="migas">Administración / Locales y salas / Agregar sala</p>
+    <h1>Agregar sala</h1>
+
+    <form class="formulario-sala">
+        <div class="campo-formulario">
+            <label for="id_local">Local</label>
+            <select name="id_local" id="id_local" required>
+                <option value="">Elegí un local</option>
+                {% for local in locales %}
+                    <option value="{{ local.id_local }}">
+                        {{ local.nombre }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="campo-formulario">
+            <label for="numero_sala">Número de sala</label>
+            <input type="number" name="numero_sala" id="numero_sala"
+            min="1" step="1" required
+            >
+        </div>
+
+        <div class="campo-formulario">
+            <label for="capacidad">Capacidad</label>
+            <input type="number" name="capacidad" id="capacidad"
+            min="1" step="1" required
+            >
+            <small>Las butacas se generan según la capacidad, hasta 20 por la fila.</small>
+        </div>
+        <div class="acciones-formulario">
+            <button type="button">Cancelar</button>
+            <button type="button">Crear Sala</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
