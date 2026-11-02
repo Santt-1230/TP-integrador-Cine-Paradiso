@@ -16,7 +16,7 @@ CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 CREATE TABLE IF NOT EXISTS salas(
 	id_sala INT AUTO_INCREMENT PRIMARY KEY,
 	id_local INT NOT NULL,
-	numero_sala INT NOT NULL UNIQUE,
+	numero_sala INT NOT NULL NULL,
 	capacidad INT NOT NULL,
 	estado ENUM('activa', 'inactiva') NOT NULL DEFAULT 'activa',
 	FOREIGN KEY(id_local) REFERENCES locales(id_local),

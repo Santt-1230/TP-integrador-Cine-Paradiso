@@ -28,6 +28,12 @@ if not app.secret_key:
     raise RuntimeError("Falta la SECRET_KEY en el .env")
     
 app.register_blueprint(salas_bp)
+app.register_blueprint(servicios_bp)
+app.register_blueprint(promociones_bp)
+
+
+
+
 app.register_blueprint(locales_bp)
 app.register_blueprint(usuarios_bp)
 app.register_blueprint(peliculas_bp)
