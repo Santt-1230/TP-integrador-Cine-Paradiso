@@ -451,3 +451,8 @@ footer {
         flex-basis: 100%;
     }
 }
+
+.pagina-admin .barra-superior,
+.pagina-admin .pie-admin {
+    flex-shrink: 0;
+}
