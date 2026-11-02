@@ -12,6 +12,7 @@ app.json.ensure_ascii = False
 
 app.register_blueprint(salas_bp)
 app.register_blueprint(servicios_bp)
+app.register_blueprint(promociones_bp)
 
 
 
