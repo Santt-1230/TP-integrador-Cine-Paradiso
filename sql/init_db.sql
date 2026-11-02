@@ -158,7 +158,7 @@ CREATE TABLE IF NOT EXISTS compras (
 	motivo_cancelacion ENUM('cliente', ' funcion_cancelada') NULL,
 	monto_reembolsado DECIMAL(10,2) NULL,
 	Foreign Key (id_usuario) REFERENCES usuarios(id_usuario),
-	Foreign Key (id_funcion) REFERENCES funciones(id_usuario)
+	Foreign Key (id_funcion) REFERENCES funciones(id_funcion)
 );
 
 CREATE TABLE IF NOT EXISTS entradas(
