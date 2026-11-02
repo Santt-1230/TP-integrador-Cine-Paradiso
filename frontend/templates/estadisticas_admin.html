@@ -3,7 +3,6 @@
 {% block contenido_admin %}
 <section class="estadisticas-admin">
 
-    <!-- Título y filtro de período -->
     <header class="estadisticas-admin__encabezado">
         <div>
             <p class="estadisticas-admin__migas">ADMINISTRACIÓN / ESTADÍSTICAS</p>
@@ -25,7 +24,6 @@
         </form>
     </header>
 
-    <!-- Indicadores principales -->
     <section class="estadisticas-admin__indicadores" aria-label="Indicadores principales">
         <article class="indicador-estadistico">
             <p class="indicador-estadistico__titulo">Ocupación promedio</p>
@@ -52,10 +50,8 @@
         </article>
     </section>
 
-    <!-- Gráficos representados con barras CSS -->
     <section class="estadisticas-admin__graficos" aria-label="Detalle de estadísticas">
 
-        <!-- Ocupación por función -->
         <article class="panel-estadistico panel-estadistico--ocupacion">
             <div class="panel-estadistico__encabezado">
                 <div>
@@ -94,7 +90,6 @@
             {% endif %}
         </article>
 
-        <!-- Ventas por género -->
         <article class="panel-estadistico">
             <div class="panel-estadistico__encabezado">
                 <div>
@@ -127,7 +122,6 @@
             {% endif %}
         </article>
 
-        <!-- Entradas vendidas por franja horaria -->
         <article class="panel-estadistico">
             <div class="panel-estadistico__encabezado">
                 <div>
@@ -168,4 +162,5 @@
     </p>
 
 </section>
+<script src="{{ url_for('static', filename='js/estadisticas.js') }}" defer></script>
 {% endblock %}

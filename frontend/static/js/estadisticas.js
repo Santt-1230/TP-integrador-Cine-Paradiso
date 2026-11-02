@@ -20,7 +20,6 @@ function animarBarrasOcupacion() {
         const anchoOriginal = Number.parseFloat(relleno.style.width);
         const anchoFinal = limitarPorcentaje(anchoOriginal);
 
-        // La barra parte de cero y llega al valor enviado por Jinja.
         relleno.style.width = '0%';
         window.requestAnimationFrame(() => {
             relleno.style.width = `${anchoFinal}%`;

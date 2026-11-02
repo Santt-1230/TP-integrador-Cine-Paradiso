@@ -1,7 +1,3 @@
-/* =========================================================
-   CINE PARADISO - Panel de administración
-   Estilos para base_admin.html e inicio_admin.html
-   ========================================================= */
 
 :root {
     --admin-rojo: #ff6268;
@@ -16,7 +12,6 @@
     --admin-sombra: 0 3px 12px rgba(34, 39, 49, 0.045);
 }
 
-/* Ajustes generales de la pantalla de administración */
 * {
     box-sizing: border-box;
 }
@@ -34,9 +29,6 @@ a {
     color: inherit;
 }
 
-/* -------------------------
-   Encabezado
-   ------------------------- */
 .admin-header {
     position: relative;
     z-index: 2;
@@ -75,11 +67,6 @@ a {
     font-weight: 600;
 }
 
-/* -------------------------
-   Distribución general
-   Acepta las dos variantes para cubrir el typo
-   "admin-layaout" que aparece en el HTML original.
-   ------------------------- */
 .admin-layout,
 .admin-layaout {
     display: flex;
@@ -88,7 +75,6 @@ a {
     width: 100%;
 }
 
-/* Menú lateral */
 .admin-sidebar {
     flex: 0 0 218px;
     width: 218px;
@@ -130,7 +116,6 @@ a {
     outline-offset: 2px;
 }
 
-/* Área central donde se renderizan los templates */
 .admin-contenido {
     flex: 1;
     min-width: 0;
@@ -138,10 +123,6 @@ a {
     background: var(--admin-fondo);
 }
 
-/* =========================================================
-   INICIO DEL ADMINISTRADOR
-   Clases utilizadas en inicio_admin.html
-   ========================================================= */
 
 .inicio-admin {
     width: 100%;
@@ -149,7 +130,6 @@ a {
     margin: 0 auto;
 }
 
-/* Bienvenida y título */
 .inicio-admin__bienvenida {
     margin-bottom: 25px;
 }
@@ -178,7 +158,6 @@ a {
     line-height: 1.5;
 }
 
-/* Tarjetas de resumen */
 .inicio-admin__resumen {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -210,7 +189,6 @@ a {
     line-height: 1;
 }
 
-/* Banner de novedades */
 .inicio-admin__banner {
     display: flex;
     align-items: center;
@@ -242,7 +220,6 @@ a {
     opacity: 0.72;
 }
 
-/* Panel que contiene la tabla */
 .inicio-admin__novedades {
     overflow: hidden;
     background: var(--admin-blanco);
@@ -282,7 +259,6 @@ a {
     text-decoration: underline;
 }
 
-/* Tabla de películas */
 .tabla-contenedor {
     width: 100%;
     overflow-x: auto;
@@ -346,9 +322,6 @@ a {
     font-size: 12px;
 }
 
-/* -------------------------
-   Adaptación a tablets
-   ------------------------- */
 @media (max-width: 900px) {
     .admin-sidebar {
         flex-basis: 190px;
@@ -368,9 +341,6 @@ a {
     }
 }
 
-/* -------------------------
-   Adaptación a celulares
-   ------------------------- */
 @media (max-width: 650px) {
     .admin-header {
         min-height: 54px;
@@ -454,10 +424,6 @@ a {
     }
 }
 
-/* =========================================================
-   ESTADÍSTICAS DEL ADMINISTRADOR
-   Clases utilizadas en estadisticas_admin.html
-   ========================================================= */
 
 .estadisticas-admin {
     width: 100%;
@@ -721,7 +687,6 @@ a {
     line-height: 1.5;
 }
 
-/* Adaptación de estadísticas para pantallas medianas */
 @media (max-width: 950px) {
     .estadisticas-admin__graficos {
         grid-template-columns: minmax(0, 1fr) minmax(250px, 0.9fr);
@@ -734,7 +699,6 @@ a {
     }
 }
 
-/* Adaptación de estadísticas para celulares */
 @media (max-width: 700px) {
     .estadisticas-admin__encabezado {
         align-items: stretch;
