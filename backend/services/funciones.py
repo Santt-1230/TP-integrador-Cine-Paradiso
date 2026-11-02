@@ -162,26 +162,3 @@ def actualizar_funcion(id_funcion, datos):
     funciones_repository.actualizar_funcion(id_funcion, campos)
     funcion = serializar_funcion(funciones_repository.obtener_funcion(id_funcion))
     return funcion, None
-
-
-def reservar_butacas(datos, id_usuario):
-    if not isinstance(datos, dict):
-        raise ValueError("El cuerpo debe ser un objeto JSON")
-
-    id_funcion = funciones_validator.validar_id(datos.get("id_funcion"), "id_funcion")
-    butacas = datos.get("id_butacas")
-    if not isinstance(butacas, list) or not butacas:
-        raise ValueError("id_butacas debe ser una lista con al menos una butaca")
-    if len(butacas) > 6:
-        raise ValueError("No se pueden reservar más de 6 butacas por compra")
-
-    id_butacas = [
-        funciones_validator.validar_id(id_butaca, "id_butacas")
-        for id_butaca in butacas
-    ]
-    if len(set(id_butacas)) != len(id_butacas):
-        raise ValueError("No se puede repetir una butaca en la misma compra")
-
-    return funciones_repository.reservar_butacas(
-        id_usuario, id_funcion, id_butacas
-    )
