@@ -15,6 +15,13 @@ def construir_error_api(code:str, message:str, description:str, level:str = 'err
         }]
     }
 
+def construir_error_db():
+    return construir_error_api(
+        code=const.ERROR_CODE_DATABASE_ERROR,
+        message=const.ERROR_MESSAGE_DATABASE_ERROR,
+        description=const.ERROR_DESCRIPTION_DATABASE_ERROR
+    )
+
 def validar_entero_positivo(valor, minimo, nombre):
     if valor is None or str(valor).strip == "":
         raise ValueError(construir_error_api(
@@ -50,3 +57,14 @@ def login_requerido(funcion):
             return jsonify(error), 401
         return funcion(*args, **kwargs)
     return verificar_sesion
+
+def rol_requerido(*roles):
+    def decorador(funcion):
+        @wraps(funcion)
+        def verificar_rol(*args, **kwargs):
+            if session.get("rol") not in roles:
+                error = construir_error_api("PERMISO_DENEGADO", "Permiso denegado", "No tienes permisos para acceder")
+                return jsonify(error), 403
+            return funcion(*args, **kwargs)
+        return verificar_rol
+    return decorador
