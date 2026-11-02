@@ -38,13 +38,16 @@ CREATE TABLE IF NOT EXISTS butacas (
 CREATE TABLE IF NOT EXISTS usuarios (
     id_usuario INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(150) NOT NULL,
+	apellido VARCHAR(150) NOT NULL,
     email VARCHAR(200) NOT NULL UNIQUE,
     contrasena_hash VARCHAR(255) NOT NULL,
+	fecha_nacimiento DATE NOT NULL,
     rol ENUM('cliente', 'administrador') NOT NULL DEFAULT 'cliente',
     activo BOOLEAN NOT NULL DEFAULT TRUE,
     fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 )CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
+INSERT INTO usuarios (nombre, apellido, email, fecha_nacimiento, contrasena_hash, rol) VALUES ('Admnin', 'Cine Paradiso', 'admin@cineparadiso.com', '1990-01-01', 
+'scrypt:32768:8:1$XogwXYeb1jrrnFYg$44a1bc2bc965551d7375ccb96e0b662cc87cf91ce52cfa37b3a547b99ca8e59b60ec7ba5243baa8a7dc199e36064d06ed0d4ccf83cb46af5cefc4e12c24fd819', 'administrador'); 
 
 
 CREATE TABLE IF NOT EXISTS productos (
