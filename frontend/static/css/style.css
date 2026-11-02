@@ -124,3 +124,330 @@ footer {
         margin: 0 1rem;
     }
 }
+
+/* -- ADMIN -- */
+
+/* BARRA SUPERIOR */
+
+.pagina-admin {
+    display: block;
+    background-color: #f4f4f5;
+    color: #333;
+}
+
+.pagina-admin .barra-superior {
+    background-color: #ff6464;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 25px;
+}
+
+.pagina-admin .marca {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.pagina-admin .marca h2 {
+    font-size: 18px;
+    margin: 0;
+}
+
+.pagina-admin .marca span {
+    font-size: 10px;
+}
+
+.pagina-admin .panel-usuario {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    font-size: 12px;
+}
+
+
+/* ESTRUCTURA */
+
+.pagina-admin .contenedor {
+    display: flex;
+    min-height: calc(100vh - 106px);
+}
+
+
+/* MENU LATERAL */
+
+.pagina-admin .menu-lateral {
+    width: 195px;
+    background-color: white;
+    padding: 25px 15px;
+    border-right: 1px solid #ddd;
+    flex-shrink: 0;
+}
+
+.pagina-admin .menu-lateral p {
+    font-size: 11px;
+    color: #999;
+    margin: 0 10px 25px;
+}
+
+.pagina-admin .menu-lateral nav {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.pagina-admin .menu-lateral a {
+    color: #444;
+    padding: 14px 10px;
+    font-size: 13px;
+    border-radius: 8px;
+}
+
+.pagina-admin .menu-lateral a.seleccionado {
+    background-color: #fff0f0;
+    color: #e64f55;
+    font-weight: bold;
+}
+
+
+/* CONTENIDO */
+
+.pagina-admin main {
+    flex: 1;
+    padding: 30px;
+    min-width: 0;
+    display: block;
+}
+
+.pagina-admin .migas {
+    font-size: 10px;
+    color: #999;
+    margin-bottom: 25px;
+}
+
+.pagina-admin .titulo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.pagina-admin .titulo h1 {
+    font-size: 23px;
+    margin: 0 0 8px;
+}
+
+.pagina-admin .titulo p {
+    font-size: 12px;
+    color: #888;
+    margin: 0;
+}
+
+
+/* BOTON AGREGAR */
+
+.pagina-admin .boton-agregar {
+    background-color: #ff6464;
+    color: #222;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 18px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+
+/* BUSCADOR Y FILTRO */
+
+.pagina-admin .filtros {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.pagina-admin .filtros input {
+    flex: 1;
+    min-width: 0;
+    padding: 14px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+.pagina-admin .filtros select {
+    padding: 14px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: white;
+}
+
+.pagina-admin .filtros span {
+    font-size: 11px;
+    color: #888;
+}
+
+
+/* TABLA */
+
+.pagina-admin .tabla-contenedor {
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    overflow-x: auto;
+}
+
+.pagina-admin table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    min-width: 700px;
+}
+
+.pagina-admin th {
+    background-color: #fafafa;
+    color: #999;
+    font-size: 10px;
+    font-weight: normal;
+    text-align: left;
+    padding: 17px 12px;
+}
+
+.pagina-admin td {
+    padding: 17px 12px;
+    border-top: 1px solid #eee;
+}
+
+.pagina-admin th:last-child,
+.pagina-admin td:last-child {
+    text-align: center;
+}
+
+
+/* ICONOS */
+
+.pagina-admin .icono {
+    display: inline-flex;
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    align-items: center;
+    justify-content: center;
+    margin-right: 10px;
+}
+
+.pagina-admin .rosa {
+    background-color: #fff0f0;
+    color: #bd5555;
+}
+
+.pagina-admin .amarillo {
+    background-color: #fff4d0;
+    color: #987b30;
+}
+
+
+/* ESTADOS */
+
+.pagina-admin .activo {
+    background-color: #def4e6;
+    color: #287447;
+    padding: 10px 25px;
+    border-radius: 30px;
+}
+
+.pagina-admin .inactivo {
+    background-color: #eee;
+    color: #777;
+    padding: 10px 25px;
+    border-radius: 30px;
+}
+
+
+/* BOTONES DE ACCIONES */
+
+.pagina-admin td button {
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 7px 9px;
+    font-size: 10px;
+    cursor: pointer;
+}
+
+.pagina-admin td button.baja {
+    color: #bd5555;
+}
+
+
+/* PIE DE TABLA */
+
+.pagina-admin .tabla-pie {
+    display: flex;
+    justify-content: space-between;
+    padding: 15px;
+    border-top: 1px solid #eee;
+    font-size: 10px;
+    color: #888;
+}
+
+
+/* AVISO */
+
+.pagina-admin .aviso {
+    background-color: #fff6d9;
+    color: #8d7844;
+    padding: 13px;
+    border-radius: 7px;
+    font-size: 11px;
+    margin-top: 12px;
+}
+
+
+/* FOOTER ADMIN */
+
+.pagina-admin .pie-admin {
+    background-color: white;
+    padding: 20px;
+    border-top: 1px solid #ddd;
+    color: #888;
+    font-size: 11px;
+    text-align: left;
+}
+
+
+/* RESPONSIVE ADMIN */
+
+@media (max-width: 700px) {
+
+    .pagina-admin .menu-lateral {
+        width: 65px;
+        padding: 15px 5px;
+    }
+
+    .pagina-admin .menu-lateral p {
+        display: none;
+    }
+
+    .pagina-admin .menu-lateral a {
+        font-size: 0;
+        text-align: center;
+    }
+
+    .pagina-admin main {
+        padding: 15px;
+    }
+
+    .pagina-admin .titulo {
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .pagina-admin .filtros {
+        flex-wrap: wrap;
+    }
+
+    .pagina-admin .filtros input {
+        flex-basis: 100%;
+    }
+}
