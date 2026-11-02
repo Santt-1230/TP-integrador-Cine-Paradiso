@@ -15,6 +15,8 @@ from flask import Flask, jsonify
 from routes.salas import salas_bp
 from routes.locales import locales_bp
 from routes.usuarios import usuarios_bp
+from routes.peliculas import peliculas_bp
+from routes.catalogo_externo import catalogo_externo_bp
 from db import obtener_conexion
 from utils import construir_error_api
 
@@ -34,6 +36,8 @@ app.register_blueprint(promociones_bp)
 
 app.register_blueprint(locales_bp)
 app.register_blueprint(usuarios_bp)
+app.register_blueprint(peliculas_bp)
+app.register_blueprint(catalogo_externo_bp)
 
 @app.errorhandler(RuntimeError)
 def error_de_conexion(error):

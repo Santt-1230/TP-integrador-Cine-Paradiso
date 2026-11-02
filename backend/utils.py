@@ -2,6 +2,7 @@ from flask import jsonify, session
 from functools import wraps
 import logging
 import constants as const
+from db import ejecutar_consulta
 
 logger = logging.getLogger(__name__)
 
@@ -57,6 +58,22 @@ def login_requerido(funcion):
             return jsonify(error), 401
         return funcion(*args, **kwargs)
     return verificar_sesion
+
+
+def admin_requerido(funcion):
+    @wraps(funcion)
+    @login_requerido
+    def verificar_rol(*args, **kwargs):
+        filas = ejecutar_consulta(
+            "SELECT rol, activo FROM usuario WHERE id_usuario = %s",
+            (session["id_usuario"],),
+        )
+        if not filas or filas[0]["rol"] != const.ROL_ADMINISTRADOR or not filas[0]["activo"]:
+            error = construir_error_api(const.ERROR_CODE_FORBIDDEN, "Acceso denegado",
+                                        "Se requiere el rol de administrador")
+            return jsonify(error), 403
+        return funcion(*args, **kwargs)
+    return verificar_rol
 
 def rol_requerido(*roles):
     def decorador(funcion):
