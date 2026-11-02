@@ -75,11 +75,39 @@ CREATE TABLE IF NOT EXISTS usuarios (
     contrasena_hash VARCHAR(255) NOT NULL,
 	fecha_nacimiento DATE NOT NULL,
     rol ENUM('cliente', 'administrador') NOT NULL DEFAULT 'cliente',
-    activo BOOLEAN NOT NULL DEFAULT TRUE,
-    fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    activo BOOLEAN NOT NULL DEFAULT TRUE
+
 )CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-INSERT INTO usuarios (nombre, apellido, email, fecha_nacimiento, contrasena_hash, rol) VALUES ('Admnin', 'Cine Paradiso', 'admin@cineparadiso.com', '1990-01-01', 
-'scrypt:32768:8:1$XogwXYeb1jrrnFYg$44a1bc2bc965551d7375ccb96e0b662cc87cf91ce52cfa37b3a547b99ca8e59b60ec7ba5243baa8a7dc199e36064d06ed0d4ccf83cb46af5cefc4e12c24fd819', 'administrador'); 
+
+CREATE TABLE IF NOT EXISTS peliculas (
+	id_pelicula INT AUTO_INCREMENT PRIMARY KEY,
+	id_externo VARCHAR(30) NULL UNIQUE,
+	nombre VARCHAR(255) NOT NULL,
+	sinopsis TEXT,
+	poster_url VARCHAR(500),
+	duracion_min INT NOT NULL,
+	clasificacion VARCHAR(20),
+	cartelera_desde DATE,
+	cartelera_hasta DATE,
+	activo BOOLEAN NOT NULL DEFAULT TRUE,
+	CONSTRAINT chk_peliculas_duracion CHECK (duracion_min > 0)
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+
+
+CREATE TABLE IF NOT EXISTS funciones (
+	id_funcion INT AUTO_INCREMENT PRIMARY KEY,
+	id_pelicula INT NOT NULL,
+	id_sala INT NOT NULL,
+	fecha_hora_inicio DATETIME NOT NULL,
+	fecha_hora_fin DATETIME NOT NULL,
+	precio_entrada DECIMAL(10,2) NOT NULL,
+	estado ENUM('programada', 'cancelada', 'finalizada') NOT NULL DEFAULT 'programada',
+	FOREIGN KEY (id_pelicula) REFERENCES peliculas(id_pelicula),
+	FOREIGN KEY (id_sala) REFERENCES salas(id_sala),
+	CONSTRAINT chk_funciones_fechas CHECK (fecha_hora_fin > fecha_hora_inicio),
+	CONSTRAINT chk_funciones_precio CHECK (precio_entrada >= 0)
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 
 
@@ -133,15 +161,40 @@ CREATE TABLE IF NOT EXISTS promociones (
 	activa BOOLEAN NOT NULL DEFAULT TRUE
 );
 
+CREATE TABLE IF NOT EXISTS compras (
+	id_compra INT AUTO_INCREMENT PRIMARY KEY,
+	id_usuario INT NOT NULL,
+	id_funcion INT NOT NULL,
+	estado ENUM('pendiente', 'confirmada', 'cancelada', 'expirada') NOT NULL DEFAULT 'pendiente',
+	fecha_creacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	expira_en DATETIME NOT NULL,
+	fecha_confirmacion DATETIME NOT NULL,
+	total DECIMAL(10,2) NOT NULL DEFAULT 0,
+	numero_factura VARCHAR(30) NULL UNIQUE,
+	fecha_cancelacion DATETIME NULL,
+	motivo_cancelacion ENUM('cliente', ' funcion_cancelada') NULL,
+	monto_reembolsado DECIMAL(10,2) NULL,
+	Foreign Key (id_usuario) REFERENCES usuarios(id_usuario),
+	Foreign Key (id_funcion) REFERENCES funciones(id_funcion)
+);
+
 CREATE TABLE IF NOT EXISTS compra_productos (
 	id_compra_producto INT AUTO_INCREMENT PRIMARY KEY,
 	id_compra INT NOT NULL,
 	id_producto INT NOT NULL,
+	fecha_compra DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	cantidad INT NOT NULL DEFAULT 1 CHECK (cantidad > 0),
 	precio_unitario DECIMAL(10,2) NOT NULL,
 	FOREIGN KEY (id_compra) REFERENCES compras(id_compra),
 	FOREIGN KEY (id_producto) REFERENCES productos(id_producto)
 );
+
+
+INSERT INTO usuarios (nombre, apellido, email, fecha_nacimiento, contrasena_hash, rol) VALUES (
+	'Admin', 'Cine Paradiso', 'admin@cineparadiso.com', '1990-01-01', 
+'scrypt:32768:8:1$XogwXYeb1jrrnFYg$44a1bc2bc965551d7375ccb96e0b662cc87cf91ce52cfa37b3a547b99ca8e59b60ec7ba5243baa8a7dc199e36064d06ed0d4ccf83cb46af5cefc4e12c24fd819', 'administrador'); 
+
+
 
 INSERT INTO locales (nombre, direccion) VALUES
     ('Paradiso Centro', 'Calle Falsa 123'),
