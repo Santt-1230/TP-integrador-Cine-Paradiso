@@ -63,21 +63,6 @@ CREATE TABLE IF NOT EXISTS compras (
 );
 
 
-<<<<<<< HEAD
-CREATE TABLE IF NOT EXISTS entradas(
-	id_entrada INT AUTO_INCREMENT PRIMARY KEY,
-	id_compra INT NOT NULL,
-	id_funcion INT NOT NULL,
-	id_butaca INT NOT NULL,
-	precio_unitario DECIMAL(10,2) NOT NULL,
-	estado ENUM('reservada', 'confirmada', 'utilizada', 'cancelada') NOT NULL DEFAULT 'reservada',
-	butaca_ocupada INT GENERATED ALWAYS AS (CASE WHEN estado = 'cancelada' THEN NULL ELSE id_butaca END) STORED,
-	fecha_compra DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	Foreign Key (id_compra) REFERENCES compras(id_compra),
-	Foreign Key (id_funcion) REFERENCES funciones(id_funcion),
-	Foreign Key (id_butaca) REFERENCES butacas(id_butaca)
-);
-=======
 CREATE TABLE IF NOT EXISTS productos (
 	id_producto INT AUTO_INCREMENT PRIMARY KEY,
 	nombre VARCHAR(100) NOT NULL,
@@ -97,6 +82,20 @@ CREATE TABLE IF NOT EXISTS promociones (
 	activa BOOLEAN NOT NULL DEFAULT TRUE
 );
 
+CREATE TABLE IF NOT EXISTS funciones (
+	id_funcion INT AUTO_INCREMENT PRIMARY KEY,
+	id_pelicula INT NOT NULL,
+	id_sala INT NOT NULL,
+	fecha_hora_inicio DATETIME NOT NULL,
+	fecha_hora_fin DATETIME NOT NULL,
+	precio_entrada DECIMAL(10,2) NOT NULL,
+	estado ENUM('programada', 'cancelada', 'finalizada') NOT NULL DEFAULT 'programada',
+	FOREIGN KEY (id_pelicula) REFERENCES peliculas(id_pelicula),
+	FOREIGN KEY (id_sala) REFERENCES salas(id_sala),
+	CONSTRAINT chk_funciones_fechas CHECK (fecha_hora_fin > fecha_hora_inicio),
+	CONSTRAINT chk_funciones_precio CHECK (precio_entrada >= 0)
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS compra_productos (
 	id_compra_producto INT AUTO_INCREMENT PRIMARY KEY,
 	id_compra INT NOT NULL,
@@ -107,7 +106,6 @@ CREATE TABLE IF NOT EXISTS compra_productos (
 	FOREIGN KEY (id_producto) REFERENCES productos(id_producto)
 );
 
->>>>>>> origin/feature/peliculas-cartelera
 INSERT INTO locales (nombre, direccion) VALUES
     ('Paradiso Centro', 'Calle Falsa 123'),
     ('Paradiso Norte', 'Avenida Ejemplo 456'),

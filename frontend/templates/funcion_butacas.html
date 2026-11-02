@@ -1,0 +1,32 @@
+{% extends "base_funciones.html" %}
+
+{% block titulo %}Butacas - Cine Paradiso{% endblock %}
+
+{% block contenido %}
+<section class="funciones-pagina">
+    <a href="{{ url_for('funciones_front.pagina_funciones') }}">← Volver a funciones</a>
+    <h1>Butacas de la función {{ id_funcion }}</h1>
+    <p>Las butacas ocupadas no están disponibles.</p>
+    {% if error %}<p class="mensaje-error">{{ error }}</p>{% endif %}
+    {% if butacas %}
+        <div class="leyenda-butacas">
+            <span><i class="butaca-muestra disponible"></i> Disponible</span>
+            <span><i class="butaca-muestra ocupada"></i> Ocupada</span>
+        </div>
+        <div class="pantalla">PANTALLA</div>
+        <div class="mapa-butacas">
+            {% for fila, asientos in butacas|groupby('fila') %}
+                <div class="fila-butacas">
+                    {% for butaca in asientos %}
+                        <div class="butaca {{ butaca.estado }}" title="Fila {{ butaca.fila }}, asiento {{ butaca.numero }}">
+                            {{ butaca.fila }}{{ butaca.numero }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        </div>
+    {% elif not error %}
+        <p>Esta sala todavía no tiene butacas cargadas.</p>
+    {% endif %}
+</section>
+{% endblock %}

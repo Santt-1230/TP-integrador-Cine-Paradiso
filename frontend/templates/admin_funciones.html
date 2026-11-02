@@ -1,0 +1,47 @@
+{% extends "base_funciones.html" %}
+
+{% block titulo %}Administrar funciones - Cine Paradiso{% endblock %}
+
+{% block contenido %}
+<section class="funciones-pagina">
+    <div class="titulo-con-accion">
+        <h1>Administrar funciones</h1>
+        <a class="boton" href="{{ url_for('funciones_front.admin_nueva_funcion') }}">Crear función</a>
+    </div>
+    {% if error %}<p class="mensaje-error">{{ error }}</p>{% endif %}
+    {% if funciones %}
+        <div class="tabla-contenedor">
+            <table>
+                <thead><tr><th>Película</th><th>Cine / sala</th><th>Inicio</th><th>Estado</th><th>Acciones</th></tr></thead>
+                <tbody>
+                    {% for funcion in funciones %}
+                    <tr>
+                        <td>{{ funcion.pelicula }}</td>
+                        <td>{{ funcion.local }} / {{ funcion.numero_sala }}</td>
+                        <td>{{ funcion.fecha_hora_inicio }}</td>
+                        <td>{{ funcion.estado }}</td>
+                        <td class="acciones-tabla">
+                            {% if funcion.tiene_entradas_activas %}
+                            <span>No editable: tiene entradas</span>
+                            {% elif funcion.estado != 'cancelada' and funcion.estado != 'finalizada' %}
+                            <a href="{{ url_for('funciones_front.admin_editar_funcion', id_funcion=funcion.id_funcion) }}">Editar</a>
+                            {% endif %}
+                            {% if funcion.estado == 'programada' %}
+                            <form method="post" action="{{ url_for('funciones_front.admin_cancelar_funcion', id_funcion=funcion.id_funcion) }}">
+                                <button class="boton-peligro" type="submit">Cancelar</button>
+                            </form>
+                            {% if funcion.tiene_entradas_activas %}
+                            <span>Después puedes crear una función nueva.</span>
+                            {% endif %}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% elif not error %}
+        <p>Todavía no hay funciones cargadas.</p>
+    {% endif %}
+</section>
+{% endblock %}
