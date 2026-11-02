@@ -2,6 +2,7 @@ from flask import jsonify, session
 from functools import wraps
 import logging
 import constants as const
+from db import ejecutar_consulta
 
 logger = logging.getLogger(__name__)
 
@@ -14,6 +15,13 @@ def construir_error_api(code:str, message:str, description:str, level:str = 'err
             "description" : description
         }]
     }
+
+def construir_error_db():
+    return construir_error_api(
+        code=const.ERROR_CODE_DATABASE_ERROR,
+        message=const.ERROR_MESSAGE_DATABASE_ERROR,
+        description=const.ERROR_DESCRIPTION_DATABASE_ERROR
+    )
 
 def validar_entero_positivo(valor, minimo, nombre):
     if valor is None or str(valor).strip == "":
@@ -50,6 +58,41 @@ def login_requerido(funcion):
             return jsonify(error), 401
         return funcion(*args, **kwargs)
     return verificar_sesion
+
+"""
+Verifica si el rol del usuario es admin
+si esta logueado y es admin permite acceder: En caso de no estarlo, 
+anula la peticion y devuelve error 403 (No autorizado)
+"""
+
+def requiere_admin(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+
+        if session.get("id_usuario") is None:
+            return jsonify({"error": "Debés iniciar sesión"}), 401
+
+        if session.get("rol") != "administrador":
+            return jsonify({"error": "No tenés permisos de administrador"}), 403
+
+        return func(*args, **kwargs)
+
+    return wrapper
+
+def admin_requerido(funcion):
+    @wraps(funcion)
+    @login_requerido
+    def verificar_rol(*args, **kwargs):
+        filas = ejecutar_consulta(
+            "SELECT rol, activo FROM usuario WHERE id_usuario = %s",
+            (session["id_usuario"],),
+        )
+        if not filas or filas[0]["rol"] != const.ROL_ADMINISTRADOR or not filas[0]["activo"]:
+            error = construir_error_api(const.ERROR_CODE_FORBIDDEN, "Acceso denegado",
+                                        "Se requiere el rol de administrador")
+            return jsonify(error), 403
+        return funcion(*args, **kwargs)
+    return verificar_rol
 
 def rol_requerido(*roles):
     def decorador(funcion):

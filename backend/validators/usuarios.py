@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date
 
 
 def texto(datos, clave):
@@ -32,9 +32,12 @@ def validar_fecha_nacimiento(fecha_nacimiento):
     if not fecha_nacimiento:
         return error_validacion("La fecha de nacimiento es obligatoria")
     try:
-        datetime.strptime(fecha_nacimiento, "%Y-%m-%d")
+        fecha = datetime.strptime(fecha_nacimiento, "%Y-%m-%d").date()
     except ValueError:
         return error_validacion("La fecha de nacimiento debe tener formato YYYY-MM-DD")
+    if fecha >= date.today():
+        return error_validacion("La fecha de nacimiento debe ser anterior al dia de hoy")
+
     return None
 
 

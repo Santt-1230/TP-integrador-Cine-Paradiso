@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block titulo %}Crear cuenta - Cine Paradiso{% endblock %}
+
+{% block estilos_extra %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/usuarios.css') }}">
+{% endblock %}
+
+{% block contenido %}
+<section class="pagina-formulario">
+    <h1>Crear cuenta</h1>
+
+    <form class="tarjeta-formulario" method="post" action="{{ url_for('registro') }}">
+        {% if error %}
+            <p class="mensaje-error">{{ error }}</p>
+        {% endif %}
+
+        <label>Nombre
+            <input type="text" name="nombre" maxlength="150" required>
+        </label>
+
+        <label>Apellido
+            <input type="text" name="apellido" maxlength="150" required>
+        </label>
+
+        <label>Mail
+            <input type="email" name="email" maxlength="200" required>
+        </label>
+
+        <label>Fecha de nacimiento
+            <input type="text" name="fecha_nacimiento" placeholder="YYYY-MM-DD" pattern="\d{4}-\d{2}-\d{2}" max="{{fecha_maxima}}" title="El formato debe ser YYYY-MM-DD" required>
+        </label>
+
+        <label>Contraseña
+            <input type="password" name="contrasena" minlength="8" required>
+        </label>
+
+        <label>Repetir contraseña
+            <input type="password" name="repetir_contrasena" minlength="8" required>
+        </label>
+
+        <button type="submit" class="boton-oscuro">Crear cuenta</button>
+    </form>
+</section>
+{% endblock %}

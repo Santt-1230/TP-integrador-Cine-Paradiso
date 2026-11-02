@@ -1,7 +1,7 @@
 from db import ejecutar_consulta, ejecutar_mutacion
 
 def crear_usuario(nombre, apellido, email, fecha_nacimiento, contrasena_hash):
-    sql = """INSERT INTO usuarios (nombre, apellido, email, fecha_nacimiento, contrasena, rol) VALUES (%s, %s, %s, %s, %s, %s)"""
+    sql = """INSERT INTO usuarios (nombre, apellido, email, fecha_nacimiento, contrasena_hash, rol) VALUES (%s, %s, %s, %s, %s, %s)"""
     params = (nombre, apellido, email, fecha_nacimiento, contrasena_hash, "cliente")
     resultado = ejecutar_mutacion(sql, params)
     return resultado["id"]
@@ -21,7 +21,7 @@ def actualizar_perfil(id_usuario, nombre, apellido, email):
     ejecutar_mutacion(sql, (nombre, apellido, email, id_usuario))
 
 def actualizar_contrasena(id_usuario, contrasena_hash):
-    sql = "UPDATE usuarios SET contrasena = %s WHERE id = %s"
+    sql = "UPDATE usuarios SET contrasena_hash = %s WHERE id = %s"
     ejecutar_mutacion(sql, (contrasena_hash, id_usuario))
 
 def listar_compras(id_usuario):

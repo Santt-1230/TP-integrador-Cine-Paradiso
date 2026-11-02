@@ -1,0 +1,82 @@
+{% extends "base_admin.html" %}
+
+{% block contenido_admin %}
+
+<section class="inicio-admin">
+
+    <!-- Bienvenida -->
+    <div class="inicio-admin__bienvenida">
+        <p>ADMINISTRACIÓN / INICIO</p>
+
+        <h1>Buen día, {{ nombre_admin|default('ADMIN', true) }}</h1>
+
+        <p>Este es el resumen de la actividad de Cine Paradiso.</p>
+    </div>
+
+    <!-- Tarjetas informativas -->
+    <section class="inicio-admin__resumen">
+
+        <article class="tarjeta-resumen">
+            <h2>Películas activas</h2>
+            <p>{{ cantidad_peliculas|default(0, true) }}</p>
+        </article>
+
+        <article class="tarjeta-resumen">
+            <h2>Funciones programadas</h2>
+            <p>{{ cantidad_funciones|default(0, true) }}</p>
+        </article>
+
+        <article class="tarjeta-resumen">
+            <h2>Ocupación promedio</h2>
+            <p>{{ ocupacion_promedio|default(0, true) }}%</p>
+        </article>
+
+    </section>
+
+    <!-- Novedades -->
+    <a href="/admin/peliculas" class="inicio-admin__banner">
+        NOVEDADES / ESTRENOS
+    </a>
+
+    <!-- Tabla de películas -->
+    <section class="inicio-admin__novedades">
+
+        <h2>Películas y próximos estrenos</h2>
+
+        {% if novedades %}
+
+        <table class="tabla-admin">
+
+            <thead>
+                <tr>
+                    <th>Película</th>
+                    <th>Estreno</th>
+                    <th>Funciones</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for pelicula in novedades %}
+                <tr>
+                    <td>{{ pelicula.nombre }}</td>
+                    <td>{{ pelicula.fecha_estreno }}</td>
+                    <td>{{ pelicula.cantidad_funciones }}</td>
+                    <td>{{ pelicula.estado }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+
+        {% else %}
+
+        <p>Todavía no hay novedades o estrenos para mostrar.</p>
+
+        {% endif %}
+
+    </section>
+
+</section>
+
+{% endblock %}
