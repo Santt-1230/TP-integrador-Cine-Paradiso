@@ -24,7 +24,6 @@ app.register_blueprint(locales_bp)
 app.register_blueprint(usuarios_bp)
 app.register_blueprint(cancelaciones_bp)
 
-if __name__ == "__main__":
 import os 
 
 load_dotenv() #Lee el archivo .env y carga las variables
