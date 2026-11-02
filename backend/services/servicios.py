@@ -5,7 +5,6 @@ from backend.repositories.servicios import (
     actualizar_servicio as actualizar_servicio_repo,
     dar_de_baja_servicio as dar_de_baja_servicio_repo,
 )
-from utils import construir_error_api
 
 
 def listar_servicios():
