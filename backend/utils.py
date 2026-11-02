@@ -15,6 +15,13 @@ def construir_error_api(code:str, message:str, description:str, level:str = 'err
         }]
     }
 
+def construir_error_db():
+    return construir_error_api(
+        code=const.ERROR_CODE_DATABASE_ERROR,
+        message=const.ERROR_MESSAGE_DATABASE_ERROR,
+        description=const.ERROR_DESCRIPTION_DATABASE_ERROR
+    )
+
 def validar_entero_positivo(valor, minimo, nombre):
     if valor is None or str(valor).strip == "":
         raise ValueError(construir_error_api(

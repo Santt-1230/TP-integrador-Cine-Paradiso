@@ -5,7 +5,9 @@ load_dotenv() #Lee el archivo .env y carga las variables
 
 from flask import Flask, jsonify
 from routes.salas import salas_bp
+from routes.locales import locales_bp
 from routes.usuarios import usuarios_bp
+from db import obtener_conexion
 from utils import construir_error_api
 
 app = Flask(__name__)
@@ -14,8 +16,9 @@ app.secret_key = os.getenv("SECRET_KEY") #Clave con la que flask firma la cookie
 
 if not app.secret_key:
     raise RuntimeError("Falta la SECRET_KEY en el .env")
-
+    
 app.register_blueprint(salas_bp)
+app.register_blueprint(locales_bp)
 app.register_blueprint(usuarios_bp)
 
 @app.errorhandler(RuntimeError)

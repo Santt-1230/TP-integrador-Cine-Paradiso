@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS salas(
 	id_local INT NOT NULL,
 	numero_sala INT NOT NULL UNIQUE,
 	capacidad INT NOT NULL,
-	activa BOOLEAN NOT NULL DEFAULT TRUE,
+	estado ENUM('activa', 'inactiva') NOT NULL DEFAULT 'activa'
 	FOREIGN KEY(id_local) REFERENCES locales(id_local),
 	CONSTRAINT uq_salas_local_numero UNIQUE (id_local, numero_sala),
     CONSTRAINT chk_salas_numero CHECK (numero_sala > 0)
@@ -30,7 +30,6 @@ CREATE TABLE IF NOT EXISTS butacas (
 	id_sala INT NOT NULL,
 	fila CHAR(1) NOT NULL,
 	numero INT NOT NULL,
-	activa BOOLEAN NOT NULL DEFAULT TRUE,
 	FOREIGN KEY (id_sala) REFERENCES salas(id_sala),
     CONSTRAINT uq_butacas_asiento UNIQUE (id_sala, fila, numero),
     CONSTRAINT chk_butacas_numero CHECK (numero > 0)
