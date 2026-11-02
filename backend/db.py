@@ -1,5 +1,6 @@
 import logging
 import os
+from contextlib import contextmanager
 import mysql.connector
 
 logger = logging.getLogger(__name__)
@@ -60,3 +61,43 @@ def ejecutar_mutacion(sql:str, parametros :tuple = ())-> dict:
             cursor.close()
         conexion.close()
 
+def ejecutar_consulta_uno(sql: str, parametros: tuple = ()) -> dict | None:
+    conexion = obtener_conexion()
+    cursor = None
+    try:
+        cursor = conexion.cursor(dictionary=True)
+        cursor.execute(sql, parametros)
+        return cursor.fetchone()
+    finally:
+        if cursor is not None:
+            cursor.close()
+        conexion.close()
+
+
+def ejecutar_consulta_todas(sql: str, parametros: tuple = ()) -> list[dict]:
+    conexion = obtener_conexion()
+    cursor = None
+    try:
+        cursor = conexion.cursor(dictionary=True)
+        cursor.execute(sql, parametros)
+        return cursor.fetchall()
+    finally:
+        if cursor is not None:
+            cursor.close()
+        conexion.close()
+
+@contextmanager
+def transaccion():
+    conexion = obtener_conexion()
+    cursor = None
+    try:
+        cursor = conexion.cursor(dictionary=True)
+        yield cursor
+        conexion.commit()
+    except Exception:
+        conexion.rollback()
+        raise
+    finally:
+        if cursor is not None:
+            cursor.close()
+        conexion.close()
