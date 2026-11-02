@@ -1,0 +1,14 @@
+{% macro tarjeta(p) %}
+<article class="tarjeta">
+    <a href="{{ url_for('peliculas_front.detalle', id_pelicula=p.id_pelicula) }}">
+        {% if p.poster_url %}
+            <img src="{{ p.poster_url }}" alt="Poster de {{ p.nombre }}" loading="lazy">
+        {% else %}
+            <div class="sin-poster">Sin póster</div>
+        {% endif %}
+        <h3>{{ p.nombre }}</h3>
+    </a>
+    <p class="tarjeta-meta">{{ p.duracion_min }} min{% if p.clasificacion %} · {{ p.clasificacion }}{% endif %}</p>
+    {% if p.generos %}<p class="tarjeta-generos">{{ p.generos | join(', ') }}</p>{% endif %}
+</article>
+{% endmacro %}

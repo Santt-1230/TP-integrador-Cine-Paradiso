@@ -8,8 +8,10 @@ body {
     flex-direction: column;
 }
 
+/* CAMBIALO POR ESTO: */
 header, footer {
-background-color: #ff6464;
+    background-color: #ff6464;
+    flex-shrink: 0; /* ← ESTO OBLIGA AL NAVEGADOR A RESPETAR SU TAMAÑO Y NO APLASTARLO */
 }
 
 .header-principal {
@@ -105,6 +107,118 @@ footer {
     gap: 1.5rem;
     font-size: 0.85rem;
 }
+
+/* BUSCÁ ESTO Y CAMBIALO: */
+.page-with-sidebar {
+    display: flex;
+    flex: 1; /* ← En lugar de min-height, esto le dice que use el espacio que sobra de forma perfecta */
+    width: 100%;
+}
+
+.user-sidebar {
+    width: 260px;
+    flex-shrink: 0;
+    background-color: #ff5a5f; 
+    padding: 30px 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.user-greeting {
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: #000;
+    text-transform: uppercase;
+    padding: 0 25px;
+    margin-bottom: 25px;
+    letter-spacing: 0.5px;
+}
+
+.sidebar-menu {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.sidebar-menu a {
+    display: block;
+    padding: 12px 25px;
+    color: #000;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.sidebar-menu a:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-menu a.active {
+    background-color: #a00000; 
+    color: #ffffff;
+}
+
+.page-with-sidebar > section {
+    flex-grow: 1;
+    padding: 30px 40px;
+    background-color: #f8f9fa; 
+}
+
+.page-with-sidebar section h2 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: #111;
+    margin-bottom: 20px;
+}
+
+.contenido-secciones {
+    flex-grow: 1;
+    background-color: #f8f9fa;
+    padding: 30px 40px;
+}
+
+.seccion-contenido {
+    display: none;
+}
+
+.seccion-contenido.activa {
+    display: block;
+}
+
+.perfil-card {
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 15px;
+    max-width: 500px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.perfil-info p {
+    margin-bottom: 10px;
+    font-size: 16px;
+    color: #333;
+}
+
+.btn-editar {
+    margin-top: 15px;
+    background-color: #ff5252;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.btn-editar:hover {
+    background-color: #e04343;
+}
+
 @media (max-width: 700px) {
     .header-principal {
         flex-wrap: wrap;
@@ -455,4 +569,133 @@ footer {
 .pagina-admin .barra-superior,
 .pagina-admin .pie-admin {
     flex-shrink: 0;
+}
+header { position: relative; }
+
+.menu-usuario { position: relative; }
+
+.menu-usuario summary {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    list-style: none;
+}
+
+.menu-usuario summary::-webkit-details-marker { display: none; }
+
+.panel-usuario {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    z-index: 20;
+    box-sizing: border-box;
+    width: 280px;
+    margin-top: 0.5rem;
+    padding: 1rem 1.2rem;
+    background: #555;
+    color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.panel-usuario a { color: #fff; }
+
+.saludo-perfil {
+    margin: 0 0 0.8rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.opciones-perfil {
+    margin: 0 0 0.8rem;
+    padding: 0;
+    list-style: none;
+    background: #2b2b30;
+    border-radius: 8px;
+}
+
+.opciones-perfil li + li { border-top: 1px solid #555; }
+
+.opciones-perfil a {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.8rem 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.boton-texto {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: #ddd;
+    font: inherit;
+    cursor: pointer;
+}
+
+.boton-texto:hover { text-decoration: underline; }
+
+.form-login {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.form-login label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #fff;
+}
+
+.form-login input {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 0.7rem 0.8rem;
+    border: 0;
+    border-radius: 8px;
+    background: #1c1c1c;
+    color: #fff;
+    font: inherit;
+    font-size: 0.95rem;
+}
+
+.boton-oscuro {
+    align-self: center;
+    padding: 0.7rem 1.6rem;
+    border: 0;
+    border-radius: 4px;
+    background: #2b2b30;
+    color: #fff;
+    font: inherit;
+    font-weight: 600;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+
+.boton-oscuro:hover { background: #000; }
+
+.enlace-chico {
+    margin: 0;
+    font-size: 0.75rem;
+    text-align: center;
+    color: #fff;
+}
+
+.enlace-chico a { text-decoration: underline; }
+
+@media (max-width: 700px) {
+    .menu-usuario { position: static; }
+
+    .panel-usuario {
+        left: 1rem;
+        right: 1rem;
+        width: auto;
+    }
 }

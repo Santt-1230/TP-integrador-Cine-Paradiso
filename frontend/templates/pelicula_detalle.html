@@ -1,0 +1,50 @@
+{% extends "base_peliculas.html" %}
+{% from "_componentes.html" import tarjeta %}
+{% block titulo %}{{ p.nombre }} · Cine Paradiso{% endblock %}
+{% block contenido %}
+<div class="contenedor">
+    <article class="detalle">
+        <div class="detalle-poster">
+            {% if p.poster_url %}
+                <img src="{{ p.poster_url }}" alt="Poster de {{ p.nombre }}">
+            {% else %}
+                <div class="sin-poster">Sin póster</div>
+            {% endif %}
+        </div>
+
+        <div class="detalle-info">
+            <h1>{{ p.nombre }}</h1>
+            <ul class="datos">
+                <li>{{ p.duracion_min }} min</li>
+                {% if p.clasificacion %}<li>Clasificación {{ p.clasificacion }}</li>{% endif %}
+                {% if p.generos %}<li>{{ p.generos | join(', ') }}</li>{% endif %}
+            </ul>
+            {% if p.cartelera_desde or p.cartelera_hasta %}
+                <p class="periodo">
+                    En cartelera
+                    {% if p.cartelera_desde %}desde el {{ p.cartelera_desde | fecha_ar }}{% endif %}
+                    {% if p.cartelera_hasta %}hasta el {{ p.cartelera_hasta | fecha_ar }}{% endif %}
+                </p>
+            {% endif %}
+
+            <h2>Sinopsis</h2>
+            <p>{{ p.sinopsis or "Sin sinopsis disponible." }}</p>
+
+            <h2>Horarios</h2>
+            {# Las funciones son del modulo de Max (P5). Cuando exista GET /api/funciones se listan aca. #}
+            <p class="vacio caja">Los horarios se publicarán próximamente.</p>
+        </div>
+    </article>
+
+    {% if mas %}
+    <section>
+        <div class="seccion-titulo"><h2>Más para ver</h2></div>
+        <div class="grilla grilla-chica">
+            {% for otra in mas %}{{ tarjeta(otra) }}{% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <p><a href="{{ url_for('peliculas_front.lista') }}">← Volver a la cartelera</a></p>
+</div>
+{% endblock %}

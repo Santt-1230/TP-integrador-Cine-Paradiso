@@ -1,0 +1,9 @@
+{% extends "base_peliculas.html" %}
+{% block titulo %}Error · Cine Paradiso{% endblock %}
+{% block contenido %}
+<div class="contenedor centrado">
+    <h1>{% if estado == 404 %}No encontrado{% else %}Algo salió mal{% endif %}</h1>
+    <p class="vacio">{{ mensaje }}</p>
+    <p><a class="boton" href="{{ url_for('peliculas_front.inicio') }}">Volver al inicio</a></p>
+</div>
+{% endblock %}
