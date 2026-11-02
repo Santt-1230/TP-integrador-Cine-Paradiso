@@ -14,3 +14,4 @@ def obtener_local_id(id_local):
     filas = ejecutar_consulta(sql, (id_local,))
     return filas[0] if filas else None
 
+

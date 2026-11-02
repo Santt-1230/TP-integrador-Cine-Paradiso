@@ -1,4 +1,3 @@
-import re
 import utils as ut
 import constants as const
 

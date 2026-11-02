@@ -78,3 +78,14 @@ def desactivar_sala(id_sala):
 
     return salas_repository.desactivar_sala(id_sala)
 
+def listar_salas_activas(id_local):
+    id_local = salas_validator.validar_id_local(id_local)
+    local = locales_repository.obtener_local_id(id_local)
+
+    if local is None or not local['activo']:
+        raise ValueError(ut.construir_error_api(
+            code=const.ERROR_CODE_LOCAL_NOT_FOUND,
+            message='Local no encontrado',
+            description=f"No existe un local activo con el ID '{id_local}'"
+        ))
+    return salas_repository.listar_salas_activas(id_local)

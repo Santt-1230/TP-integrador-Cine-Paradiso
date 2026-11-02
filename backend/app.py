@@ -4,6 +4,7 @@ load_dotenv()
 
 from flask import Flask
 from routes.salas import salas_bp
+from routes.locales import locales_bp
 from db import obtener_conexion
 
 app = Flask(__name__)
