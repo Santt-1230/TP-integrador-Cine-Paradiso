@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS salas(
 	id_local INT NOT NULL,
 	numero_sala INT NOT NULL UNIQUE,
 	capacidad INT NOT NULL,
-	estado ENUM('activa', 'inactiva') NOT NULL DEFAULT 'activa'
+	estado ENUM('activa', 'inactiva') NOT NULL DEFAULT 'activa',
 	FOREIGN KEY(id_local) REFERENCES locales(id_local),
 	CONSTRAINT uq_salas_local_numero UNIQUE (id_local, numero_sala),
     CONSTRAINT chk_salas_numero CHECK (numero_sala > 0),
