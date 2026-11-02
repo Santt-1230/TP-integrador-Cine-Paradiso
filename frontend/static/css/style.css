@@ -105,6 +105,112 @@ footer {
     gap: 1.5rem;
     font-size: 0.85rem;
 }
+.admin-header{
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 2rem;
+}
+.admin-header-titulo{
+    margin-left: auto;
+}
+.admin-layout{
+    display: flex;
+    flex: 1;
+}
+.admin-sidebar{
+    width: 220px;
+    flex-shrink: 0;
+    padding: 1.5rem 1rem;
+    background-color: white;
+}
+.admin-menu{
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+.admin-menu a{
+    padding: 0.7rem;
+    border-radius: 8px;
+}
+.admin-menu a:hover{
+    background-color: #ffecec;
+}
+.admin-contenido{
+    flex: 1;
+    min-width: 0;
+    padding: 2rem;
+}
+.pagina-locales-salas,
+.pagina-locales{
+    width: min(68.75, calc(100% - 2rem));
+    margin: 2rem auto;
+}
+
+.encabezado-pagina,
+.cabecera-local{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+.tarjeta-local,
+.tarjeta-local-publica{
+    margin: 1rem 0;
+    padding: 1.5rem;
+    background-color: white;
+    border: 0.0625rem solid #ddd;
+    border-radius: 0.625rem;
+}
+.tarjeta-local{
+    padding: 0;
+    overflow-x: auto;
+}
+.boton-elegi-local{
+    display: inline-block;
+    margin-top: 1rem;
+    padding: 0.7rem 1rem;
+    background-color: #ff6464;
+    border-radius: 0.5rem;
+}
+.cabecera-local{
+    padding: 1rem;
+}
+.tabla-salas{
+    width: 100%;
+    border-collapse: collapse;
+}
+.tabla-salas th,
+.tabla-salas td{
+    padding: 0.8rem;
+    border-top: 1px solid #eee;
+    text-align: left;
+}
+.formulario-admin{
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 1.5rem;
+    background-color: white;
+    border-radius: 10px;
+}
+.formulario-admin,
+.campo-formulario{
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+.formulario-admin{
+    gap: 1.2rem;
+}
+.campo-formulario input,
+.campo-formulario select{
+    padding: 0.7rem;
+}
+.acciones-formulario{
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+}
 @media (max-width: 700px) {
     .header-principal {
         flex-wrap: wrap;
@@ -122,5 +228,29 @@ footer {
         flex-wrap: wrap;
         gap: 1rem;
         margin: 0 1rem;
+    }
+
+    .admin-layout{
+        flex-direction: column;
+
+    }
+
+    .admin-sidebar{
+        width: auto;
+    }
+
+    .admin-menu{
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .admin-contenido{
+        padding: 1rem;
+    }
+
+    .encabezado-pagina,
+    .cabecera-local{
+        align-items: flex-start;
+        flex-direction: column;
     }
 }
