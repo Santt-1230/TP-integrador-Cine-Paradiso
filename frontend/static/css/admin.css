@@ -1,0 +1,789 @@
+/* =========================================================
+   CINE PARADISO - Panel de administración
+   Estilos para base_admin.html e inicio_admin.html
+   ========================================================= */
+
+:root {
+    --admin-rojo: #ff6268;
+    --admin-rojo-oscuro: #ed4f57;
+    --admin-amarillo: #ffda4d;
+    --admin-fondo: #f2f3f6;
+    --admin-blanco: #ffffff;
+    --admin-texto: #292b33;
+    --admin-texto-suave: #858995;
+    --admin-borde: #e9eaf0;
+    --admin-verde: #71c99a;
+    --admin-sombra: 0 3px 12px rgba(34, 39, 49, 0.045);
+}
+
+/* Ajustes generales de la pantalla de administración */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--admin-fondo);
+    color: var(--admin-texto);
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 14px;
+}
+
+a {
+    color: inherit;
+}
+
+/* -------------------------
+   Encabezado
+   ------------------------- */
+.admin-header {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    width: 100%;
+    min-height: 58px;
+    padding: 0 28px;
+    background: var(--admin-rojo);
+    color: #25252b;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+}
+
+.admin-header .logo {
+    color: #25252b;
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 0.35px;
+    text-decoration: none;
+}
+
+.admin-header > span {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+}
+
+.admin-header > span:first-of-type {
+    opacity: 0.78;
+}
+
+.admin-header > span:last-of-type {
+    margin-left: auto;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+/* -------------------------
+   Distribución general
+   Acepta las dos variantes para cubrir el typo
+   "admin-layaout" que aparece en el HTML original.
+   ------------------------- */
+.admin-layout,
+.admin-layaout {
+    display: flex;
+    align-items: stretch;
+    min-height: calc(100vh - 58px);
+    width: 100%;
+}
+
+/* Menú lateral */
+.admin-sidebar {
+    flex: 0 0 218px;
+    width: 218px;
+    min-height: calc(100vh - 58px);
+    padding: 28px 14px;
+    background: var(--admin-blanco);
+    border-right: 1px solid var(--admin-borde);
+}
+
+.admin-sidebar nav {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.admin-sidebar nav a {
+    display: flex;
+    align-items: center;
+    min-height: 39px;
+    padding: 9px 13px;
+    border-radius: 8px;
+    color: #555966;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.25;
+    text-decoration: none;
+    transition: background-color 150ms ease, color 150ms ease;
+}
+
+.admin-sidebar nav a:hover {
+    background: #fff0f0;
+    color: var(--admin-rojo-oscuro);
+}
+
+.admin-sidebar nav a:focus-visible,
+.admin-header a:focus-visible,
+.inicio-admin a:focus-visible {
+    outline: 3px solid rgba(237, 79, 87, 0.35);
+    outline-offset: 2px;
+}
+
+/* Área central donde se renderizan los templates */
+.admin-contenido {
+    flex: 1;
+    min-width: 0;
+    padding: 34px 38px 48px;
+    background: var(--admin-fondo);
+}
+
+/* =========================================================
+   INICIO DEL ADMINISTRADOR
+   Clases utilizadas en inicio_admin.html
+   ========================================================= */
+
+.inicio-admin {
+    width: 100%;
+    max-width: 1250px;
+    margin: 0 auto;
+}
+
+/* Bienvenida y título */
+.inicio-admin__bienvenida {
+    margin-bottom: 25px;
+}
+
+.inicio-admin__migas {
+    margin: 0 0 11px;
+    color: #a0a3ad;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.65px;
+    text-transform: uppercase;
+}
+
+.inicio-admin__bienvenida h1 {
+    margin: 0 0 5px;
+    color: var(--admin-texto);
+    font-size: clamp(22px, 2.2vw, 29px);
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.inicio-admin__descripcion {
+    margin: 0;
+    color: var(--admin-texto-suave);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+/* Tarjetas de resumen */
+.inicio-admin__resumen {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 17px;
+    margin-bottom: 22px;
+}
+
+.tarjeta-resumen {
+    min-height: 104px;
+    padding: 19px 21px;
+    background: var(--admin-blanco);
+    border: 1px solid rgba(225, 227, 233, 0.75);
+    border-radius: 13px;
+    box-shadow: var(--admin-sombra);
+}
+
+.tarjeta-resumen h2 {
+    margin: 0 0 12px;
+    color: var(--admin-texto-suave);
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.tarjeta-resumen__valor {
+    margin: 0;
+    color: var(--admin-texto);
+    font-size: 27px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+/* Banner de novedades */
+.inicio-admin__banner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    min-height: 66px;
+    margin: 0 0 24px;
+    padding: 16px 22px;
+    background: var(--admin-amarillo);
+    border-radius: 9px;
+    color: #34302a;
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 0.25px;
+    text-align: center;
+    text-decoration: none;
+    transition: background-color 150ms ease, transform 150ms ease;
+}
+
+.inicio-admin__banner:hover {
+    background: #ffd43a;
+    transform: translateY(-1px);
+}
+
+.inicio-admin__banner-enlace {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0;
+    opacity: 0.72;
+}
+
+/* Panel que contiene la tabla */
+.inicio-admin__novedades {
+    overflow: hidden;
+    background: var(--admin-blanco);
+    border: 1px solid rgba(225, 227, 233, 0.8);
+    border-radius: 12px;
+    box-shadow: var(--admin-sombra);
+}
+
+.inicio-admin__seccion-encabezado {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 19px 21px 15px;
+}
+
+.inicio-admin__seccion-encabezado .inicio-admin__migas {
+    margin-bottom: 6px;
+}
+
+.inicio-admin__seccion-encabezado h2 {
+    margin: 0;
+    color: var(--admin-texto);
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.inicio-admin__seccion-encabezado > a {
+    color: var(--admin-rojo-oscuro);
+    font-size: 11px;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.inicio-admin__seccion-encabezado > a:hover {
+    text-decoration: underline;
+}
+
+/* Tabla de películas */
+.tabla-contenedor {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.tabla-admin {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.tabla-admin thead {
+    background: #fafafd;
+}
+
+.tabla-admin th {
+    padding: 12px 19px;
+    color: #9296a1;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.35px;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.tabla-admin td {
+    padding: 14px 19px;
+    border-top: 1px solid #f0f1f4;
+    color: #515560;
+    font-size: 12px;
+    vertical-align: middle;
+}
+
+.tabla-admin tbody tr:hover {
+    background: #fdfdff;
+}
+
+.tabla-admin td:first-child {
+    color: var(--admin-texto);
+    font-weight: 600;
+}
+
+.estado-admin {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 23px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: #e5f6ec;
+    color: #37865b;
+    font-size: 10px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.inicio-admin__sin-datos {
+    margin: 0;
+    padding: 25px 21px;
+    color: var(--admin-texto-suave);
+    font-size: 12px;
+}
+
+/* -------------------------
+   Adaptación a tablets
+   ------------------------- */
+@media (max-width: 900px) {
+    .admin-sidebar {
+        flex-basis: 190px;
+        width: 190px;
+    }
+
+    .admin-contenido {
+        padding: 28px 24px 40px;
+    }
+
+    .inicio-admin__resumen {
+        gap: 12px;
+    }
+
+    .tarjeta-resumen {
+        padding: 17px;
+    }
+}
+
+/* -------------------------
+   Adaptación a celulares
+   ------------------------- */
+@media (max-width: 650px) {
+    .admin-header {
+        min-height: 54px;
+        gap: 11px;
+        padding: 0 16px;
+    }
+
+    .admin-header .logo {
+        font-size: 13px;
+    }
+
+    .admin-header > span {
+        font-size: 10px;
+    }
+
+    .admin-header > span:last-of-type {
+        display: none;
+    }
+
+    .admin-layout,
+    .admin-layaout {
+        flex-direction: column;
+        min-height: calc(100vh - 54px);
+    }
+
+    .admin-sidebar {
+        width: 100%;
+        min-height: auto;
+        padding: 9px 12px;
+        border-right: 0;
+        border-bottom: 1px solid var(--admin-borde);
+    }
+
+    .admin-sidebar nav {
+        flex-direction: row;
+        gap: 5px;
+        overflow-x: auto;
+        padding-bottom: 2px;
+    }
+
+    .admin-sidebar nav a {
+        min-height: 34px;
+        padding: 8px 11px;
+        font-size: 11px;
+        white-space: nowrap;
+    }
+
+    .admin-contenido {
+        padding: 25px 15px 35px;
+    }
+
+    .inicio-admin__resumen {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .tarjeta-resumen {
+        min-height: 88px;
+    }
+
+    .inicio-admin__banner {
+        flex-direction: column;
+        gap: 5px;
+        min-height: 70px;
+        font-size: 13px;
+    }
+
+    .inicio-admin__seccion-encabezado {
+        align-items: flex-start;
+        padding: 17px 15px 13px;
+    }
+
+    .inicio-admin__seccion-encabezado h2 {
+        font-size: 14px;
+    }
+
+    .tabla-admin th,
+    .tabla-admin td {
+        padding-right: 13px;
+        padding-left: 13px;
+    }
+}
+
+/* =========================================================
+   ESTADÍSTICAS DEL ADMINISTRADOR
+   Clases utilizadas en estadisticas_admin.html
+   ========================================================= */
+
+.estadisticas-admin {
+    width: 100%;
+    max-width: 1250px;
+    margin: 0 auto;
+}
+
+.estadisticas-admin__encabezado {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 24px;
+}
+
+.estadisticas-admin__migas {
+    margin: 0 0 10px;
+    color: #a0a3ad;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.65px;
+    text-transform: uppercase;
+}
+
+.estadisticas-admin__encabezado h1 {
+    margin: 0 0 6px;
+    color: var(--admin-texto);
+    font-size: clamp(22px, 2.2vw, 29px);
+    line-height: 1.2;
+}
+
+.estadisticas-admin__descripcion {
+    margin: 0;
+    color: var(--admin-texto-suave);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.estadisticas-admin__filtro {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 8px;
+    background: var(--admin-blanco);
+    border: 1px solid var(--admin-borde);
+    border-radius: 9px;
+    box-shadow: var(--admin-sombra);
+}
+
+.estadisticas-admin__filtro label {
+    color: var(--admin-texto-suave);
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.estadisticas-admin__filtro select {
+    min-height: 32px;
+    padding: 0 27px 0 10px;
+    border: 1px solid var(--admin-borde);
+    border-radius: 6px;
+    background: #fff;
+    color: var(--admin-texto);
+    font: inherit;
+    font-size: 11px;
+}
+
+.estadisticas-admin__filtro button {
+    min-height: 32px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 6px;
+    background: var(--admin-rojo);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.estadisticas-admin__filtro button:hover {
+    background: var(--admin-rojo-oscuro);
+}
+
+.estadisticas-admin__indicadores {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.indicador-estadistico {
+    min-height: 108px;
+    padding: 17px 20px;
+    background: var(--admin-blanco);
+    border: 1px solid rgba(225, 227, 233, 0.8);
+    border-radius: 12px;
+    box-shadow: var(--admin-sombra);
+}
+
+.indicador-estadistico__titulo {
+    margin: 0 0 11px;
+    color: var(--admin-texto-suave);
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.indicador-estadistico__valor {
+    margin: 0 0 7px;
+    color: var(--admin-texto);
+    font-size: 27px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.indicador-estadistico__detalle {
+    margin: 0;
+    color: #a0a3ad;
+    font-size: 10px;
+}
+
+.estadisticas-admin__graficos {
+    display: grid;
+    grid-template-columns: minmax(0, 1.45fr) minmax(280px, 1fr);
+    align-items: start;
+    gap: 16px;
+}
+
+.panel-estadistico {
+    min-width: 0;
+    padding: 18px 19px 17px;
+    background: var(--admin-blanco);
+    border: 1px solid rgba(225, 227, 233, 0.8);
+    border-radius: 12px;
+    box-shadow: var(--admin-sombra);
+}
+
+.panel-estadistico--ocupacion {
+    grid-row: span 2;
+}
+
+.panel-estadistico__encabezado {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 19px;
+}
+
+.panel-estadistico__encabezado h2 {
+    margin: 0 0 5px;
+    color: var(--admin-texto);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.panel-estadistico__encabezado p {
+    margin: 0;
+    color: var(--admin-texto-suave);
+    font-size: 10px;
+    line-height: 1.45;
+}
+
+.tabla-barras__cabecera,
+.fila-barra--ocupacion {
+    display: grid;
+    grid-template-columns: minmax(105px, 1.25fr) 55px minmax(80px, 1fr) 32px;
+    align-items: center;
+    gap: 12px;
+}
+
+.tabla-barras__cabecera {
+    padding: 0 0 10px;
+    color: #a0a3ad;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.35px;
+}
+
+.fila-barra--ocupacion {
+    min-height: 51px;
+    border-top: 1px solid #f0f1f4;
+}
+
+.fila-barra__nombre {
+    overflow: hidden;
+    color: var(--admin-texto);
+    font-size: 10px;
+    font-weight: 600;
+    text-overflow: ellipsis;
+}
+
+.fila-barra__hora {
+    color: var(--admin-texto-suave);
+    font-size: 10px;
+    white-space: nowrap;
+}
+
+.fila-barra__pista {
+    overflow: hidden;
+    width: 100%;
+    height: 7px;
+    border-radius: 20px;
+    background: #eff0f2;
+}
+
+.fila-barra__relleno {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+}
+
+.fila-barra__relleno--verde {
+    background: var(--admin-verde);
+}
+
+.fila-barra__relleno--rojo {
+    background: var(--admin-rojo);
+}
+
+.fila-barra__valor {
+    color: #686c77;
+    font-size: 10px;
+    font-weight: 600;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.lista-barras {
+    display: flex;
+    flex-direction: column;
+    gap: 17px;
+}
+
+.fila-barra--simple {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.fila-barra__datos {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.panel-estadistico__sin-datos {
+    margin: 0;
+    padding: 18px 0 8px;
+    color: var(--admin-texto-suave);
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+.estadisticas-admin__nota {
+    margin: 18px 0 0;
+    padding: 13px 16px;
+    border-radius: 8px;
+    background: #fff8df;
+    color: #8a7a43;
+    font-size: 10px;
+    line-height: 1.5;
+}
+
+/* Adaptación de estadísticas para pantallas medianas */
+@media (max-width: 950px) {
+    .estadisticas-admin__graficos {
+        grid-template-columns: minmax(0, 1fr) minmax(250px, 0.9fr);
+    }
+
+    .tabla-barras__cabecera,
+    .fila-barra--ocupacion {
+        grid-template-columns: minmax(90px, 1.1fr) 48px minmax(65px, 1fr) 30px;
+        gap: 8px;
+    }
+}
+
+/* Adaptación de estadísticas para celulares */
+@media (max-width: 700px) {
+    .estadisticas-admin__encabezado {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .estadisticas-admin__filtro {
+        align-self: flex-start;
+        max-width: 100%;
+        flex-wrap: wrap;
+    }
+
+    .estadisticas-admin__indicadores {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .indicador-estadistico {
+        min-height: 91px;
+    }
+
+    .estadisticas-admin__graficos {
+        grid-template-columns: 1fr;
+    }
+
+    .panel-estadistico--ocupacion {
+        grid-row: auto;
+    }
+}
+
+@media (max-width: 430px) {
+    .panel-estadistico {
+        padding: 16px 13px;
+    }
+
+    .tabla-barras__cabecera,
+    .fila-barra--ocupacion {
+        grid-template-columns: minmax(75px, 1fr) 42px minmax(55px, 0.9fr) 28px;
+        gap: 6px;
+    }
+
+    .tabla-barras__cabecera {
+        font-size: 8px;
+    }
+
+    .fila-barra__nombre,
+    .fila-barra__hora,
+    .fila-barra__valor {
+        font-size: 9px;
+    }
+}
