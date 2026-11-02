@@ -2,30 +2,54 @@
 
 {% block titulo %}Mis compras - Cine Paradiso{% endblock %}
 
- <main>
         {% block contenido %}
 <div class="page-with-sidebar">
     
     <!-- Columna Izquierda: Sidebar del usuario -->
     <aside class="user-sidebar">
-        <div class="user-greeting">Bienvenido {{ nombre.upper() }}</div>
+        <div class="user-greeting">Bienvenido</div>
         <nav class="sidebar-menu">
-            <a href="#">PELICULAS VISTAS</a>
-            <a href="#">MIS COMPRAS</a>
-            <a href="#">RESEÑAS</a>
-            <a href="#">CUPONES Y PUNTOS</a>
-            <a href="#">MERCH</a>
-            <a href="#">TU OPINION</a>
-            <a href="#">ARREPENTIMIENTO</a>
-            <a href="#">DAR DE BAJA</a>
+            <a href="#mi-perfil">MI PERFIL</a>
+            <a href="#peliculas-vistas">PELICULAS VISTAS</a>
+            <a href="#mis-compras">MIS COMPRAS</a>
+            <a href="#resenas">RESEÑAS</a>
+            <a href="#cupones-y-puntos">CUPONES Y PUNTOS</a>
+            <a href="#merch">MERCH</a>
+            <a href="#tu-opinion">TU OPINION</a>
+            <a href="#arrepentimiento">ARREPENTIMIENTO</a>
+            <a href="#dar-de-baja">DAR DE BAJA</a>
         </nav>
     </aside>
-    <section>
-        {% block seccion_nav %}
-        <h2>Mis compras</h2>
-        {% endblock %}
-    </section>
+    <div class="contenido-secciones">
+        <section id="mi-perfil" class="seccion-contenido activa">
+            <h2>Mi Perfil</h2>
+            <div class="perfil-card">
+                <div class="perfil-info">
+                    <p><strong>Nombre:</strong> Juan Pérez</p>
+                    <p><strong>Email:</strong> usuario@email.com</p>
+                    <p><strong>Teléfono:</strong> +54 11 1234-5678</p>
+                    <p><strong>Nivel de socio:</strong> Cine Paradiso VIP</p>
+                </div>
+                <button class="btn-editar">Editar Datos</button>
+            </div>
+        </section>
+           <!-- Sección Películas Vistas (sin la clase activa) -->
+        <section id="peliculas-vistas" class="seccion-contenido">
+        <h2>Películas Vistas</h2>
+        <p>Aquí verás tu historial de películas.</p>
+        </section>
 
-</div>
-        {% endblock %}
-</main>
+<!-- Sección Mis Compras (con la clase activa por defecto) -->
+<section id="mis-compras" class="seccion-contenido">
+    <h2>Mis compras</h2>
+    <p>Aquí verás tus tickets y facturas.</p>
+</section>
+
+            <section id="resenas" class="seccion-contenido">
+                <h2>Reseñas</h2>
+                <p>Aquí están tus opiniones de las películas.</p>
+            </section>
+        </div>
+
+    </div>
+{% endblock %}
