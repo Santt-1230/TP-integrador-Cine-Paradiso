@@ -1,3 +1,5 @@
+from flask import jsonify, session
+from functools import wraps
 import logging
 import constants as const
 
@@ -43,3 +45,26 @@ def validar_entero_positivo(valor, minimo, nombre):
         ))
     return valor
 
+"""
+Esta funcion sirve para proteger rutas de la API, verifica si hay un id_usuario en la sesion activa
+si esta logueado permite acceder: En caso de no estarlo, anula la peticion y devuelve error 401 (No autenticado)
+"""
+def login_requerido(funcion):
+    @wraps(funcion)
+    def verificar_sesion(*args, **kwargs):
+        if "id_usuario" not in session:
+            error = construir_error_api("NO_AUTENTICADO", "No autenticado", "Debe iniciar sesion para acceder")
+            return jsonify(error), 401
+        return funcion(*args, **kwargs)
+    return verificar_sesion
+
+def rol_requerido(*roles):
+    def decorador(funcion):
+        @wraps(funcion)
+        def verificar_rol(*args, **kwargs):
+            if session.get("rol") not in roles:
+                error = construir_error_api("PERMISO_DENEGADO", "Permiso denegado", "No tienes permisos para acceder")
+                return jsonify(error), 403
+            return funcion(*args, **kwargs)
+        return verificar_rol
+    return decorador
