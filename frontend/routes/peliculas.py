@@ -26,7 +26,6 @@ def fecha_ar(valor):
 @peliculas_front_bp.get("/")
 def inicio():
     peliculas = api.get("/api/peliculas", {"limite": POR_PAGINA})["peliculas"]
-    # Los modulos de Euge (P7). Si su endpoint todavia no existe, la seccion simplemente no se muestra.
     # Los "productos" del sitio son los servicios del backend (GET /api/servicios).
     promociones = api.get_lista("/api/promociones", "promociones")
     productos = api.get_lista("/api/servicios", "servicios")
