@@ -1,12 +1,12 @@
 from flask import Flask
-from routes.cancelaciones_routes import cancelaciones_bp
+from routes.cancelaciones import cancelaciones_bp
 
 app = Flask(__name__)
 
 app.register_blueprint(cancelaciones_bp)
 
 if __name__ == "__main__":
-import os 
+    import os 
 from dotenv import load_dotenv
 
 load_dotenv() #Lee el archivo .env y carga las variables

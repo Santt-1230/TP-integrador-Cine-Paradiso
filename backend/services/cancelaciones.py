@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from repositories.cancelaciones_repository import (
+from repositories.cancelaciones import (
     ejecutar_cancelacion_bd,
     obtener_compra_para_cancelar,
 )
