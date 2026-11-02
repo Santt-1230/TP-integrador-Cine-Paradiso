@@ -1,0 +1,11 @@
+{# Panel de perfil: se abre al tocar el icono del usuario cuando hay sesion iniciada (se incluye desde base.html) #}
+<p class="saludo-perfil">Hola, {{ session.get('nombre') }}</p>
+
+<ul class="opciones-perfil">
+    <li><a href="{{ url_for('mi_cuenta') }}"><i class="bi bi-person-circle"></i> Mi cuenta</a></li>
+    <li><a href="#"><i class="bi bi-ticket-perforated"></i> Mis compras</a></li>
+</ul>
+
+<form method="post" action="{{ url_for('logout') }}">
+    <button type="submit" class="boton-texto">Cerrar sesión</button>
+</form>
