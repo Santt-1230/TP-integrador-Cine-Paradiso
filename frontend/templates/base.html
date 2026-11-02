@@ -32,11 +32,22 @@
             <input type="search" name="q" placeholder="Buscar película" aria-label="Buscar película">
         </form>
 
-        {% if session.get('id_usuario') %}
-            <span class="nombre-usuario">{{ session.get('nombre') }} {{ session.get('apellido') }}</span>
-        {% else %}
-            <a href="#" class="usuario" aria-label="Ingresar"><i class="bi bi-person-fill"></i></a>
-        {% endif %}
+        <details class="menu-usuario">
+            {% if session.get('id_usuario') %}
+                <summary class="usuario">
+                    <span class="nombre-usuario">{{ session.get('nombre') }} {{ session.get('apellido') }}</span>
+                    <i class="bi bi-person-fill"></i>
+                </summary>
+                <div class="panel-usuario">
+                    {% include "perfil.html" %}
+                </div>
+            {% else %}
+                <summary class="usuario" aria-label="Ingresar"><i class="bi bi-person-fill"></i></summary>
+                <div class="panel-usuario">
+                    {% include "form_login.html" %}
+                </div>
+            {% endif %}
+        </details>
     </div>
 
      {% block menu_secundario %}{% endblock %}
