@@ -62,6 +62,20 @@ CREATE TABLE IF NOT EXISTS compras (
 	Foreign Key (id_funcion) REFERENCES funciones(id_funcion)
 );
 
+CREATE TABLE IF NOT EXISTS entradas(
+	id_entrada INT AUTO_INCREMENT PRIMARY KEY,
+	id_compra INT NOT NULL,
+	id_funcion INT NOT NULL,
+	id_butaca INT NOT NULL,
+	precio_unitario DECIMAL(10,2) NOT NULL,
+	estado ENUM('reservada', 'confirmada', 'utilizada', 'cancelada') NOT NULL DEFAULT 'reservada',
+	butaca_ocupada INT GENERATED ALWAYS AS (CASE WHEN estado = 'cancelada' THEN NULL ELSE id_butaca END) STORED,
+	fecha_compra DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	Foreign Key (id_compra) REFERENCES compras(id_compra),
+	Foreign Key (id_funcion) REFERENCES funciones(id_funcion),
+	Foreign Key (id_butaca) REFERENCES butacas(id_butaca)
+);
+
 
 CREATE TABLE IF NOT EXISTS productos (
 	id_producto INT AUTO_INCREMENT PRIMARY KEY,
@@ -119,3 +133,6 @@ INSERT INTO butacas (id_sala, fila, numero) VALUES
     (1, 'B', 1), (1, 'B', 2), (1, 'B', 3),
     (2, 'A', 1), (2, 'A', 2), (2, 'A', 3),
     (2, 'B', 1), (2, 'B', 2), (2, 'B', 3);
+
+
+
