@@ -19,6 +19,13 @@ def validar_datos(compra):
             message="El body recibido es invalido",
             description="Al body recibido le falta butaca/s"
         )
+    if len(butacas) > 6:
+            return construir_error_api(
+                code="BUTACAS_INVALIDAS",
+                message="Maxima butacas alcanzadas",
+                description="Solo se puede reservar un maximo de 6 butacas"
+            )
+    
 
     try:
         butacas_ids = []

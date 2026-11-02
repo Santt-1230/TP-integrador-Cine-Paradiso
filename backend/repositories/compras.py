@@ -42,6 +42,26 @@ def registrar_entrada(id_compra,datos, precio_unitario):
             total_cambios += 1
     return total_cambios == len(datos["butacas"])
 
+def butacas_disponibles(id_funcion, id_butacas):
+    if not id_butacas:
+        return False
+
+    marcadores = ", ".join(["%s"] * len(id_butacas))
+    sql = (
+        "SELECT e.id_butaca "
+        "FROM entradas e "
+        "INNER JOIN compras c ON c.id_compra = e.id_compra "
+        f"WHERE e.id_funcion = %s AND e.id_butaca IN ({marcadores}) "
+        "AND e.estado IN ('reservada', 'confirmada', 'utilizada') "
+        "AND (c.estado = 'confirmada' OR "
+        "(c.estado = 'pendiente' AND c.expira_en > NOW()))"
+    )
+
+    parametros = (id_funcion, *id_butacas)
+    butacas_ocupadas = ejecutar_consulta(sql, parametros)
+    return not butacas_ocupadas
+
+
 def obtener_funcion_precio(id_funcion):
     sql = "SELECT precio_entrada from funciones WHERE id_funcion = %s"
     parametros = [id_funcion]

@@ -62,7 +62,13 @@ def registrar_compras():
             code="ERROR_COMPRA",
             message="ERROR AL REGISTRAR UNA COMPRA",
             description="No se pudo registrar"
-        ))
+        )), 500
+    if error == "BUTACA_NO_DISPONIBLE":
+        return jsonify(construir_error_api(
+            code="BUTACA_NO_DISPONIBLE",
+            message="Butaca no disponible",
+            description="Algunas de las butacas no esta disponible"
+        )), 409
     if error is not None:
         return jsonify(error), 400
     return jsonify({"message": exito}), 201
