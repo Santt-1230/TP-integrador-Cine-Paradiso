@@ -6,7 +6,7 @@ from repositories.cancelaciones_repository import (
 
 MINUTOS_LIMITE_CANCELACION = 60
 
-def procesar_cancelacion_cliente(id_compra: int) -> tuple[dict, int]:
+def procesar_cancelacion_cliente(id_compra: int, datos: dict | None = None) -> tuple[dict, int]:
     compra = obtener_compra_para_cancelar(id_compra)
 
     if not compra:
