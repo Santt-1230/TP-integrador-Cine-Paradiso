@@ -6,10 +6,14 @@ from routes.admin import admin_bp
 from routes.estadisticas import estadisticas_bp
 from routes.peliculas import peliculas_front_bp
 from routes.usuarios import usuarios_bp
+from routes.validar_qr import validar_qr_bp
+
 
 load_dotenv()
 
+
 app = Flask(__name__)
+
 app.secret_key = os.getenv("SECRET_KEY", "desarrollo")
 
 if not app.secret_key:
@@ -20,10 +24,12 @@ app.register_blueprint(admin_bp)
 app.register_blueprint(estadisticas_bp)
 app.register_blueprint(peliculas_front_bp)
 app.register_blueprint(usuarios_bp)
+app.register_blueprint(validar_qr_bp)
 
-@app.route("/")
-def index():
-    return render_template("index.html")
+@app.route('/mis-compras')
+def mis_compras():
+    return render_template('mis_compras.html')
+
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5000)
+    app.run(port=5001, debug=True)

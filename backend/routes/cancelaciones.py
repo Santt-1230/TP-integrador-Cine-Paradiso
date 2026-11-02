@@ -1,7 +1,7 @@
 import logging
 from flask import Blueprint, jsonify, request
-from services.cancelaciones_service import procesar_cancelacion_cliente
-from validators.cancelaciones_validator import validar_peticion_cancelacion
+from services.cancelaciones import procesar_cancelacion_cliente
+from validators.cancelaciones import validar_peticion_cancelacion
 
 logger = logging.getLogger(__name__)
 cancelaciones_bp = Blueprint("cancelaciones", __name__, url_prefix="/api")
