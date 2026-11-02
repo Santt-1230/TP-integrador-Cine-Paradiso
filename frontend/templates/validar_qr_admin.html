@@ -1,0 +1,93 @@
+{% extends "base_admin.html" %}
+
+{% block estilos_adicionales %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/qr-admin.css') }}">
+{% endblock %}
+
+{% block contenido_admin %}
+<section class="qr-admin" id="qr-admin"
+         data-validar-url="/admin/api/qr/validar">
+
+    <header class="qr-admin__encabezado">
+        <div>
+            <p class="qr-admin__migas">ADMINISTRACIÓN / VALIDACIÓN DE ENTRADAS</p>
+            <h1>Validar entrada</h1>
+            <p class="qr-admin__descripcion">
+                Escaneá el código QR de la entrada para comprobar su validez.
+            </p>
+        </div>
+        <span class="qr-admin__etiqueta">CONTROL DE ACCESO</span>
+    </header>
+
+    <div class="qr-admin__columnas">
+        <section class="qr-panel qr-panel--lector" aria-labelledby="qr-titulo-lector">
+            <div class="qr-panel__encabezado">
+                <div>
+                    <h2 id="qr-titulo-lector">Escanear con cámara</h2>
+                    <p>Ubicá el código QR dentro del recuadro.</p>
+                </div>
+            </div>
+
+            <div class="qr-lector-marco">
+                <div id="qr-reader" class="qr-lector" aria-label="Área de lectura del código QR"></div>
+            </div>
+
+            <div class="qr-admin__acciones-camara">
+                <button type="button" class="qr-boton qr-boton--principal" id="qr-iniciar">
+                    Activar cámara
+                </button>
+                <button type="button" class="qr-boton qr-boton--secundario" id="qr-detener" disabled>
+                    Detener cámara
+                </button>
+            </div>
+
+            <p class="qr-admin__estado" id="qr-estado" role="status" aria-live="polite">
+                La cámara está apagada.
+            </p>
+            <p class="qr-admin__ayuda">
+                El navegador puede solicitar permiso para utilizar la cámara. Para acceder a ella,
+                normalmente necesitás abrir el sitio mediante HTTPS o desde localhost.
+            </p>
+        </section>
+
+        <section class="qr-panel qr-panel--manual" aria-labelledby="qr-titulo-manual">
+            <div class="qr-panel__encabezado">
+                <div>
+                    <h2 id="qr-titulo-manual">Ingresar código manualmente</h2>
+                    <p>También podés pegar el contenido del QR si no podés usar la cámara.</p>
+                </div>
+            </div>
+
+            <form id="qr-form-manual" class="qr-form-manual">
+                <label for="qr-codigo">Código de la entrada</label>
+                <textarea id="qr-codigo" name="qr" rows="4"
+                          placeholder="Pegá o escribí el código QR"
+                          autocomplete="off" required></textarea>
+                <button type="submit" class="qr-boton qr-boton--principal" id="qr-validar-manual">
+                    Validar código
+                </button>
+            </form>
+
+            <div class="qr-admin__aviso">
+                <strong>Importante</strong>
+                <p>La lectura del QR no confirma por sí sola el ingreso. El código se envía al servidor,
+                   donde se debe comprobar el estado de la entrada y registrar la validación.</p>
+            </div>
+        </section>
+    </div>
+
+    <section class="qr-resultado" id="qr-resultado" aria-live="polite" hidden>
+        <div class="qr-resultado__encabezado">
+            <h2 id="qr-resultado-titulo">Resultado de la validación</h2>
+            <span class="qr-resultado__estado" id="qr-resultado-estado"></span>
+        </div>
+        <p id="qr-resultado-mensaje" class="qr-resultado__mensaje"></p>
+        <dl class="qr-resultado__detalles" id="qr-resultado-detalles" hidden></dl>
+    </section>
+
+</section>
+
+<!-- Librería de lectura QR. Se carga antes de qr.js. -->
+<script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js" defer></script>
+<script src="{{ url_for('static', filename='js/qr-admin.js') }}" defer></script>
+{% endblock %}
