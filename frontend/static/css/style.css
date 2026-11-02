@@ -1,1 +1,126 @@
+body {
+    margin: 0;
+    font-family: "Open Sans", Arial, sans-serif;
+    color:black;
+    background-color: #d9d7d7;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
 
+header, footer {
+background-color: #ff6464;
+}
+
+.header-principal {
+display: flex;
+align-items: center;
+gap: 1.5rem;
+padding: 1rem 3rem;
+}
+a {
+    color: black;
+    text-decoration: none;
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+.menu-principal {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin: 0 auto 0 1rem;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+}
+
+.cine-actual {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.buscador input {
+    border: 0;
+    border-radius: 999px;
+    padding: 0.4rem 1rem;
+    width: 200px;
+}
+
+.usuario { font-size: 1.5rem; }
+
+.nombre-usuario {
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.desplegable { position: relative; }
+
+.desplegable summary {
+    cursor: pointer;
+    list-style: none;
+}
+
+.desplegable summary::-webkit-details-marker { display: none; }
+
+.desplegable ul {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 10;
+    min-width: 180px;
+    margin: 0.5rem 0 0;
+    padding: 0.5rem 1rem;
+    list-style: none;
+    background: #b30000;
+    color: #fff;
+    border-radius: 8px;
+}
+
+.desplegable li { padding: 0.3rem 0; }
+
+footer {
+    background: #ff6464;
+    text-align: center;
+    padding: 2rem 1rem;
+}
+.redes {
+    display: flex;
+    justify-content: center;
+    gap: 1.2rem;
+    margin: 1rem 0 2rem;
+}
+.redes a {
+    font-size: 1.6rem;
+    transition: transform 0.2s;
+}
+.redes a:hover { transform: scale(1.15); }
+
+.footer-links {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    font-size: 0.85rem;
+}
+@media (max-width: 700px) {
+    .header-principal {
+        flex-wrap: wrap;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    .menu-principal {
+        margin: 0;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .menu-secundario {
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin: 0 1rem;
+    }
+}
