@@ -4,7 +4,7 @@ def crear_usuario(nombre, apellido, email, fecha_nacimiento, contrasena_hash):
     sql = """INSERT INTO usuarios (nombre, apellido, email, fecha_nacimiento, contrasena_hash, rol) VALUES (%s, %s, %s, %s, %s, %s)"""
     params = (nombre, apellido, email, fecha_nacimiento, contrasena_hash, "cliente")
     resultado = ejecutar_mutacion(sql, params)
-    return resultado["id"]
+    return resultado["id_usuario"]
 
 def buscar_por_email(email):
     sql = "SELECT * FROM usuarios WHERE email = %s"
@@ -12,16 +12,16 @@ def buscar_por_email(email):
     return filas[0] if filas else None
 
 def buscar_por_id(id_usuario):
-    sql = "SELECT * FROM usuarios WHERE id = %s"
+    sql = "SELECT * FROM usuarios WHERE id_usuario = %s"
     filas = ejecutar_consulta(sql, (id_usuario,))
     return filas[0] if filas else None
 
 def actualizar_perfil(id_usuario, nombre, apellido, email):
-    sql = "UPDATE usuarios SET nombre = %s, apellido = %s, email = %s WHERE id = %s"
+    sql = "UPDATE usuarios SET nombre = %s, apellido = %s, email = %s WHERE id_usuario = %s"
     ejecutar_mutacion(sql, (nombre, apellido, email, id_usuario))
 
 def actualizar_contrasena(id_usuario, contrasena_hash):
-    sql = "UPDATE usuarios SET contrasena_hash = %s WHERE id = %s"
+    sql = "UPDATE usuarios SET contrasena_hash = %s WHERE id_usuario = %s"
     ejecutar_mutacion(sql, (contrasena_hash, id_usuario))
 
 def listar_compras(id_usuario):
