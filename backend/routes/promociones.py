@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify
-from backend.services.promociones import listar_promociones
+from services.promociones import listar_promociones
 
 promociones_bp = Blueprint('promociones', __name__, url_prefix='/api')
 
