@@ -10,7 +10,7 @@
 <section class="pagina-formulario">
     <h1>Crear cuenta</h1>
 
-    <form class="tarjeta-formulario" method="post" action="{{ url_for('registro') }}">
+    <form class="tarjeta-formulario" method="post" action="{{ url_for('usuarios.registro') }}">
         {% if error %}
             <p class="mensaje-error">{{ error }}</p>
         {% endif %}
