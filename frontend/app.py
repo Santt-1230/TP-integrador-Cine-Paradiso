@@ -1,13 +1,3 @@
-from flask import render_template
-
-@app.route('/locales', methods = ['GET'])
-def mostrar_locales():
-    locales = [
-        {'id_local':1, 'nombre': 'Cine Centro', 'direccion':''},
-        {'id_local':2, 'nombre': 'Cine Norte', 'direccion':''},
-        {'id_local':3, 'nombre': 'Cine Sur', 'direccion':''}
-    ]
-    return render_template('locales.html', locales=locales)
 import os
 from dotenv import load_dotenv
 from flask import Flask, render_template
@@ -35,7 +25,6 @@ app.register_blueprint(estadisticas_bp)
 app.register_blueprint(peliculas_front_bp)
 app.register_blueprint(usuarios_bp)
 app.register_blueprint(validar_qr_bp)
-
 @app.route('/mis-compras')
 def mis_compras():
     return render_template('mis_compras.html')
