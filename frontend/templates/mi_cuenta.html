@@ -20,7 +20,7 @@
         <p class="mensaje-ok">{{ mensaje }}</p>
     {% endif %}
 
-    <form class="tarjeta-formulario" method="post" action="{{ url_for('mi_cuenta') }}">
+    <form class="tarjeta-formulario" method="post" action="{{ url_for('usuarios.mi_cuenta') }}">
         <h2>Información personal</h2>
 
         <label>Nombre
@@ -42,7 +42,7 @@
         <button type="submit" class="boton-oscuro">Actualizar mis datos</button>
     </form>
 
-    <form class="tarjeta-formulario" method="post" action="{{ url_for('cambiar_correo') }}">
+    <form class="tarjeta-formulario" method="post" action="{{ url_for('usuarios.cambiar_correo') }}">
         <h2>Cambiar correo electrónico</h2>
 
         <label>Correo actual
@@ -56,7 +56,7 @@
         <button type="submit" class="boton-oscuro">Cambiar correo</button>
     </form>
 
-    <form class="tarjeta-formulario" method="post" action="{{ url_for('cambiar_contrasena') }}">
+    <form class="tarjeta-formulario" method="post" action="{{ url_for('usuarios.cambiar_contrasena') }}">
         <h2>Cambiar contraseña</h2>
 
         <label>Contraseña actual

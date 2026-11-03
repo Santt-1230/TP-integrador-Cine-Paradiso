@@ -2,10 +2,10 @@
 <p class="saludo-perfil">Hola, {{ session.get('nombre') }}</p>
 
 <ul class="opciones-perfil">
-    <li><a href="{{ url_for('mi_cuenta') }}"><i class="bi bi-person-circle"></i> Mi cuenta</a></li>
+    <li><a href="{{ url_for('usuarios.mi_cuenta') }}"><i class="bi bi-person-circle"></i> Mi cuenta</a></li>
     <li><a href="#"><i class="bi bi-ticket-perforated"></i> Mis compras</a></li>
 </ul>
 
-<form method="post" action="{{ url_for('logout') }}">
+<form method="post" action="{{ url_for('usuarios.logout') }}">
     <button type="submit" class="boton-texto">Cerrar sesión</button>
 </form>
