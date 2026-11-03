@@ -1,14 +1,4 @@
 {% extends "base.html" %}
-<<<<<<< HEAD
-=======
-
-{% block estilos %}
-<link rel="stylesheet"
-      href="{{ url_for('static', filename='css/admin.css') }}">
-{% endblock %}
-
-
->>>>>>> 0b251c451c0d1cb36fa395dc1567a32f9034c860
 {% block encabezado %}
 <header class="admin-header">
     <a href="/admin" class="logo">CINE PARADISO</a>
@@ -17,25 +7,16 @@
 </header>
 {% endblock %}
 
-<<<<<<< HEAD
 {% block contenido %}
 <div class="admin-layaout">
-=======
-
-{% block contenido %}
-
-<div class="admin-layout">
-
->>>>>>> 0b251c451c0d1cb36fa395dc1567a32f9034c860
     <aside class="admin-sidebar">
         <nav>
-            <a href="/admin">Inicio</a>
+            <a href="/admin|">Inicio</a>
             <a href="/admin/peliculas">Películas</a>
             <a href="/admin/funciones">Funciones</a>
             <a href="/admin/locales">Locales y salas</a>
             <a href="/admin/servicios">Servicios</a>
             <a href="/admin/estadisticas">Estadísticas</a>
-<<<<<<< HEAD
             <a href="/admin/usuarios"></a>
         </nav>
     </aside>
@@ -43,19 +24,4 @@
         {% block contenido_admin %}{% endblock %}
     </div>
 </div>
-=======
-            <a href="/admin/usuarios">Usuarios</a>
-            <a href="/admin/qr">Escaneo de QR</a>
-        </nav>
-    </aside>
-
-    <div class="admin-contenido">
-        {% block contenido_admin %}
-        <script src="{{ url_for('static', filename='js/admin.js') }}" defer></script>
-        {% endblock %}
-    </div>
-
-</div>
-
->>>>>>> 0b251c451c0d1cb36fa395dc1567a32f9034c860
 {% endblock %}
