@@ -10,13 +10,13 @@ CREATE TABLE IF NOT EXISTS locales(
 	id_local INT AUTO_INCREMENT PRIMARY KEY,
 	nombre VARCHAR(50) NOT NULL UNIQUE,
 	direccion VARCHAR(200) NOT NULL UNIQUE,
-	activo  BOOLEAN NOT NULL DEFAULT TRUE)
-CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+	activo BOOLEAN NOT NULL DEFAULT TRUE
+)CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS salas(
 	id_sala INT AUTO_INCREMENT PRIMARY KEY,
 	id_local INT NOT NULL,
-	numero_sala INT NOT NULL NULL,
+	numero_sala INT NOT NULL,
 	capacidad INT NOT NULL,
 	estado ENUM('activa', 'inactiva') NOT NULL DEFAULT 'activa',
 	FOREIGN KEY(id_local) REFERENCES locales(id_local),
