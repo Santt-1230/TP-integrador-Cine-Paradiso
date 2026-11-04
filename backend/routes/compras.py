@@ -63,6 +63,12 @@ def registrar_compras():
             message="ERROR AL REGISTRAR UNA COMPRA",
             description="No se pudo registrar"
         )), 500
+    if error == "BUTACA_INEXISTENTE":
+        return jsonify(construir_error_api(
+            code="BUTACA_INEXISTENTE",
+            message="Butaca inexistente",
+            description="Alguna butaca no existe o no pertenece a la sala de esta funcion"
+        )), 404
     if error == "BUTACA_NO_DISPONIBLE":
         return jsonify(construir_error_api(
             code="BUTACA_NO_DISPONIBLE",
@@ -117,7 +123,7 @@ def obtener_factura(id):
 
 
 
-@compras_bp.route('/compras/<int:id>/qr', methods=['GET'])
+@compras_bp.route('/entradas/<int:id>/qr', methods=['GET'])
 @login_requerido
 def obtener_qr(id):
     id_usuario = session["id_usuario"]
@@ -150,5 +156,47 @@ def obtener_qr(id):
 
 
 @compras_bp.route('/compras/<int:id>/servicios', methods=['POST'])
+@login_requerido
 def registrar_servicio(id):
-    pass
+    if session.get("rol") != "cliente":
+        return jsonify(construir_error_api(
+            code="SIN_PERMISO",
+            message="Acceso denegado",
+            description="Solo un cliente puede agregar servicios a su compra",
+        )), 403
+
+    datos = request.get_json(silent=True)
+    resultado, error = compras_services.agregar_servicio(id, session["id_usuario"], datos)
+    if isinstance(error, dict):
+        return jsonify(error), 400
+    if error == "COMPRA_INEXISTENTE":
+        return jsonify(construir_error_api(
+            code=error,
+            message="Compra no encontrada",
+            description="La compra no existe o no pertenece al usuario autenticado",
+        )), 404
+    if error == "PRODUCTO_NO_DISPONIBLE":
+        return jsonify(construir_error_api(
+            code=error,
+            message="Producto no disponible",
+            description="No existe un producto activo con el id_producto indicado",
+        )), 404
+    if error == "COMPRA_NO_MODIFICABLE":
+        return jsonify(construir_error_api(
+            code=error,
+            message="Compra no modificable",
+            description="Solo se pueden agregar servicios a compras pendientes",
+        )), 409
+    if error == "COMPRA_VENCIDA":
+        return jsonify(construir_error_api(
+            code=error,
+            message="Compra vencida",
+            description="La reserva de esta compra ya venció",
+        )), 409
+    if error:
+        return jsonify(construir_error_api(
+            code="ERROR_AGREGAR_SERVICIO",
+            message="No se pudo agregar el servicio",
+            description="Ocurrió un error al actualizar la compra",
+        )), 500
+    return jsonify(resultado), 201

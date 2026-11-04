@@ -29,15 +29,15 @@ def construir_compra(compra, pelicula, entradas):
 
 def listar_compras(id_usuario):
     compras = compras_repositories.obtener_compras(id_usuario)
-    if compras is None:
+    if not compras:
         return None, "SIN_COMPRAS"
     resultado = []
+    print(compras)
     
     for compra in compras:
-        funcion = funciones_repositories.obtener_funcion(compra["id_funcion"])
+        funcion = compras_repositories.obtener_funcion(compra["id_funcion"])
         pelicula = peliculas_repositories.buscar_por_id(funcion["id_pelicula"])
         entradas  = compras_repositories.obtener_entradas(compra["id_compra"])
-        print(entradas)
         resultado.append(construir_compra(compra, pelicula, entradas))
     return resultado, None
 
@@ -55,15 +55,12 @@ def registrar_compra(id_usuario, datos):
     if error is not None:
         return None, error 
 
-    funcion = compras_repositories.obtener_funcion(datos["id_funcion"]) #modificarlo con el funciones
+    funcion = compras_repositories.obtener_funcion(datos["id_funcion"])
 
 
     if not funcion:
-
         return None,"FUNCION_INEXISTENTE"
-    
     if funcion["estado"] != "programada":
-    
         return None, "FUNCION_NO_DISPONIBLE"
     butacas_libres = compras_repositories.butacas_disponibles(funcion["id_funcion"], datos["butacas"])
     if not butacas_libres:
@@ -143,3 +140,47 @@ def obtener_qr(id_compra, id_usuario=None):
             "estado": qr["estado"]
         })
     return resultado, None
+
+
+def agregar_servicio(id_compra, id_usuario, datos):
+    error = compras_validators.validar_datos_servicio(datos)
+    if error:
+        return None, error
+
+    compra = compras_repositories.obtener_compra_para_servicio(
+        id_compra, id_usuario
+    )
+    if not compra:
+        return None, "COMPRA_INEXISTENTE"
+    if compra["estado"] != "pendiente":
+        return None, "COMPRA_NO_MODIFICABLE"
+    if not compra["vigente"]:
+        return None, "COMPRA_VENCIDA"
+
+    producto = compras_repositories.obtener_producto_activo(
+        datos["id_producto"]
+    )
+    if not producto:
+        return None, "PRODUCTO_NO_DISPONIBLE"
+
+    cantidad = datos["cantidad"]
+    subtotal = producto["precio"] * cantidad
+    cambio = compras_repositories.insertar_servicio_compra(
+        id_compra, producto["id_producto"], cantidad, producto["precio"]
+    )
+    if cambio["filas"] == 0:
+        return None, "ERROR_AGREGAR_SERVICIO"
+
+    total_compra = compras_repositories.actualizar_total_compra(
+        id_compra, subtotal
+    )
+    return {
+        "id_compra": id_compra,
+        "id_producto": producto["id_producto"],
+        "producto": producto["nombre"],
+        "cantidad": cantidad,
+        "precio_unitario": producto["precio"],
+        "subtotal": subtotal,
+        "total_compra": total_compra,
+    }, None
+

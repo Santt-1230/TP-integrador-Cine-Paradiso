@@ -44,3 +44,35 @@ def validar_datos(compra):
         )
 
     return None
+
+def validar_datos_servicio(datos):
+    if not isinstance(datos, dict):
+        return construir_error_api(
+            code="BODY_INVALIDO",
+            message="El body recibido es inválido",
+            description="Se esperaba un objeto JSON con id_producto y cantidad",
+        )
+
+    id_producto = datos.get("id_producto")
+    cantidad = datos.get("cantidad", 1)
+    valores = ((id_producto, "id_producto"), (cantidad, "cantidad"))
+    for valor, campo in valores:
+        if isinstance(valor, bool) or not (
+            isinstance(valor, int)
+            or (isinstance(valor, str) and valor.strip().isdigit())
+        ):
+            return construir_error_api(
+                code="DATOS_INVALIDOS",
+                message="Parámetro inválido",
+                description=f"'{campo}' debe ser un número entero positivo",
+            )
+        if int(valor) <= 0:
+            return construir_error_api(
+                code="DATOS_INVALIDOS",
+                message="Parámetro inválido",
+                description=f"'{campo}' debe ser mayor que cero",
+            )
+
+    datos["id_producto"] = int(id_producto)
+    datos["cantidad"] = int(cantidad)
+    return None

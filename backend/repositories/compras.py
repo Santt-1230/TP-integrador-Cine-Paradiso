@@ -46,21 +46,29 @@ def butacas_disponibles(id_funcion, id_butacas):
     if not id_butacas:
         return False
 
-    marcadores = ", ".join(["%s"] * len(id_butacas))
+    butacas = tuple(dict.fromkeys(int(butaca) for butaca in id_butacas))
+    marcadores = ", ".join(["%s"] * len(butacas))
     sql = (
-        "SELECT e.id_butaca "
-        "FROM entradas e "
-        "INNER JOIN compras c ON c.id_compra = e.id_compra "
-        f"WHERE e.id_funcion = %s AND e.id_butaca IN ({marcadores}) "
+        "SELECT COUNT(DISTINCT b.id_butaca) AS butacas_validas, "
+        "COUNT(DISTINCT CASE WHEN c.id_compra IS NOT NULL "
+        "THEN b.id_butaca END) AS butacas_ocupadas "
+        "FROM funciones f "
+        "INNER JOIN butacas b ON b.id_sala = f.id_sala "
+        "LEFT JOIN entradas e ON e.id_funcion = f.id_funcion "
+        "AND e.id_butaca = b.id_butaca "
         "AND e.estado IN ('reservada', 'confirmada', 'utilizada') "
+        "LEFT JOIN compras c ON c.id_compra = e.id_compra "
         "AND (c.estado = 'confirmada' OR "
-        "(c.estado = 'pendiente' AND c.expira_en > NOW()))"
+        "(c.estado = 'pendiente' AND c.expira_en > NOW())) "
+        f"WHERE f.id_funcion = %s AND b.id_butaca IN ({marcadores})"
     )
-
-    parametros = (id_funcion, *id_butacas)
-    butacas_ocupadas = ejecutar_consulta(sql, parametros)
-    return not butacas_ocupadas
-
+    resultado = ejecutar_consulta(sql, (id_funcion, *butacas))
+    if not resultado:
+        return False
+    return (
+        resultado[0]["butacas_validas"] == len(butacas)
+        and resultado[0]["butacas_ocupadas"] == 0
+    )
 
 def obtener_funcion_precio(id_funcion):
     sql = "SELECT precio_entrada from funciones WHERE id_funcion = %s"
@@ -93,3 +101,41 @@ def obtener_funcion(id_funcion):
     parametros = [id_funcion]
     funcion = ejecutar_consulta(sql, parametros)
     return funcion[0] if funcion else None
+
+
+def obtener_compra_para_servicio(id_compra, id_usuario):
+    filas = ejecutar_consulta(
+        "SELECT id_compra, estado, expira_en > NOW() AS vigente "
+        "FROM compras WHERE id_compra = %s AND id_usuario = %s",
+        (id_compra, id_usuario),
+    )
+    return filas[0] if filas else None
+
+
+def obtener_producto_activo(id_producto):
+    filas = ejecutar_consulta(
+        "SELECT id_producto, nombre, precio FROM productos "
+        "WHERE id_producto = %s AND activo = TRUE",
+        (id_producto,),
+    )
+    return filas[0] if filas else None
+
+
+def insertar_servicio_compra(id_compra, id_producto, cantidad, precio):
+    return ejecutar_mutacion(
+        "INSERT INTO compra_productos "
+        "(id_compra, id_producto, cantidad, precio_unitario) "
+        "VALUES (%s, %s, %s, %s)",
+        (id_compra, id_producto, cantidad, precio),
+    )
+
+
+def actualizar_total_compra(id_compra, subtotal):
+    ejecutar_mutacion(
+        "UPDATE compras SET total = total + %s WHERE id_compra = %s",
+        (subtotal, id_compra),
+    )
+    filas = ejecutar_consulta(
+        "SELECT total FROM compras WHERE id_compra = %s", (id_compra,)
+    )
+    return filas[0]["total"] if filas else None
