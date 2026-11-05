@@ -5,12 +5,11 @@ from db import (
 
 def listar_locales_activos():
     sql='SELECT id_local, nombre, direccion, activo FROM locales' \
-    'WHERE activo = TRUE ORDER BY nombre'
+    ' WHERE activo = TRUE ORDER BY nombre'
     return ejecutar_consulta(sql)
 
 def obtener_local_id(id_local):
-    sql='SELECT id_local, nombre, direccion, activo FROM locales' \
-    'WHERE id_local = %s'
+    sql='SELECT * FROM locales WHERE id_local = %s'
     filas = ejecutar_consulta(sql, (id_local,))
     return filas[0] if filas else None
 
