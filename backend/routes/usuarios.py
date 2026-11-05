@@ -96,3 +96,12 @@ def ver_historial():
         return jsonify(construir_error_api(*error)), 401
 
     return jsonify(historial), 200
+
+@usuarios_bp.route("/usuarios/me/arrepentimiento", methods=["PATCH"])
+@login_requerido
+def arrepentimiento():
+    exito, error = usuarios_service.dar_de_baja(session["id_usuario"])
+    session.clear()
+    if not exito:
+        return jsonify(construir_error_api(*error)), 401
+    return jsonify({"mensaje": "Cuenta dada de baja correctamente"}), 200

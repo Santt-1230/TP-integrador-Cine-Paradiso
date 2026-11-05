@@ -55,3 +55,9 @@ def listar_peliculas_vistas(id_usuario):
         INNER JOIN peliculas p ON f.id_pelicula = p.id_pelicula 
         WHERE c.id_usuario = %s AND e.estado = 'utilizada'"""
     return ejecutar_consulta(sql, (id_usuario,))
+
+def desactivar_usuario(id_usuario):
+    sql = """UPDATE usuarios
+             SET activo = FALSE, email = CONCAT('baja_', %s, '@eliminado.local')
+             WHERE id = %s"""
+    ejecutar_mutacion(sql, (id_usuario, id_usuario))
