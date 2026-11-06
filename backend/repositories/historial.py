@@ -1,4 +1,4 @@
-from utils_db import ejecutar_consulta
+from db import ejecutar_consulta
 
 def obtener_por_usuario(id_usuario):
     sql_historial = """
