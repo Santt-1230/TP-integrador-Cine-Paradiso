@@ -1,20 +1,20 @@
 from flask import Blueprint, jsonify, request 
 from repositories.admin import obtener_usuarios, obtener_usuario_por_id, actualizar_usuario 
-from utils import requiere_admin
+from utils import admin_requerido
 
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/api/admin")
 
 
 @admin_bp.route("/usuarios", methods=["GET"])
-@requiere_admin
+@admin_requerido
 def get_usuarios():
     usuarios = obtener_usuarios()
     return jsonify(usuarios), 200
 
 
 @admin_bp.route("/usuarios/<int:id>/editar", methods = ["GET"])
-@requiere_admin
+@admin_requerido
 def get_usuario(id):
     usuario = obtener_usuario_por_id(id)
     if usuario:
@@ -25,7 +25,7 @@ def get_usuario(id):
 
 
 @admin_bp.route("/usuarios/<int:id>/editar", methods = ["PATCH"])
-@requiere_admin
+@admin_requerido
 def update_usuario(id):
     data = request.get_json()
     nombre = data.get("nombre")

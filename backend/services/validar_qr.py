@@ -1,4 +1,4 @@
-from backend.repositories.validar_qr import validar_qr, obtener_qr
+from repositories.validar_qr import validar_qr, obtener_qr
 
 
 def procesar_validacion_qr(token: str, id_validador: int) -> dict:

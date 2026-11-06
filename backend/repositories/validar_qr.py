@@ -1,4 +1,4 @@
-from backend.db import ejecutar_consulta, ejecutar_mutacion, obtener_conexion
+from db import ejecutar_consulta, ejecutar_mutacion, obtener_conexion
 
 
 

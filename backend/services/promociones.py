@@ -1,4 +1,4 @@
-from backend.repositories.promociones import obtener_promociones
+from repositories.promociones import obtener_promociones
 
 
 def listar_promociones():
