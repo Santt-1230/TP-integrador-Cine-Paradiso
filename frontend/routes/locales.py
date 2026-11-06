@@ -1,25 +1,22 @@
+import os
+import requests
 from flask import Blueprint, redirect,session, render_template, request, url_for
+from api import BACKEND_URL
 
 locales_bp = Blueprint('locales', __name__)
-LOCALES_PRUEBA = [{'id_local':1, 'nombre': 'Cine Centro', 'salas': [{
-            'id_sala':1, 'numero_sala':1, 'capacidad':120, 'estado' : 'activa'},
-            {
-            'id_sala':2, 'numero_sala':2, 'capacidad':133, 'estado' : 'activa'}
-        ]},
-        {'id_local':2, 'nombre': 'Cine Norte', 'salas': [{
-        'id_sala':3, 'numero_sala':1, 'capacidad':39, 'estado' : 'activa'},
-        {
-        'id_sala':4, 'numero_sala':2, 'capacidad':200, 'estado' : 'activa'}
-        ]}, {'id_local':3, 'nombre': 'Cine Sur', 'salas': [{
-                'id_sala':5, 'numero_sala':1, 'capacidad':100, 'estado' : 'activa'},
-                {
-                'id_sala':6, 'numero_sala':2, 'capacidad':138, 'estado' : 'activa'}
-            ]}
-        ]
 
-@locales_bp.route('/prueba-locales', methods = ['GET'])
-def probar_locales():
-    return render_template("inicio.html", locales = LOCALES_PRUEBA)
+@locales_bp.route('/locales', methods = ['GET'])
+def mostrar_locales():
+    try:
+        respuesta = requests.get(f"{BACKEND_URL}/api/locales", timeout = 5)
+        respuesta.raise_for_status()
+        locales = respuesta.json()
+        error = None
+    except requests.RequestException:
+        locales = []
+        error = 'No se pudieron cargar los locales, asegurese que el backend este iniciado'
+
+    return render_template("locales.html", locales = locales, error = error)
 
 @locales_bp.route('/elegir-cine/<int:id_local>', methods = ['GET'])
 def elegir_cine(id_local):
