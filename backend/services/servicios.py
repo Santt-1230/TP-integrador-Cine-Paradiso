@@ -1,4 +1,4 @@
-from backend.repositories.servicios import (
+from repositories.servicios import (
     obtener_servicios,
     obtener_servicio_por_id,
     crear_servicio as crear_servicio_repo,

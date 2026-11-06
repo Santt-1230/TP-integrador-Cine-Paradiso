@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 salas_bp = Blueprint('salas', __name__, url_prefix='/api')
 
 @salas_bp.route('/salas' , methods= ['GET'])
-@requiere_admin
+@ut.admin_requerido
 def obtener_salas():
     id_local = request.args.get('id_local')
     try: 
@@ -44,7 +44,7 @@ def obtener_sala_id(id_sala):
         return jsonify(ut.construir_error_db()), 500
 
 @salas_bp.route('/salas', methods = ['POST'])
-@requiere_admin
+@ut.admin_requerido
 def crear_sala(datos):
     datos = request.get_json(silent=True)
     if not isinstance(datos, dict):
@@ -86,7 +86,7 @@ def obtener_butacas_sala(id_sala):
 
 
 @salas_bp.route('/salas<id_sala>', methods = ['PATCH'])
-@requiere_admin
+@ut.admin_requerido
 def actualizar_sala(id_sala):
     body = request.get_json(silent=True)
     if not isinstance(body, dict):
@@ -117,7 +117,7 @@ def actualizar_sala(id_sala):
     
     
 @salas_bp.route('/salas/<id_sala>', methods = ['DELETE'])
-@requiere_admin
+@ut.admin_requerido
 def desactivar_sala(id_sala):
     try:
         sala = salas_services.desactivar_sala(id_sala)

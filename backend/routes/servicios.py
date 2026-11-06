@@ -1,13 +1,12 @@
 from flask import Blueprint, jsonify, request
-from backend.services.servicios import (
+from services.servicios import (
     listar_servicios,
     listar_servicio_por_id,
     crear_servicio,
     actualizar_servicio,
-    dar_de_baja_servicio,
-    error_no_encontrado,
+    dar_de_baja_servicio
 )
-from backend.validators.servicios import validar_creacion, validar_modificacion
+from validators.servicios import validar_creacion, validar_modificacion
 from utils import construir_error_api
 
 servicios_bp = Blueprint('servicios', __name__, url_prefix="/api")

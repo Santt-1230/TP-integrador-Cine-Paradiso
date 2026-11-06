@@ -1,4 +1,4 @@
-from backend.repositories import admin as admin_repository
+from repositories import admin as admin_repository
 
 
 def obtener_usuarios():
