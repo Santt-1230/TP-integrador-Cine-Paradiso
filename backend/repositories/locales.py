@@ -1,7 +1,5 @@
-from db import (
-    ejecutar_consulta,
-    ejecutar_mutacion
-)
+from db import ejecutar_consulta
+
 
 def listar_locales_activos():
     sql='SELECT id_local, nombre, direccion, activo FROM locales' \

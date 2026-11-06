@@ -68,7 +68,6 @@ def desactivar_sala(id_sala):
     return listar_sala_por_id(id_sala)
 
 def listar_salas_activas(id_local:int)->list[dict]:
-    sql = "SELECT id_sala, numero_sala, capacidad FROM salas' \
-    'WHERE id_local = %s AND estado = 'activa' ORDER BY numero_sala"
-    parametros = (id_local,)
-    return ejecutar_consulta(sql, parametros)
+    sql = "SELECT id_sala, numero_sala, capacidad FROM salas " \
+    "WHERE id_local = %s AND estado = 'activa' ORDER BY numero_sala"
+    return ejecutar_consulta(sql, (id_local,))
