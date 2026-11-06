@@ -26,17 +26,19 @@ def listar_sala_por_id(id_sala: int)-> dict | None:
 def crear_sala(id_local:int, numero_sala:int, capacidad:int):
     sql = 'INSERT INTO salas(id_local, numero_sala, capacidad) '\
     'VALUES (%s, %s, %s)'
-    resultado = ejecutar_mutacion(sql, (id_local, numero_sala, capacidad))
+    parametros = (id_local, numero_sala, capacidad)
+    resultado = ejecutar_mutacion(sql, parametros)
     return resultado['id']
     
 
 def insertar_butacas(id_sala:int, capacidad:int):
-    sql = 'INSERT INTO butacas (id_sala, fila, numero)' \
-    'VALUES (%s, %s, %s)'
+    sql = 'INSERT INTO butacas (id_sala, fila, numero)'\
+    ' VALUES (%s, %s, %s)'
     for i in range(capacidad):
         fila= chr(ord('A') + i // const.BUTACAS_POR_FILA)
         numero = i % const.BUTACAS_POR_FILA + 1
-        return ejecutar_mutacion(sql, (id_sala, fila, numero))
+        parametros = (id_sala, fila, numero)
+        ejecutar_mutacion(sql, parametros)
 
 def crear_sala_con_butacas(id_local, numero_sala, capacidad):
     id_sala = crear_sala(id_local, numero_sala, capacidad)
@@ -51,18 +53,12 @@ def obtener_butacas(id_sala:int) -> list[dict]:
 def actualizar_sala(id_sala, cambios):
     campos = []
     parametros = []
-    if 'numero_sala' in cambios:
-        campos.append('numero_sala')
-        parametros.append(cambios['numero_sala'])
-
-    if 'estado' in cambios:
-        campos.append('estado')
-        parametros.append(cambios['estado'])
-
+    for campo, valor in cambios.items():
+        campos.append(f"{campo} = %s")
+        parametros.append(valor)
     parametros.append(id_sala)
-
-    sql = "UPDATE salas SET {', '.join(campos)} WHERE id_sala = %s"
-    ejecutar_mutacion(sql, parametros)
+    sql = f"UPDATE salas SET {', '.join(campos)} WHERE id_sala = %s"
+    ejecutar_mutacion(sql, tuple(parametros))
     return listar_sala_por_id(id_sala)
 
 def desactivar_sala(id_sala):

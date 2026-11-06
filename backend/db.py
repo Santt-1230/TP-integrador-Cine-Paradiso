@@ -56,6 +56,7 @@ def ejecutar_mutacion(sql:str, parametros :tuple = ())-> dict:
         conexion.commit()
         return {'id': cursor.lastrowid, 'filas' : cursor.rowcount}
     except Exception:
+        logger.exception("Error al ejecutar la mutacion en la base de datos")
         conexion.rollback()
         raise
     finally:
