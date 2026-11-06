@@ -5,5 +5,5 @@ def listar_promociones():
     activas = []
     for promocion in obtener_promociones():
         if promocion["activo"]:
-            activos.append(promocion)
+            activas.append(promocion)
     return activas

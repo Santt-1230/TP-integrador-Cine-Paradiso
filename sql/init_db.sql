@@ -173,7 +173,7 @@ CREATE TABLE IF NOT EXISTS entradas(
 	butaca_ocupada INT GENERATED ALWAYS AS (CASE WHEN estado = 'cancelada' THEN NULL ELSE id_butaca END) STORED,
 	Foreign Key (id_compra) REFERENCES compras(id_compra),
 	Foreign Key (id_funcion) REFERENCES funciones(id_funcion),
-	Foreign Key (id_butaca) REFERENCES butacas(id_butaca),
+	Foreign Key (id_butaca) REFERENCES butacas(id_butaca)
 );
 CREATE TABLE IF NOT EXISTS productos (
 	id_producto INT AUTO_INCREMENT PRIMARY KEY,
