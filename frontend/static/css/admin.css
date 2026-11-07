@@ -95,6 +95,7 @@ a {
     align-items: center;
     min-height: 39px;
     padding: 9px 13px;
+    gap: 10px;
     border-radius: 8px;
     color: #555966;
     font-size: 13px;
@@ -109,9 +110,23 @@ a {
     color: var(--admin-rojo-oscuro);
 }
 
+.admin-sidebar nav a.activo,
+.admin-sidebar nav a.is-active {
+    background: #fff0f0;
+    color: var(--admin-rojo-oscuro);
+    font-weight: 700;
+}
+
+.admin-sidebar nav a i {
+    flex: 0 0 18px;
+    font-size: 15px;
+    text-align: center;
+}
+
 .admin-sidebar nav a:focus-visible,
 .admin-header a:focus-visible,
-.inicio-admin a:focus-visible {
+.inicio-admin a:focus-visible,
+.estadisticas-admin a:focus-visible {
     outline: 3px solid rgba(237, 79, 87, 0.35);
     outline-offset: 2px;
 }
@@ -437,6 +452,11 @@ a {
     justify-content: space-between;
     gap: 24px;
     margin-bottom: 24px;
+    padding: 0;
+    background: transparent;
+    box-shadow: none;
+    color: var(--admin-texto);
+    flex-shrink: 1;
 }
 
 .estadisticas-admin__migas {
@@ -509,17 +529,23 @@ a {
 .estadisticas-admin__indicadores {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 16px;
-    margin-bottom: 18px;
+    gap: 20px;
+    margin-bottom: 24px;
 }
 
 .indicador-estadistico {
-    min-height: 108px;
-    padding: 17px 20px;
+    min-height: 120px;
+    padding: 22px;
     background: var(--admin-blanco);
     border: 1px solid rgba(225, 227, 233, 0.8);
     border-radius: 12px;
     box-shadow: var(--admin-sombra);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.indicador-estadistico:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(34, 39, 49, 0.08);
 }
 
 .indicador-estadistico__titulo {
@@ -532,7 +558,7 @@ a {
 .indicador-estadistico__valor {
     margin: 0 0 7px;
     color: var(--admin-texto);
-    font-size: 27px;
+    font-size: 30px;
     font-weight: 700;
     line-height: 1;
 }
@@ -547,7 +573,7 @@ a {
     display: grid;
     grid-template-columns: minmax(0, 1.45fr) minmax(280px, 1fr);
     align-items: start;
-    gap: 16px;
+    gap: 20px;
 }
 
 .panel-estadistico {
@@ -555,8 +581,13 @@ a {
     padding: 18px 19px 17px;
     background: var(--admin-blanco);
     border: 1px solid rgba(225, 227, 233, 0.8);
-    border-radius: 12px;
+    border-radius: 13px;
     box-shadow: var(--admin-sombra);
+    transition: box-shadow 0.2s ease;
+}
+
+.panel-estadistico:hover {
+    box-shadow: 0 5px 16px rgba(34, 39, 49, 0.07);
 }
 
 .panel-estadistico--ocupacion {
@@ -685,6 +716,17 @@ a {
     color: #8a7a43;
     font-size: 10px;
     line-height: 1.5;
+}
+
+.estadisticas-error {
+    margin-bottom: 20px;
+    padding: 14px 18px;
+    border: 1px solid #f3c6c6;
+    border-radius: 9px;
+    background: #fff0f0;
+    color: #a73535;
+    font-size: 13px;
+    font-weight: 600;
 }
 
 @media (max-width: 950px) {

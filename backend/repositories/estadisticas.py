@@ -2,6 +2,10 @@ from db import ejecutar_consulta
 from datetime import datetime, timedelta
 
 
+# =========================================================
+# FECHAS
+# =========================================================
+
 def obtener_fecha_inicio(periodo=30):
 
     if periodo is None:
@@ -20,6 +24,9 @@ def obtener_fecha_inicio(periodo=30):
     return datetime.now() - timedelta(days=dias)
 
 
+# =========================================================
+# VENTAS TOTALES
+# =========================================================
 
 def obtener_ventas_totales(periodo=30):
 
@@ -27,13 +34,13 @@ def obtener_ventas_totales(periodo=30):
 
     consulta = """
         SELECT
-            COALESCE(SUM(total), 0) AS ventas_totales
+            COALESCE(SUM(c.total), 0) AS ventas_totales
 
-        FROM compras
+        FROM compras AS c
 
-        WHERE estado = 'confirmada'
-            AND fecha_confirmacion >= %s
-            AND fecha_confirmacion <= NOW();
+        WHERE c.estado = 'confirmada'
+            AND c.fecha_confirmacion >= %s
+            AND c.fecha_confirmacion <= NOW();
     """
 
     resultado = ejecutar_consulta(consulta, (fecha_desde,))
@@ -41,28 +48,37 @@ def obtener_ventas_totales(periodo=30):
     return resultado[0]["ventas_totales"] if resultado else 0
 
 
+# =========================================================
+# VENTAS DE ENTRADAS
+# =========================================================
+
 def obtener_ventas_entradas(periodo=30):
 
     fecha_desde = obtener_fecha_inicio(periodo)
 
     consulta = """
         SELECT
-            COUNT(*) AS ventas_entradas
+            COUNT(e.id_entrada) AS ventas_entradas
 
-        FROM compras compra
+        FROM compras AS c
 
-        INNER JOIN entradas entrada
-            ON compra.id_compra = entrada.id_compra
+        INNER JOIN entradas AS e
+            ON c.id_compra = e.id_compra
 
-        WHERE compra.estado = 'confirmada'
-            AND entrada.estado IN ('confirmada', 'utilizada')
-            AND compra.fecha_confirmacion >= %s
-            AND compra.fecha_confirmacion <= NOW();
+        WHERE c.estado = 'confirmada'
+            AND e.estado IN ('confirmada', 'utilizada')
+            AND c.fecha_confirmacion >= %s
+            AND c.fecha_confirmacion <= NOW();
     """
 
     resultado = ejecutar_consulta(consulta, (fecha_desde,))
 
     return resultado[0]["ventas_entradas"] if resultado else 0
+
+
+# =========================================================
+# VENTAS DE PRODUCTOS
+# =========================================================
 
 def obtener_ventas_productos(periodo=30):
 
@@ -71,21 +87,18 @@ def obtener_ventas_productos(periodo=30):
     consulta = """
         SELECT
             COALESCE(
-                SUM(
-                    compra_producto.cantidad *
-                    compra_producto.precio_unitario
-                ),
+                SUM(cp.cantidad * cp.precio_unitario),
                 0
             ) AS ventas_productos
 
-        FROM compras compra
+        FROM compras AS c
 
-        INNER JOIN compra_productos compra_producto
-            ON compra.id_compra = compra_producto.id_compra
+        INNER JOIN compra_productos AS cp
+            ON c.id_compra = cp.id_compra
 
-        WHERE compra.estado = 'confirmada'
-            AND compra.fecha_confirmacion >= %s
-            AND compra.fecha_confirmacion <= NOW();
+        WHERE c.estado = 'confirmada'
+            AND c.fecha_confirmacion >= %s
+            AND c.fecha_confirmacion <= NOW();
     """
 
     resultado = ejecutar_consulta(consulta, (fecha_desde,))
@@ -93,46 +106,55 @@ def obtener_ventas_productos(periodo=30):
     return resultado[0]["ventas_productos"] if resultado else 0
 
 
+# =========================================================
+# VENTAS POR GÉNERO
+# =========================================================
+
 def obtener_ventas_por_genero(periodo=30):
 
     fecha_desde = obtener_fecha_inicio(periodo)
 
     consulta = """
         SELECT
-            genero.nombre AS genero,
+            g.nombre AS genero,
 
-            COUNT(*) AS cantidad,
+            COUNT(e.id_entrada) AS cantidad,
 
-            SUM(entrada.precio_unitario) AS ventas_por_genero
+            SUM(e.precio_unitario) AS ventas_por_genero
 
-        FROM compras compra
+        FROM compras AS c
 
-        INNER JOIN entradas entrada
-            ON compra.id_compra = entrada.id_compra
+        INNER JOIN entradas AS e
+            ON c.id_compra = e.id_compra
 
-        INNER JOIN funciones funcion
-            ON entrada.id_funcion = funcion.id_funcion
+        INNER JOIN funciones AS f
+            ON e.id_funcion = f.id_funcion
 
-        INNER JOIN peliculas pelicula
-            ON funcion.id_pelicula = pelicula.id_pelicula
+        INNER JOIN peliculas AS p
+            ON f.id_pelicula = p.id_pelicula
 
-        INNER JOIN pelicula_genero
-            ON pelicula.id_pelicula = pelicula_genero.id_pelicula
+        INNER JOIN pelicula_genero AS pg
+            ON p.id_pelicula = pg.id_pelicula
 
-        INNER JOIN generos genero
-            ON pelicula_genero.id_genero = genero.id_genero
+        INNER JOIN generos AS g
+            ON pg.id_genero = g.id_genero
 
-        WHERE compra.estado = 'confirmada'
-            AND entrada.estado IN ('confirmada', 'utilizada')
-            AND compra.fecha_confirmacion >= %s
-            AND compra.fecha_confirmacion <= NOW()
+        WHERE c.estado = 'confirmada'
+            AND e.estado IN ('confirmada', 'utilizada')
+            AND c.fecha_confirmacion >= %s
+            AND c.fecha_confirmacion <= NOW()
 
-        GROUP BY genero.id_genero, genero.nombre
+        GROUP BY g.id_genero, g.nombre
 
         ORDER BY cantidad DESC;
     """
 
     return ejecutar_consulta(consulta, (fecha_desde,))
+
+
+# =========================================================
+# CANCELACIONES
+# =========================================================
 
 def obtener_cancelaciones(periodo=30):
 
@@ -140,19 +162,24 @@ def obtener_cancelaciones(periodo=30):
 
     consulta = """
         SELECT
-            COUNT(*) AS cancelaciones
+            COUNT(c.id_compra) AS cancelaciones
 
-        FROM compras
+        FROM compras AS c
 
-        WHERE estado = 'cancelada'
-            AND fecha_cancelacion IS NOT NULL
-            AND fecha_cancelacion >= %s
-            AND fecha_cancelacion <= NOW();
+        WHERE c.estado = 'cancelada'
+            AND c.fecha_cancelacion IS NOT NULL
+            AND c.fecha_cancelacion >= %s
+            AND c.fecha_cancelacion <= NOW();
     """
 
     resultado = ejecutar_consulta(consulta, (fecha_desde,))
 
     return resultado[0]["cancelaciones"] if resultado else 0
+
+
+# =========================================================
+# ENTRADAS VENDIDAS POR FRANJA HORARIA
+# =========================================================
 
 def obtener_entradas_vendidas_por_franja(periodo=30):
 
@@ -162,33 +189,36 @@ def obtener_entradas_vendidas_por_franja(periodo=30):
         SELECT
 
             CONCAT(
-                LPAD(HOUR(funcion.fecha_hora_inicio), 2, '0'),
+                LPAD(HOUR(f.fecha_hora_inicio), 2, '0'),
                 ':00'
             ) AS franja,
 
-            COUNT(*) AS cantidad
+            COUNT(e.id_entrada) AS cantidad
 
-        FROM entradas entrada
+        FROM entradas AS e
 
-        INNER JOIN compras compra
-            ON entrada.id_compra = compra.id_compra
+        INNER JOIN compras AS c
+            ON e.id_compra = c.id_compra
 
-        INNER JOIN funciones funcion
-            ON entrada.id_funcion = funcion.id_funcion
+        INNER JOIN funciones AS f
+            ON e.id_funcion = f.id_funcion
 
-        WHERE compra.estado = 'confirmada'
-            AND entrada.estado IN ('confirmada', 'utilizada')
-            AND compra.fecha_confirmacion >= %s
-            AND compra.fecha_confirmacion <= NOW()
+        WHERE c.estado = 'confirmada'
+            AND e.estado IN ('confirmada', 'utilizada')
+            AND c.fecha_confirmacion >= %s
+            AND c.fecha_confirmacion <= NOW()
 
-        GROUP BY HOUR(funcion.fecha_hora_inicio)
+        GROUP BY HOUR(f.fecha_hora_inicio)
 
-        ORDER BY cantidad DESC;
+        ORDER BY HOUR(f.fecha_hora_inicio) ASC;
     """
 
     return ejecutar_consulta(consulta, (fecha_desde,))
 
 
+# =========================================================
+# OCUPACIÓN POR FUNCIÓN
+# =========================================================
 
 def obtener_ocupacion_por_funcion(id_funcion=None, periodo=30):
 
@@ -198,69 +228,72 @@ def obtener_ocupacion_por_funcion(id_funcion=None, periodo=30):
     parametros = [fecha_desde]
 
     if id_funcion is not None:
-        filtro = "AND funcion.id_funcion = %s"
+        filtro = "AND f.id_funcion = %s"
         parametros.append(id_funcion)
 
     consulta = f"""
         SELECT
-            funcion.id_funcion,
-            pelicula.nombre AS pelicula,
-            funcion.id_sala,
+
+            f.id_funcion,
+
+            p.nombre AS pelicula,
+
+            f.id_sala,
 
             TIME_FORMAT(
-                funcion.fecha_hora_inicio, '%H:%i'
+                f.fecha_hora_inicio, '%H:%i'
             ) AS hora,
 
-            COALESCE(capacidad.capacidad_total, 0) AS capacidad_total,
+            s.capacidad AS capacidad_total,
 
-            COALESCE(ocupacion.entradas_ocupadas, 0) AS entradas_ocupadas,
+            COUNT(c.id_compra) AS entradas_ocupadas,
 
             COALESCE(
                 ROUND(
-                    ocupacion.entradas_ocupadas * 100.0 /
-                    NULLIF(capacidad.capacidad_total, 0),
+                    COUNT(c.id_compra) * 100.0 /
+                    NULLIF(s.capacidad, 0),
                     2
                 ),
                 0
             ) AS porcentaje
 
-        FROM funciones funcion
+        FROM funciones AS f
 
-        INNER JOIN peliculas pelicula
-            ON funcion.id_pelicula = pelicula.id_pelicula
+        INNER JOIN peliculas AS p
+            ON f.id_pelicula = p.id_pelicula
 
-        LEFT JOIN (
-            SELECT
-                id_sala,
-                COUNT(*) AS capacidad_total
-            FROM butacas
-            WHERE activa = TRUE
-            GROUP BY id_sala
-        ) capacidad
-            ON funcion.id_sala = capacidad.id_sala
+        INNER JOIN salas AS s
+            ON f.id_sala = s.id_sala
 
-        LEFT JOIN (
-            SELECT
-                entrada.id_funcion,
-                COUNT(*) AS entradas_ocupadas
-            FROM entradas entrada
-            INNER JOIN compras compra
-                ON entrada.id_compra = compra.id_compra
-            WHERE compra.estado = 'confirmada'
-                AND entrada.estado IN ('confirmada', 'utilizada')
-            GROUP BY entrada.id_funcion
-        ) ocupacion
-            ON funcion.id_funcion = ocupacion.id_funcion
+        LEFT JOIN entradas AS e
+            ON f.id_funcion = e.id_funcion
+            AND e.estado IN ('confirmada', 'utilizada')
 
-        WHERE funcion.estado = 'finalizada'
-            AND funcion.fecha_hora_inicio >= %s
-            AND funcion.fecha_hora_inicio <= NOW()
+        LEFT JOIN compras AS c
+            ON e.id_compra = c.id_compra
+            AND c.estado = 'confirmada'
+
+        WHERE f.estado = 'finalizada'
+            AND f.fecha_hora_inicio >= %s
+            AND f.fecha_hora_inicio <= NOW()
             {filtro}
 
-        ORDER BY funcion.fecha_hora_inicio DESC;
+        GROUP BY
+            f.id_funcion,
+            p.nombre,
+            f.id_sala,
+            f.fecha_hora_inicio,
+            s.capacidad
+
+        ORDER BY f.fecha_hora_inicio DESC;
     """
 
     return ejecutar_consulta(consulta, tuple(parametros))
+
+
+# =========================================================
+# OCUPACIÓN POR PELÍCULA
+# =========================================================
 
 def obtener_ocupacion_por_pelicula(id_pelicula=None, periodo=30):
 
@@ -270,70 +303,74 @@ def obtener_ocupacion_por_pelicula(id_pelicula=None, periodo=30):
     parametros = [fecha_desde]
 
     if id_pelicula is not None:
-        filtro = "AND pelicula.id_pelicula = %s"
+        filtro = "AND f.id_pelicula = %s"
         parametros.append(id_pelicula)
 
     consulta = f"""
         SELECT
-            pelicula.id_pelicula,
-            pelicula.nombre AS pelicula,
 
-            COUNT(funcion.id_funcion) AS cantidad_funciones,
+            p.id_pelicula,
 
-            SUM(COALESCE(capacidad.capacidad_total, 0))
-                AS capacidad_total,
+            p.nombre AS pelicula,
 
-            SUM(COALESCE(ocupacion.entradas_ocupadas, 0))
-                AS entradas_ocupadas,
+            COUNT(*) AS cantidad_funciones,
+
+            SUM(ocupacion.capacidad_total) AS capacidad_total,
+
+            SUM(ocupacion.entradas_ocupadas) AS entradas_ocupadas,
 
             COALESCE(
                 ROUND(
-                    SUM(COALESCE(ocupacion.entradas_ocupadas, 0)) * 100.0 /
-                    NULLIF(
-                        SUM(COALESCE(capacidad.capacidad_total, 0)),
-                        0
-                    ),
+                    SUM(ocupacion.entradas_ocupadas) * 100.0 /
+                    NULLIF(SUM(ocupacion.capacidad_total), 0),
                     2
                 ),
                 0
             ) AS porcentaje
 
-        FROM funciones funcion
+        FROM (
 
-        INNER JOIN peliculas pelicula
-            ON funcion.id_pelicula = pelicula.id_pelicula
-
-        LEFT JOIN (
             SELECT
-                id_sala,
-                COUNT(*) AS capacidad_total
-            FROM butacas
-            WHERE activa = TRUE
-            GROUP BY id_sala
-        ) capacidad
-            ON funcion.id_sala = capacidad.id_sala
 
-        LEFT JOIN (
-            SELECT
-                entrada.id_funcion,
-                COUNT(*) AS entradas_ocupadas
-            FROM entradas entrada
-            INNER JOIN compras compra
-                ON entrada.id_compra = compra.id_compra
-            WHERE compra.estado = 'confirmada'
-                AND entrada.estado IN ('confirmada', 'utilizada')
-            GROUP BY entrada.id_funcion
-        ) ocupacion
-            ON funcion.id_funcion = ocupacion.id_funcion
+                f.id_funcion,
 
-        WHERE funcion.estado = 'finalizada'
-            AND funcion.fecha_hora_inicio >= %s
-            AND funcion.fecha_hora_inicio <= NOW()
-            {filtro}
+                f.id_pelicula,
+
+                s.capacidad AS capacidad_total,
+
+                COUNT(c.id_compra) AS entradas_ocupadas
+
+            FROM funciones AS f
+
+            INNER JOIN salas AS s
+                ON f.id_sala = s.id_sala
+
+            LEFT JOIN entradas AS e
+                ON f.id_funcion = e.id_funcion
+                AND e.estado IN ('confirmada', 'utilizada')
+
+            LEFT JOIN compras AS c
+                ON e.id_compra = c.id_compra
+                AND c.estado = 'confirmada'
+
+            WHERE f.estado = 'finalizada'
+                AND f.fecha_hora_inicio >= %s
+                AND f.fecha_hora_inicio <= NOW()
+                {filtro}
+
+            GROUP BY
+                f.id_funcion,
+                f.id_pelicula,
+                s.capacidad
+
+        ) AS ocupacion
+
+        INNER JOIN peliculas AS p
+            ON ocupacion.id_pelicula = p.id_pelicula
 
         GROUP BY
-            pelicula.id_pelicula,
-            pelicula.nombre
+            p.id_pelicula,
+            p.nombre
 
         ORDER BY porcentaje DESC;
     """
