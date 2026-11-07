@@ -1,12 +1,12 @@
 from flask import Blueprint,request, jsonify, session
 from services.validar_qr import procesar_validacion_qr
 from validators.validar_qr import validar_token
-from utils import requiere_admin
+from utils import admin_requerido
 
 validar_qr = Blueprint('validar_qr', __name__, url_prefix='/api/qr')
 
 @validar_qr.route('/validar', methods=['PATCH'])
-@requiere_admin
+@admin_requerido
 def validacion_qr():
 
     datos = request.get_json(silent=True)
