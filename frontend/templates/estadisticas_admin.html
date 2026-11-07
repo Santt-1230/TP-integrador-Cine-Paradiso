@@ -244,7 +244,77 @@
             {% endif %}
 
         </article>
+        <!-- OCUPACIÓN POR PELÍCULA -->
 
+        <!-- OCUPACIÓN POR PELÍCULA -->
+        <article class="panel-estadistico">
+
+            <div class="panel-estadistico__encabezado">
+                <div>
+                    <h2>Ocupación por película</h2>
+                    <p>Porcentaje de butacas ocupadas por película.</p>
+                </div>
+            </div>
+
+            {% if ocupacion_por_pelicula %}
+
+                <div class="ocupacion-peliculas">
+
+                    {% for pelicula in ocupacion_por_pelicula %}
+
+                        {% set porcentaje =
+                            pelicula.porcentaje|default(0, true)|float
+                        %}
+
+                        <div class="ocupacion-pelicula">
+
+                            <div class="ocupacion-pelicula__datos">
+
+                                <div class="ocupacion-pelicula__info">
+
+                                    <span class="ocupacion-pelicula__nombre">
+                                        {{ pelicula.pelicula }}
+                                    </span>
+
+                                    <span class="ocupacion-pelicula__detalle">
+                                        {{ pelicula.cantidad_funciones }} funciones
+                                        ·
+                                        {{ pelicula.entradas_ocupadas }}/{{ pelicula.capacidad_total }}
+                                        butacas
+                                    </span>
+
+                                </div>
+
+                                <span class="ocupacion-pelicula__porcentaje">
+                                    {{ porcentaje|round(2) }}%
+                                </span>
+
+                            </div>
+
+                            <div class="ocupacion-pelicula__pista">
+
+                                <span
+                                    class="ocupacion-pelicula__relleno"
+                                    style="width: {{ [0, [porcentaje, 100]|min]|max }}%;">
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% else %}
+
+                <p class="panel-estadistico__sin-datos">
+                    No hay datos de ocupación por película para este período.
+                </p>
+
+            {% endif %}
+
+        </article>
 
         <!-- VENTAS POR GÉNERO -->
         <article class="panel-estadistico">
