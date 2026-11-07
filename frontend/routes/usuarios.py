@@ -40,14 +40,24 @@ def login():
     if request.method == "GET":
         return render_template("login.html")
 
-    datos = {"email": request.form.get("email", ""),
-             "contrasena": request.form.get("contrasena", "")}
+    datos = {
+        "email": request.form.get("email", ""),
+        "contrasena": request.form.get("contrasena", "")
+    }
+
     try:
         respuesta = api.pedir("POST", "/api/auth/login", datos)
     except api.ApiError as e:
         return render_template("login.html", error=e.mensaje)
 
-    guardar_sesion(respuesta["usuario"])
+    usuario = respuesta["usuario"]
+
+    guardar_sesion(usuario)
+
+    # Redireccionar según el rol
+    if usuario["rol"] == "administrador":
+        return redirect("/admin")
+
     return redirect(url_for("peliculas_front.inicio"))
 
 @usuarios_bp.route("/registro", methods=["GET", "POST"])

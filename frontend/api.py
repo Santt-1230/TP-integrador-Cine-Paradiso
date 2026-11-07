@@ -52,9 +52,9 @@ def cookies_backend():
     return {}
 
 
-def pedir(metodo, ruta, datos=None):
+def pedir(metodo, ruta, datos=None,params=None):
     try:
-        r = requests.request(metodo, f"{BACKEND_URL}{ruta}", json=datos, cookies=cookies_backend(), timeout=10) #Si no hay conexion o se agota el tiempo de espera
+        r = requests.request(metodo, f"{BACKEND_URL}{ruta}", json=datos, params=params, cookies=cookies_backend(), timeout=10) #Si no hay conexion o se agota el tiempo de espera
     except requests.RequestException:
         raise ApiError(503, "No se pudo conectar con el servidor. Intenta de nuevo en unos minutos.")
 

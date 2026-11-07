@@ -29,5 +29,6 @@ app.register_blueprint(validar_qr_bp)
 app.register_blueprint(perfil_bp)
 
 
+
 if __name__ == "__main__":
     app.run(port=5001, debug=True)

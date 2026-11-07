@@ -37,6 +37,7 @@ app.register_blueprint(estadisticas_bp)
 app.register_blueprint(peliculas_bp)
 app.register_blueprint(promociones_bp)
 
+
 # 4. Manejador global de errores
 @app.errorhandler(RuntimeError)
 def error_de_conexion(error):
