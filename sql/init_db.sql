@@ -223,6 +223,43 @@ CREATE TABLE IF NOT EXISTS compra_productos (
 );
 
 
+CREATE TABLE IF NOT EXISTS qr (
+    id_qr INT AUTO_INCREMENT PRIMARY KEY,
+
+    id_compra INT NOT NULL,
+    id_entrada INT NULL,
+
+    tipo ENUM('entrada', 'producto') NOT NULL,
+
+    token_qr VARCHAR(255) NOT NULL UNIQUE,
+
+    fecha_generacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    fecha_uso DATETIME NULL,
+
+    estado ENUM('valido', 'utilizado', 'expirado', 'cancelado')
+        NOT NULL DEFAULT 'valido',
+
+    id_validador INT NULL,
+
+    FOREIGN KEY (id_compra)
+        REFERENCES compras(id_compra),
+
+    FOREIGN KEY (id_entrada)
+        REFERENCES entradas(id_entrada),
+
+    FOREIGN KEY (id_validador)
+        REFERENCES usuarios(id_usuario),
+
+    CONSTRAINT chk_qr_tipo_entrada
+        CHECK (
+            (tipo = 'entrada' AND id_entrada IS NOT NULL)
+            OR
+            (tipo = 'producto' AND id_entrada IS NULL)
+        )
+);
+
+
+
 INSERT INTO usuarios (nombre, apellido, email, fecha_nacimiento, contrasena_hash, rol) VALUES (
 	'Admin', 'Cine Paradiso', 'admin@cineparadiso.com', '1990-01-01', 
 'scrypt:32768:8:1$XogwXYeb1jrrnFYg$44a1bc2bc965551d7375ccb96e0b662cc87cf91ce52cfa37b3a547b99ca8e59b60ec7ba5243baa8a7dc199e36064d06ed0d4ccf83cb46af5cefc4e12c24fd819', 'administrador'); 

@@ -7,7 +7,7 @@ def validar_qr(token: str, id_validador: int) -> dict:
     sql = """
         UPDATE qr
         SET
-            estado = 'usado',
+            estado = 'utilizado',
             fecha_uso = NOW(),
             id_validador = %s
         WHERE token = %s
