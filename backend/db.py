@@ -1,7 +1,7 @@
 import logging
 import os
 from contextlib import contextmanager
-import mysql.connector
+import mysql
 
 logger = logging.getLogger(__name__)
 
@@ -40,6 +40,8 @@ def ejecutar_consulta(sql:str, parametros : tuple = ())->list[dict]:
         cursor = conexion.cursor(dictionary=True)
         cursor.execute(sql,parametros)
         return cursor.fetchall()
+    except mysql.connector.Error:
+        logger.exception("Error de MySQL al ejecutar consulta")
     finally:
         if cursor is not None:
             cursor.close()
@@ -52,8 +54,9 @@ def ejecutar_mutacion(sql:str, parametros :tuple = ())-> dict:
         cursor = conexion.cursor(dictionary=True)
         cursor.execute(sql,parametros)
         conexion.commit()
-        return {"id": cursor.lastrowid, "filas": cursor.rowcount}
+        return {'id': cursor.lastrowid, 'filas' : cursor.rowcount}
     except Exception:
+        logger.exception("Error al ejecutar la mutacion en la base de datos")
         conexion.rollback()
         raise
     finally:

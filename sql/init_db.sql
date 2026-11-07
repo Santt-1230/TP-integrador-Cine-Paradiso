@@ -10,8 +10,8 @@ CREATE TABLE IF NOT EXISTS locales(
 	id_local INT AUTO_INCREMENT PRIMARY KEY,
 	nombre VARCHAR(50) NOT NULL UNIQUE,
 	direccion VARCHAR(200) NOT NULL UNIQUE,
-	activo  BOOLEAN NOT NULL DEFAULT TRUE)
-CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+	activo BOOLEAN NOT NULL DEFAULT TRUE
+)CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS salas(
 	id_sala INT AUTO_INCREMENT PRIMARY KEY,
@@ -171,8 +171,9 @@ INSERT INTO locales (nombre, direccion) VALUES
     ('Paradiso Norte', 'Avenida Ejemplo 456'),
     ('Paradiso Sur', 'Calle de Prueba 789');
 INSERT INTO salas (id_local, numero_sala, capacidad) VALUES
-    (1, 1, 6),
-    (2, 1, 6);
+    (1, 1, 100),
+    (2, 1, 200);
+	(3, 1, 150);
 
 INSERT INTO butacas (id_sala, fila, numero) VALUES
     (1, 'A', 1), (1, 'A', 2), (1, 'A', 3),

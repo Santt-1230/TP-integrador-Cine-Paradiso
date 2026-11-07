@@ -6,8 +6,8 @@ load_dotenv() #Lee el archivo .env y carga las variables
 from flask import Flask, jsonify
 
 from utils import construir_error_api
-from routes.servicios import servicios_bp
 from routes.salas import salas_bp
+from routes.servicios import servicios_bp
 from routes.locales import locales_bp
 from routes.usuarios import usuarios_bp
 from routes.peliculas import peliculas_bp
