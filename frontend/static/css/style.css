@@ -265,7 +265,7 @@ footer {
     background-color: #ba2b30; 
 }
 
-.sidebar-menu > form {
+.sidebar-menu > form{
     background-color: #b30000;
     width: 40%;
     padding: 0.6rem;
@@ -276,6 +276,72 @@ footer {
     font-weight: bold;
     font-size: small;
     text-align:center;
+}
+
+/* Sección de Baja de Cuenta / Arrepentimiento */
+.seccion-arrepentimiento {
+  
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.seccion-arrepentimiento p {
+  color: #666;
+  font-size: 0.95rem;
+  margin-bottom: 16px;
+}
+
+.form-group {
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+/* Campo de texto (Textarea) */
+.form-control {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  resize: vertical;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: #d32f2f;
+  box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.15);
+}
+
+/* Botón de acción destructiva / baja */
+.boton-eliminar-cuenta {
+  background-color: #b30000;
+  color: #ffffff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.boton-eliminar-cuenta:hover {
+  background-color: #b20710;
+}
+
+.boton-eliminar-cuenta:active {
+  transform: scale(0.98);
 }
 
 .page-with-sidebar > section {

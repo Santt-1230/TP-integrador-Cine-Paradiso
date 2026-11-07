@@ -9,16 +9,16 @@
         <div class="user-greeting">Bienvenido, {{ session.get('nombre') }}</div>
         <nav class="sidebar-menu">
             <a href="#mi-perfil" class="active bi bi-person-circle"> MI PERFIL</a>
-            <a href="#peliculas-vistas">PELICULAS VISTAS</a>
+            <a href="#peliculas-vistas" class="bi bi-film"> PELICULAS VISTAS</a>
             <a href="#mis-compras" class="bi bi-ticket-perforated"> MIS COMPRAS</a>
-            <a href="#resenas">RESEÑAS</a>
-            <a href="#cupones-y-puntos">CUPONES Y PUNTOS</a>
-            <a href="#merch">MERCH</a>
-            <a href="#tu-opinion">TU OPINION</a>
-            <a href="#arrepentimiento">ARREPENTIMIENTO</a>
+            <a href="#resenas" class="bi bi-chat-right-text-fill"> RESEÑAS</a>
+            <a href="#cupones-y-puntos" class="bi bi-award"> CUPONES Y PUNTOS</a>
+            <a href="#merch" class="bi bi-bag-fill"> MERCH</a>
+            <a href="#tu-opinion" class="bi bi-pen"> TU OPINION</a>
+            <a href="#arrepentimiento" class="bi bi-hand-thumbs-down"> ARREPENTIMIENTO</a>
             <form method="post" action="{{ url_for('usuarios.logout') }}">
-            <button type="submit" class="boton-texto">Cerrar sesión</button>
-        </form>
+                <button type="submit" class="boton-texto">Cerrar sesión</button>
+            </form>
         </nav>
     </aside>
     <div class="contenido-secciones">
@@ -26,10 +26,10 @@
             <h2>Mi Perfil</h2>
             <div class="perfil-card">
                 <div class="perfil-info">
-                    <p><strong>Id usuario:</strong> id</p>
-                    <p><strong>Nombre:</strong> Juan Pérez</p>
-                    <p><strong>Email:</strong> usuario@email.com</p>
-                    <p><strong>Fecha de nacimiento:</strong> str(usuario["fecha_nacimiento"])</p>
+                    <p><strong>Nombre:</strong> {{ session.get('nombre') }} {{ session.get('apellido') }}</p>
+                    <p><strong>Email:</strong> {{ session.get('mail') }}</p>
+                    <p><strong>Fecha de nacimiento:</strong> {{ session.get('fecha_nacimiento') }}</p>
+                    <p><strong>Contraseña:</strong> {{ session.get('contrasena_hash') }}</p>
                 </div>
                 <button class="btn-editar">Editar Datos</button>
             </div>
@@ -37,18 +37,61 @@
         <section id="peliculas-vistas" class="seccion-contenido">
         <h2>Películas vistas</h2>
         <p>Aquí verás tu historial de películas.</p>
+        <h3>{{ session.get('peliculas-vistas') }}</h3>
         </section>
         <section id="mis-compras" class="seccion-contenido">
             <h2>Mis compras</h2>
-            <p>Aquí verás tus tickets y facturas.</p>
+            <div class="contenedor-compras">
+            {% for compra in compras %}
+                <div class="tarjeta-compra">
+                    <img src="{{ compra.poster_url }}" alt="{{ compra.titulo }}" class="poster">
+                    
+                    <div class="detalles-compra">
+                        <h2>{{ compra.titulo }}</h2>
+                        <p><strong>Fecha de compra:</strong> {{ compra.fecha_compra }}</p>
+                        <p><strong>Monto total:</strong> ${{ compra.monto_total }}</p>
+                        <p><strong>Duración:</strong> {{ compra.duracion_min }} min</p>
+                        <p><strong>Clasificación:</strong> {{ compra.clasificacion }}</p>
+                    </div>
+                </div>
+            {% else %}
+                <p>No se encontraron compras en tu historial.</p>
+            {% endfor %}
+</div>
         </section>
          <section id="resenas" class="seccion-contenido">
             <h2>Reseñas</h2>
-            <p>Aquí están tus opiniones de las películas.</p>
+           {% for compra in compras %}
+                <div class="tarjeta-compra">
+                    <img src="{{ compra.poster_url }}" alt="{{ compra.titulo }}" class="poster">
+                    
+                    <div class="detalles-compra">
+                        <h2>{{ peliculas.nombre }}</h2>
+                        <p><strong>Duración:</strong> {{ compra.duracion_min }} min</p>
+                        <p><strong>Clasificación:</strong> {{ compra.clasificacion }}</p>
+                        <p>Reseña</p>
+                    </div>
+                </div>
+            {% else %}
+                <p>No se encontraron reseñas en tu historial.</p>
+            {% endfor %}
         </section>
         <section id="cupones-y-puntos" class="seccion-contenido">
             <h2>Cupones y puntos</h2>
-            <p>Aquí están tus Cupones y puntos.</p>
+             {% for compra in compras %}
+                <div class="tarjeta-compra">
+                    <img src="{{ compra.poster_url }}" alt="{{ compra.titulo }}" class="poster">
+                    
+                    <div class="detalles-compra">
+                        <h2>{{ peliculas.nombre }}</h2>
+                        <p><strong>Duración:</strong> {{ compra.duracion_min }} min</p>
+                        <p><strong>Clasificación:</strong> {{ compra.clasificacion }}</p>
+                        <p>Reseña</p>
+                    </div>
+                </div>
+            {% else %}
+                <p>No se encontraron cupones ni puntos en tu historial.</p>
+            {% endfor %}
         </section>
         <section id="merch" class="seccion-contenido">
             <h2>Merch</h2>
@@ -59,10 +102,27 @@
             <p>Aquí está tu opinión.</p>
         </section>
         <section id="arrepentimiento" class="seccion-contenido">
-            <h2>Arrepentimiento</h2>
-            <p>Botón de arrepentimiento</p>
-                        <h2>Dar de baja</h2>
-            <p>Si querés dar de baja tocá acá.</p>
+            <div class="seccion-arrepentimiento">
+                <h2>Arrepentimiento / Baja del servicio</h2>
+                <p>Si querés cancelar dar de baja tu cuenta en Cine Paradiso, podés hacerlo desde acá.</p>
+
+                <form id="form-baja-cuenta">
+                    <div class="form-group">
+                        <label for="comentario-baja">¿Por qué decidís darte de baja? (Opcional):</label>
+                        <textarea 
+                            id="comentario-baja" 
+                            name="comentario" 
+                            rows="4" 
+                            class="form-control" 
+                            placeholder="Dejanos tu opinión para ayudarnos a mejorar..."
+                        ></textarea>
+                    </div>
+
+                    <button type="submit" class="boton-eliminar-cuenta">
+                        Solicitar Baja de Cuenta
+                    </button>
+                </form>
+            </div>
         </section>
 
     </div>
