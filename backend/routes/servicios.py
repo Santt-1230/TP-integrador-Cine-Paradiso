@@ -59,11 +59,7 @@ def modificar_servicio_route(id_producto):
     return jsonify(datos), 200
 
 
-<<<<<<< HEAD
-@servicios_bp.route('/servicios/<id>', methods=['PATCH'])
-=======
 @servicios_bp.route('/servicios/<id>', methods=["PATCH"])
->>>>>>> origin/feature/front-arreglos-usuarios
 def dar_de_baja_servicio_route(id_producto):
     se_dio_de_baja = dar_de_baja_servicio(id_producto)
     if not se_dio_de_baja:
