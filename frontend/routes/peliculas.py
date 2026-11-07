@@ -8,8 +8,8 @@ peliculas_front_bp = Blueprint("peliculas_front", __name__)
 
 POR_PAGINA = 8
 DIAS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
-# Ruta del flujo de compra (modulo de Brandon). Si se llama distinto, se cambia solo aca.
-URL_COMPRA = "/comprar/{id_funcion}"
+# Pantalla de eleccion de butacas de una funcion (modulo de Max). Si se llama distinto, se cambia solo aca.
+URL_COMPRA = "/funciones/{id_funcion}/butacas"
 
 
 @peliculas_front_bp.app_errorhandler(api.ApiError)
@@ -92,5 +92,5 @@ def detalle(id_pelicula):
     otras = api.get_lista("/api/peliculas", "peliculas", {"limite": 4})
     mas_para_ver = [p for p in otras if p["id_pelicula"] != id_pelicula][:3]
     # Si el backend no responde o no hay funciones, la pelicula se muestra igual (get_lista devuelve []).
-    funciones = agrupar_por_dia(api.get_lista(f"/api/peliculas/{id_pelicula}/funciones", "funciones"))
+    funciones = agrupar_por_dia(api.get_lista("/api/funciones", "funciones", {"pelicula_id": id_pelicula}))
     return render_template("pelicula_detalle.html", p=pelicula, mas=mas_para_ver, funciones=funciones)

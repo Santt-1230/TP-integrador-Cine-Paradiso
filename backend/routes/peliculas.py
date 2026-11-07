@@ -28,12 +28,6 @@ def detalle_pelicula(id_pelicula):
     return _responder(*peliculas_service.obtener_publica(id_pelicula))
 
 
-@peliculas_bp.get("/peliculas/<int:id_pelicula>/funciones")
-def funciones_de_pelicula(id_pelicula):
-    """Funciones futuras y programadas de una pelicula (solo lectura)."""
-    return _responder(*peliculas_service.listar_funciones(id_pelicula), clave="funciones")
-
-
 @peliculas_bp.get("/admin/peliculas")
 @admin_requerido
 def listar_peliculas_admin():

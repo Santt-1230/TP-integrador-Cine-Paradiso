@@ -5,9 +5,6 @@ import api
 funciones_front_bp = Blueprint("funciones_front", __name__)
 
 
-@funciones_front_bp.route("/", methods=["GET"])
-def inicio():
-    return redirect(url_for("funciones_front.pagina_funciones"))
 
 
 @funciones_front_bp.route("/funciones", methods=["GET"])

@@ -174,21 +174,3 @@ def actualizar(id_pelicula, campos, nombres_generos=None):
                 cur.executemany("INSERT INTO pelicula_genero (id_pelicula, id_genero) VALUES (%s, %s)",
                                 [(id_pelicula, g) for g in ids_generos])
     return []
-
-
-def listar_funciones_futuras(id_pelicula):
-    """Funciones programadas que todavia no empezaron, con su sala y su local. Solo lee."""
-    return ejecutar_consulta(
-        """SELECT f.id_funcion, f.fecha_hora_inicio, f.fecha_hora_fin, f.precio_entrada,
-                  s.id_sala, s.numero_sala, l.id_local, l.nombre AS local_nombre, l.direccion AS local_direccion
-           FROM funciones f
-           JOIN salas s ON s.id_sala = f.id_sala
-           JOIN locales l ON l.id_local = s.id_local
-           WHERE f.id_pelicula = %s
-             AND f.estado = 'programada'
-             AND f.fecha_hora_inicio > NOW()
-             AND s.estado = 'activa'
-             AND l.activo = 1
-           ORDER BY f.fecha_hora_inicio""",
-        (id_pelicula,),
-    )

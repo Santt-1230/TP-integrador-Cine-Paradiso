@@ -27,7 +27,7 @@ def listar_funciones(pelicula_id=None, local_id=None, fecha=None, incluir_cancel
     parametros = []
 
     if not incluir_canceladas:
-        sql += " AND f.estado = 'programada' AND f.fecha_hora_inicio > NOW()"
+        sql += " AND f.estado = 'programada' AND f.fecha_hora_inicio > NOW() AND p.activo = TRUE"
     if pelicula_id is not None:
         sql += " AND f.id_pelicula = %s"
         parametros.append(pelicula_id)

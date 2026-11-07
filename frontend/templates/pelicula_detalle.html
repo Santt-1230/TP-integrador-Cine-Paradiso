@@ -40,8 +40,8 @@
                         <li class="funcion caja">
                             <span class="funcion-hora">{{ f.hora_inicio }}</span>
                             <span class="funcion-detalle">
-                                {{ f.local.nombre }} · Sala {{ f.sala.numero_sala }}
-                                <small>Termina {{ f.hora_fin }} · {{ f.local.direccion }}</small>
+                                {{ f.local }} · Sala {{ f.numero_sala }}
+                                <small>Termina {{ f.hora_fin }}</small>
                             </span>
                             <span class="precio">{{ f.precio_entrada | precio_ar }}</span>
                             <a class="boton" href="{{ f.url_compra }}">Comprar</a>
