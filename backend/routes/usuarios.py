@@ -75,14 +75,11 @@ def ver_perfil():
 @login_requerido
 def cambiar_contrasena():
     datos = request.get_json(silent=True) or {}
-    actual = datos.get("contrasena_actual", "")
-    nueva = datos.get("nueva_contrasena") or datos.get("contrasena_nueva", "")
-    repetir = datos.get("repetir_contrasena")
-   
-    error = usuarios_validator.validar_contrasena(nueva, repetir)
+    error = usuarios_validator.validar_cambio_contrasena(datos)
+       
     if error:
         return jsonify(construir_error_api(*error)), 400
-    exito, error = usuarios_service.cambiar_contrasena(session["id_usuario"], actual, nueva)
+    exito, error = usuarios_service.cambiar_contrasena(session["id_usuario"], datos["contrasena_actual"], datos["contrasena_nueva"])
     if not exito:
         if error[0] == "SESION_INVALIDA":
             session.clear()

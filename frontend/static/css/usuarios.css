@@ -73,3 +73,8 @@
 @media (max-width: 700px) {
     .tarjeta-formulario { padding: 1.2rem; }
 }
+
+input[type="date"] {
+    color-scheme: dark;
+    color: #fff;
+}
