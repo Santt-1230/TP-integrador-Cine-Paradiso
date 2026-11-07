@@ -23,14 +23,14 @@ def crear_sala(datos):
             message='Local no encontrada',
             description=f"No existe un local con el ID '{id_local}'."
         ))
-    if local is not ['activo']:
+    if not local['activo']:
         raise ValueError(ut.construir_error_api(
             code=const.ERROR_CODE_LOCAL_INACTIVE,
             message='Local inactivo',
             description=f"No se puede crear una sala en el local '{id_local}'"
         ))
     sala_existente = salas_repository.existe_sala(id_local, numero_sala)
-    if sala_existente is not None:
+    if sala_existente:
         raise ValueError(ut.construir_error_api(
             code=const.ERROR_CODE_SALA_CONFLICT,
             message='Numero de sala ocupado',
@@ -40,14 +40,14 @@ def crear_sala(datos):
     return salas_repository.listar_sala_por_id(id_sala)
 
 def obtener_butacas_sala(id_sala):
-    id_sala = salas_validator.validar_id_sala('id_sala')
+    id_sala = salas_validator.validar_id_sala(id_sala)
     sala = salas_repository.listar_sala_por_id(id_sala)
     if sala is None:
         return None
     return salas_repository.obtener_butacas(id_sala)
 
 def actualizar_sala(id_sala, datos):
-    id_sala = salas_validator.validar_id_sala('id_sala')
+    id_sala = salas_validator.validar_id_sala(id_sala)
     sala = salas_repository.listar_sala_por_id(id_sala)
     cambios = salas_validator.validar_actualizacion_sala(datos)
     if sala is None:
@@ -56,12 +56,14 @@ def actualizar_sala(id_sala, datos):
             message='Sala no encontrada',
             description=f"No existe una sala con el ID '{id_sala}'."
         ))
-    if 'numero_sala' in cambios:
-        if salas_repository.existe_sala('id_local', 'numero_sala'):
+    numero_nuevo = cambios.get('numero_sala', sala['numero_sala'])
+    estado_nuevo = cambios.get('estado', sala['estado'])
+    if (estado_nuevo == 'activa' and (numero_nuevo != sala['numero_sala'] or sala['estado'] == 'inactiva')):
+        if salas_repository.existe_sala(sala['id_local'], numero_nuevo):
             raise ValueError(ut.construir_error_api(
                 code=const.ERROR_CODE_SALA_CONFLICT,
                 message='Numero de sala ocupado',
-                description=f"Ya existe una sala con el numero {cambios['numero_sala']} en el local {sala['id_local']}."
+                description=f"Ya existe una sala con el numero {numero_nuevo} en el local {sala['id_local']}."
             ))
     return salas_repository.actualizar_sala(id_sala, cambios)
 

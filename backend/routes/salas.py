@@ -5,7 +5,11 @@ import utils as ut
 import constants as const
 from services import salas as salas_services
 from utils import requiere_admin
+<<<<<<< HEAD
+
+=======
 logger = logging.getLogger(__name__)
+>>>>>>> origin/feature/front-arreglos-usuarios
 salas_bp = Blueprint('salas', __name__, url_prefix='/api')
 
 @salas_bp.route('/salas' , methods= ['GET'])
@@ -22,7 +26,7 @@ def obtener_salas():
     except (RuntimeError, mysql.connector.Error):
         return jsonify(ut.construir_error_db()), 500
 
-@salas_bp.route('/salas<id_sala>', methods=['GET'])
+@salas_bp.route('/salas/<id_sala>', methods=['GET'])
 def obtener_sala_id(id_sala):
     try:
         sala = salas_services.listar_sala_id(id_sala)
@@ -35,7 +39,7 @@ def obtener_sala_id(id_sala):
             )
             return jsonify(error), 404
         
-        return jsonify({sala:'sala'}), 200
+        return jsonify({'sala':sala}), 200
     
     except ValueError as error:
         return jsonify(error.args[0]), 400
@@ -44,8 +48,13 @@ def obtener_sala_id(id_sala):
         return jsonify(ut.construir_error_db()), 500
 
 @salas_bp.route('/salas', methods = ['POST'])
+<<<<<<< HEAD
+@requiere_admin
+def crear_sala():
+=======
 @ut.admin_requerido
 def crear_sala(datos):
+>>>>>>> origin/feature/front-arreglos-usuarios
     datos = request.get_json(silent=True)
     if not isinstance(datos, dict):
         respuesta = ut.construir_error_api(
@@ -59,7 +68,15 @@ def crear_sala(datos):
         return jsonify({'sala' : sala}), 201
 
     except ValueError as error:
-        return jsonify(error.args[0]), 400
+        respuesta = error.args[0]
+        codigo = respuesta['errors'][0]['code']
+        if codigo == const.ERROR_CODE_LOCAL_NOT_FOUND:
+            return jsonify(respuesta), 404
+        
+        if codigo == const.ERROR_CODE_SALA_CONFLICT:
+            return jsonify(respuesta), 409
+        
+        return jsonify(respuesta), 400
     
     except (RuntimeError, mysql.connector.Error):
         jsonify(ut.construir_error_db()), 500
@@ -85,11 +102,16 @@ def obtener_butacas_sala(id_sala):
         return jsonify(ut.construir_error_db()), 500
 
 
+<<<<<<< HEAD
+@salas_bp.route('/salas/<id_sala>', methods = ['PATCH'])
+@requiere_admin
+=======
 @salas_bp.route('/salas<id_sala>', methods = ['PATCH'])
 @ut.admin_requerido
+>>>>>>> origin/feature/front-arreglos-usuarios
 def actualizar_sala(id_sala):
-    body = request.get_json(silent=True)
-    if not isinstance(body, dict):
+    datos = request.get_json(silent=True)
+    if not isinstance(datos, dict):
         respuesta = ut.construir_error_api(
             code=const.ERROR_CODE_INVALID_PARAMETER,
             message='Datos invalidos',
@@ -97,7 +119,7 @@ def actualizar_sala(id_sala):
         )
         return jsonify(respuesta), 400
     try:
-        sala = salas_services.actualizar_sala(id_sala)
+        sala = salas_services.actualizar_sala(id_sala, datos)
         return jsonify({'sala':sala}), 200
 
     except ValueError as error:
@@ -113,7 +135,7 @@ def actualizar_sala(id_sala):
         return jsonify(respuesta), 400
 
     except (RuntimeError, mysql.connector.Error):
-        return jsonify(ut.construir_error.db()), 500
+        return jsonify(ut.construir_error_db()), 500
     
     
 @salas_bp.route('/salas/<id_sala>', methods = ['DELETE'])

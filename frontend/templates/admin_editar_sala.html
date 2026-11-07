@@ -6,7 +6,7 @@
 <div class="formulario-admin">
     <p class="migas">Administración / Locales y salas / Editar sala</p>
     <h1>Editar sala {{ sala.numero_sala }}</h1>
-
+    <p> Local: {{ local.nombre }}</p>
     <form class="formulario-sala">
         <div class="campo-formulario">
             <label for="numero_sala">Número de sala</label>
@@ -28,7 +28,7 @@
         </div>
 
         <div class="acciones-formulario">
-            <button type="button">Cancelar</button>
+            <a class="boton-agregar" href="{{ url_for('locales.probar_admin_locales') }}">Cancelar</a>
             <button type="button">Guardar cambios</button>
         </div>
     </form>
