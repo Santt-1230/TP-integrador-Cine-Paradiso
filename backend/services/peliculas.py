@@ -54,6 +54,24 @@ def obtener_publica(id_pelicula):
     return _con_generos([fila])[0], None
 
 
+def listar_funciones(id_pelicula):
+    """Funciones futuras de una pelicula activa, para la pagina de detalle."""
+    if not repo.buscar_activa(id_pelicula):
+        return None, _no_encontrada(id_pelicula)
+    funciones = []
+    for f in repo.listar_funciones_futuras(id_pelicula):
+        funciones.append({
+            "id_funcion": f["id_funcion"],
+            "fecha_hora_inicio": f["fecha_hora_inicio"].isoformat(),
+            "fecha_hora_fin": f["fecha_hora_fin"].isoformat(),
+            "precio_entrada": float(f["precio_entrada"]),
+            "sala": {"id_sala": f["id_sala"], "numero_sala": f["numero_sala"]},
+            "local": {"id_local": f["id_local"], "nombre": f["local_nombre"],
+                      "direccion": f["local_direccion"]},
+        })
+    return funciones, None
+
+
 # -------------------------------------------------------------------- admin
 def listar_admin(estado=None, texto=None):
     error = validador.validar_estado(estado)
