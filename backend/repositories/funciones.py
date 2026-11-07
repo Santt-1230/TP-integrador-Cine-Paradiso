@@ -72,6 +72,17 @@ def obtener_duracion_pelicula(id_pelicula):
     return filas[0]["duracion_min"] if filas else None
 
 
+def pelicula_vigente_en(id_pelicula, fecha):
+    """True si la fecha cae dentro de cartelera_desde/cartelera_hasta (NULL = sin limite)."""
+    filas = ejecutar_consulta(
+        "SELECT id_pelicula FROM peliculas WHERE id_pelicula = %s "
+        "AND (cartelera_desde IS NULL OR cartelera_desde <= %s) "
+        "AND (cartelera_hasta IS NULL OR cartelera_hasta >= %s)",
+        (id_pelicula, fecha.date(), fecha.date()),
+    )
+    return bool(filas)
+
+
 def sala_activa(id_sala):
     filas = ejecutar_consulta(
         "SELECT id_sala FROM salas WHERE id_sala = %s AND estado = 'activa'",

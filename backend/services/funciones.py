@@ -64,6 +64,8 @@ def crear_funcion(datos):
     duracion = funciones_repository.obtener_duracion_pelicula(id_pelicula)
     if duracion is None:
         raise ValueError("La película no existe o está inactiva")
+    if not funciones_repository.pelicula_vigente_en(id_pelicula, inicio):
+        raise ValueError("La película no está en cartelera en la fecha de la función")
     if not funciones_repository.sala_activa(id_sala):
         raise ValueError("La sala no existe o está inactiva")
 
@@ -146,6 +148,8 @@ def actualizar_funcion(id_funcion, datos):
         duracion = funciones_repository.obtener_duracion_pelicula(id_pelicula)
         if duracion is None:
             raise ValueError("La película no existe o está inactiva")
+        if not funciones_repository.pelicula_vigente_en(id_pelicula, inicio):
+            raise ValueError("La película no está en cartelera en la fecha de la función")
         if not funciones_repository.sala_activa(id_sala):
             raise ValueError("La sala no existe o está inactiva")
 
