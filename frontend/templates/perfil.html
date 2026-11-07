@@ -1,0 +1,68 @@
+{% block titulo %}Mi perfil - Cine Paradiso{% endblock %}
+
+        {% block contenido %}
+<div class="page-with-sidebar">
+    
+    <aside class="user-sidebar">
+        <div class="user-greeting">Bienvenido, {{ session.get('nombre') }}</div>
+        <nav class="sidebar-menu">
+            <a href="#mi-perfil" class="active bi bi-person-circle"> MI PERFIL</a>
+            <a href="#peliculas-vistas">PELICULAS VISTAS</a>
+            <a href="#mis-compras" class="bi bi-ticket-perforated"> MIS COMPRAS</a>
+            <a href="#resenas">RESEÑAS</a>
+            <a href="#cupones-y-puntos">CUPONES Y PUNTOS</a>
+            <a href="#merch">MERCH</a>
+            <a href="#tu-opinion">TU OPINION</a>
+            <a href="#arrepentimiento">ARREPENTIMIENTO</a>
+            <form method="post" action="{{ url_for('usuarios.logout') }}">
+            <button type="submit" class="boton-texto">Cerrar sesión</button>
+        </form>
+        </nav>
+    </aside>
+    <div class="contenido-secciones">
+        <section id="mi-perfil" class="seccion-contenido activa">
+            <h2>Mi Perfil</h2>
+            <div class="perfil-card">
+                <div class="perfil-info">
+                    <p><strong>Id usuario:</strong> id</p>
+                    <p><strong>Nombre:</strong> Juan Pérez</p>
+                    <p><strong>Email:</strong> usuario@email.com</p>
+                    <p><strong>Fecha de nacimiento:</strong> str(usuario["fecha_nacimiento"])</p>
+                </div>
+                <button class="btn-editar">Editar Datos</button>
+            </div>
+        </section>
+        <section id="peliculas-vistas" class="seccion-contenido">
+        <h2>Películas vistas</h2>
+        <p>Aquí verás tu historial de películas.</p>
+        </section>
+        <section id="mis-compras" class="seccion-contenido">
+            <h2>Mis compras</h2>
+            <p>Aquí verás tus tickets y facturas.</p>
+        </section>
+         <section id="resenas" class="seccion-contenido">
+            <h2>Reseñas</h2>
+            <p>Aquí están tus opiniones de las películas.</p>
+        </section>
+        <section id="cupones-y-puntos" class="seccion-contenido">
+            <h2>Cupones y puntos</h2>
+            <p>Aquí están tus Cupones y puntos.</p>
+        </section>
+        <section id="merch" class="seccion-contenido">
+            <h2>Merch</h2>
+            <p>Aquí está tu merch.</p>
+        </section>
+        <section id="tu-opinion" class="seccion-contenido">
+            <h2>Tu opinión</h2>
+            <p>Aquí está tu opinión.</p>
+        </section>
+        <section id="arrepentimiento" class="seccion-contenido">
+            <h2>Arrepentimiento</h2>
+            <p>Botón de arrepentimiento</p>
+                        <h2>Dar de baja</h2>
+            <p>Si querés dar de baja tocá acá.</p>
+        </section>
+
+    </div>
+</div>
+{% endblock %}

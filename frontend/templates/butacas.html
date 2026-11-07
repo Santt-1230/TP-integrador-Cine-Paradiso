@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block titulo %}Elegí tu/tus butaca/butacas - Cine Paradiso{% endblock %}
+
+{% block contenido %}
+<h1>Seleccionar butacas</h1>
+{% if error %}
+<p class="vacio">{{ error }}</p>
+{% endif %}
+<form method="post" id="form-butacas" action="{{ url_for('salas.elegir_butacas', id_sala=id_sala) }}">
+    {% for fila, butacas_fila in butacas|groupby('fila') %}
+    <div class="fila">
+        <span>{{ fila }}</span>
+        {% for butaca in butacas_fila %}
+        <label class="butaca">
+            <input type="checkbox" name="butacas" value="{{ butaca.id_butaca }}">
+            {{ fila }}{{ butaca.numero }}
+        </label>
+        {% endfor %}
+    </div>
+    {% endfor %}
+    <button>CONTINUAR</button>
+</form>
+{% endblock %}

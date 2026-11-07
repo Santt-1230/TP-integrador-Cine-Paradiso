@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block titulo %}Elegí un cine - Cine Paradiso{% endblock %}
+
+{% block contenido %}
+<div class="pagina-locales">
+    <h1>Elegí un cine</h1>
+    <p>Seleccioná el local donde querés ver las funciones.</p>
+
+    <div class="tarjetas-locales">
+        {% for local in locales %}
+            <article class="tarjeta-local-publica">
+                <h2>{{ local.nombre }}</h2>
+
+                {% if local.direccion %}
+                    <p>{{ local.direccion }}</p>
+                {% endif %}
+
+                <a class="boton-elegir-local" href="{{ url_for('locales.elegir_cine', id_local=local.id_local)}}">
+                    Elegir este cine
+                </a>
+            </article>
+        {% else %}
+            <p>No hay locales disponibles.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

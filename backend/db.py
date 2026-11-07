@@ -1,6 +1,7 @@
 import logging
 import os
-import mysql.connector
+from contextlib import contextmanager
+import mysql
 
 logger = logging.getLogger(__name__)
 
@@ -39,6 +40,8 @@ def ejecutar_consulta(sql:str, parametros : tuple = ())->list[dict]:
         cursor = conexion.cursor(dictionary=True)
         cursor.execute(sql,parametros)
         return cursor.fetchall()
+    except mysql.connector.Error:
+        logger.exception("Error de MySQL al ejecutar consulta")
     finally:
         if cursor is not None:
             cursor.close()
@@ -51,7 +54,25 @@ def ejecutar_mutacion(sql:str, parametros :tuple = ())-> dict:
         cursor = conexion.cursor(dictionary=True)
         cursor.execute(sql,parametros)
         conexion.commit()
-        return {"id": cursor.lastrowid, "filas": cursor.rowcount}
+        return {'id': cursor.lastrowid, 'filas' : cursor.rowcount}
+    except Exception:
+        logger.exception("Error al ejecutar la mutacion en la base de datos")
+        conexion.rollback()
+        raise
+    finally:
+        if cursor is not None:
+            cursor.close()
+        conexion.close()
+        conexion.close()
+
+@contextmanager
+def transaccion():
+    conexion = obtener_conexion()
+    cursor = None
+    try:
+        cursor = conexion.cursor(dictionary=True)
+        yield cursor
+        conexion.commit()
     except Exception:
         conexion.rollback()
         raise
@@ -59,4 +80,3 @@ def ejecutar_mutacion(sql:str, parametros :tuple = ())-> dict:
         if cursor is not None:
             cursor.close()
         conexion.close()
-

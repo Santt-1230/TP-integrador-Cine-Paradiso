@@ -1,6 +1,93 @@
 from repositories import salas as salas_repository
+from repositories import locales as locales_repository
 from validators import salas as salas_validator
-
+import utils as ut
+import constants as const
 def listar_salas(id_local=None):
+    if id_local is not None:
+        id_local = salas_validator.validar_id_local(id_local)
+    return salas_repository.listar_salas_por_local(id_local)
+
+def listar_sala_id(id_sala):
+    id_sala = salas_validator.validar_id_sala(id_sala)
+    return salas_repository.listar_sala_por_id(id_sala)
+
+def crear_sala(datos):
+    id_local=salas_validator.validar_id_local(datos.get('id_local'))
+    numero_sala=salas_validator.validar_numero_sala(datos.get('numero_sala'))
+    capacidad=salas_validator.validar_capacidad(datos.get('capacidad'))
+    local = locales_repository.obtener_local_id(id_local)
+    if local is None:
+        raise ValueError(ut.construir_error_api(
+            code=const.ERROR_CODE_LOCAL_NOT_FOUND,
+            message='Local no encontrada',
+            description=f"No existe un local con el ID '{id_local}'."
+        ))
+    if not local['activo']:
+        raise ValueError(ut.construir_error_api(
+            code=const.ERROR_CODE_LOCAL_INACTIVE,
+            message='Local inactivo',
+            description=f"No se puede crear una sala en el local '{id_local}'"
+        ))
+    sala_existente = salas_repository.existe_sala(id_local, numero_sala)
+    if sala_existente:
+        raise ValueError(ut.construir_error_api(
+            code=const.ERROR_CODE_SALA_CONFLICT,
+            message='Numero de sala ocupado',
+            description=f"Ya existe una sala con el numero '{numero_sala}' en el local '{id_local}'"
+        ))
+    id_sala = salas_repository.crear_sala_con_butacas(id_local, numero_sala, capacidad)
+    return salas_repository.listar_sala_por_id(id_sala)
+
+def obtener_butacas_sala(id_sala):
+    id_sala = salas_validator.validar_id_sala(id_sala)
+    sala = salas_repository.listar_sala_por_id(id_sala)
+    if sala is None:
+        return None
+    return salas_repository.obtener_butacas(id_sala)
+
+def actualizar_sala(id_sala, datos):
+    id_sala = salas_validator.validar_id_sala(id_sala)
+    sala = salas_repository.listar_sala_por_id(id_sala)
+    cambios = salas_validator.validar_actualizacion_sala(datos)
+    if sala is None:
+        raise ValueError(ut.construir_error_api(
+            code=const.ERROR_CODE_SALA_NOT_FOUND,
+            message='Sala no encontrada',
+            description=f"No existe una sala con el ID '{id_sala}'."
+        ))
+    numero_nuevo = cambios.get('numero_sala', sala['numero_sala'])
+    estado_nuevo = cambios.get('estado', sala['estado'])
+    if (estado_nuevo == 'activa' and (numero_nuevo != sala['numero_sala'] or sala['estado'] == 'inactiva')):
+        if salas_repository.existe_sala(sala['id_local'], numero_nuevo):
+            raise ValueError(ut.construir_error_api(
+                code=const.ERROR_CODE_SALA_CONFLICT,
+                message='Numero de sala ocupado',
+                description=f"Ya existe una sala con el numero {numero_nuevo} en el local {sala['id_local']}."
+            ))
+    return salas_repository.actualizar_sala(id_sala, cambios)
+
+
+def desactivar_sala(id_sala):
+    id_sala = salas_validator.validar_id_sala(id_sala)
+    sala = salas_repository.listar_sala_por_id(id_sala)
+    if sala is None:
+        raise ValueError(ut.construir_error_api(
+            code=const.ERROR_CODE_SALA_NOT_FOUND,
+            message='Sala no encontrada',
+            description=f"No existe una sala con el ID '{id_sala}'"
+        ))
+
+    return salas_repository.desactivar_sala(id_sala)
+
+def listar_salas_activas(id_local):
     id_local = salas_validator.validar_id_local(id_local)
-    return salas_repository.listar_salas(id_local)
+    local = locales_repository.obtener_local_id(id_local)
+
+    if local is None or not local['activo']:
+        raise ValueError(ut.construir_error_api(
+            code=const.ERROR_CODE_LOCAL_NOT_FOUND,
+            message='Local no encontrado',
+            description=f"No existe un local activo con el ID '{id_local}'"
+        ))
+    return salas_repository.listar_salas_activas(id_local)
