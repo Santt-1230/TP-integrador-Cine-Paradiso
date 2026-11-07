@@ -1,5 +1,5 @@
-from backend.repositories import estadisticas as estadisticas_repository
-from backend.validators.estadisticas import validar_periodo_estadisticas
+from repositories import estadisticas as estadisticas_repository
+from validators.estadisticas import validar_periodo_estadisticas
 from repositories.estadisticas import (
     obtener_ventas_totales,
     obtener_ventas_entradas,

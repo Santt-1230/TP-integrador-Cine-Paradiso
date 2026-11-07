@@ -134,3 +134,10 @@ def obtener_historial(id_usuario):
 
     peliculas_vistas = usuarios_repository.listar_peliculas_vistas(id_usuario)
     return {"compras": historial_compras, "peliculas_vistas": peliculas_vistas}, None
+
+def dar_de_baja(id_usuario):
+    usuario = buscar_usuario_activo(id_usuario)
+    if not usuario:
+        return False, SESION_INVALIDA
+    usuarios_repository.desactivar_usuario(id_usuario)
+    return True, None

@@ -1,6 +1,6 @@
 from flask import Blueprint,request, jsonify, session
-from backend.services.validar_qr import procesar_validacion_qr
-from backend.validators.validar_qr import validar_token
+from services.validar_qr import procesar_validacion_qr
+from validators.validar_qr import validar_token
 from utils import requiere_admin
 
 validar_qr = Blueprint('validar_qr', __name__, url_prefix='/api/qr')

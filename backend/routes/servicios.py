@@ -4,7 +4,7 @@ from services.servicios import (
     listar_servicio_por_id,
     crear_servicio,
     actualizar_servicio,
-    dar_de_baja_servicio,
+    dar_de_baja_servicio
 )
 from validators.servicios import validar_creacion, validar_modificacion
 from utils import construir_error_api
@@ -28,8 +28,8 @@ def obtener_servicios_route():
 
 
 @servicios_bp.route('/servicios/<id>', methods=['GET'])
-def obtener_servicio_por_id_route():
-    servicio = listar_servicio_por_id()
+def obtener_servicio_por_id_route(id_producto):
+    servicio = listar_servicio_por_id(id_producto)
     if servicio is None:
         return error_no_encontrado(id_producto)
     return jsonify(servicio), 200
@@ -46,7 +46,7 @@ def crear_servicio_route():
     return jsonify(datos), 201
 
 
-@servicios_bp.route('/servicios', methods=['PATCH'])
+@servicios_bp.route('/servicios/<id>', methods=['PATCH'])
 def modificar_servicio_route(id_producto):
     datos = request.get_json(silent=True)
     mensaje = validar_modificacion(datos)
@@ -59,7 +59,7 @@ def modificar_servicio_route(id_producto):
     return jsonify(datos), 200
 
 
-@servicios_bp.route('/servicios/<id>', methods=['PATCH'])
+@servicios_bp.route('/servicios/<id>', methods=["PATCH"])
 def dar_de_baja_servicio_route(id_producto):
     se_dio_de_baja = dar_de_baja_servicio(id_producto)
     if not se_dio_de_baja:
