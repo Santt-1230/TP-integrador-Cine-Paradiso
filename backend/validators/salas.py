@@ -39,7 +39,7 @@ def validar_actualizacion_sala(datos):
             ))
     cambios = {}
     if 'numero_sala' in datos:
-        cambios['numero_sala'] = validar_numero_sala('numero_sala')
+        cambios['numero_sala'] = validar_numero_sala(datos['numero_sala'])
     if 'estado' in datos:
         if datos['estado'] not in ('activa', 'inactiva'):
             raise ValueError(ut.construir_error_api(
