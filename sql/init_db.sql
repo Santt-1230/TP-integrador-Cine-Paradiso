@@ -36,7 +36,8 @@ CREATE TABLE IF NOT EXISTS peliculas (
 	cartelera_desde DATE,
 	cartelera_hasta DATE,
 	activo BOOLEAN NOT NULL DEFAULT TRUE,
-	CONSTRAINT chk_peliculas_duracion CHECK (duracion_min > 0)
+	CONSTRAINT chk_peliculas_duracion CHECK (duracion_min > 0),
+	CONSTRAINT chk_pelicula_cartelera CHECK (cartelera_desde IS NULL OR cartelera_hasta IS NULL OR cartelera_hasta >= cartelera_desde)
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS butacas (
