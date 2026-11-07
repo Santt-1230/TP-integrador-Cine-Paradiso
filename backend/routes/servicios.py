@@ -4,11 +4,7 @@ from services.servicios import (
     listar_servicio_por_id,
     crear_servicio,
     actualizar_servicio,
-<<<<<<< HEAD
-    dar_de_baja_servicio,
-=======
     dar_de_baja_servicio
->>>>>>> origin/feature/front-arreglos-usuarios
 )
 from validators.servicios import validar_creacion, validar_modificacion
 from utils import construir_error_api

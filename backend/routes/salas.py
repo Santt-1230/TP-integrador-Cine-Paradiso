@@ -5,11 +5,8 @@ import utils as ut
 import constants as const
 from services import salas as salas_services
 from utils import requiere_admin
-<<<<<<< HEAD
 
-=======
 logger = logging.getLogger(__name__)
->>>>>>> origin/feature/front-arreglos-usuarios
 salas_bp = Blueprint('salas', __name__, url_prefix='/api')
 
 @salas_bp.route('/salas' , methods= ['GET'])
@@ -48,13 +45,8 @@ def obtener_sala_id(id_sala):
         return jsonify(ut.construir_error_db()), 500
 
 @salas_bp.route('/salas', methods = ['POST'])
-<<<<<<< HEAD
-@requiere_admin
-def crear_sala():
-=======
 @ut.admin_requerido
 def crear_sala(datos):
->>>>>>> origin/feature/front-arreglos-usuarios
     datos = request.get_json(silent=True)
     if not isinstance(datos, dict):
         respuesta = ut.construir_error_api(
@@ -102,13 +94,8 @@ def obtener_butacas_sala(id_sala):
         return jsonify(ut.construir_error_db()), 500
 
 
-<<<<<<< HEAD
-@salas_bp.route('/salas/<id_sala>', methods = ['PATCH'])
-@requiere_admin
-=======
 @salas_bp.route('/salas<id_sala>', methods = ['PATCH'])
 @ut.admin_requerido
->>>>>>> origin/feature/front-arreglos-usuarios
 def actualizar_sala(id_sala):
     datos = request.get_json(silent=True)
     if not isinstance(datos, dict):
