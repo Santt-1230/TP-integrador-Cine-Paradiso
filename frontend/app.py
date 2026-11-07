@@ -8,6 +8,7 @@ from routes.peliculas import peliculas_front_bp
 from routes.usuarios import usuarios_bp
 from routes.validar_qr import validar_qr_bp
 from routes.perfil import perfil_bp
+from routes.funciones import funciones_front_bp
 
 
 load_dotenv()
@@ -27,6 +28,7 @@ app.register_blueprint(peliculas_front_bp)
 app.register_blueprint(usuarios_bp)
 app.register_blueprint(validar_qr_bp)
 app.register_blueprint(perfil_bp)
+app.register_blueprint(funciones_front_bp)
 
 
 if __name__ == "__main__":
