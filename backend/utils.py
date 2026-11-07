@@ -71,7 +71,7 @@ def admin_requerido(funcion):
     @login_requerido
     def verificar_rol(*args, **kwargs):
         filas = ejecutar_consulta(
-            "SELECT rol, activo FROM usuario WHERE id_usuario = %s",
+            "SELECT rol, activo FROM usuarios WHERE id_usuario = %s",
             (session["id_usuario"],),
         )
         if not filas or filas[0]["rol"] != const.ROL_ADMINISTRADOR or not filas[0]["activo"]:

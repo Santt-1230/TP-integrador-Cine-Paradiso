@@ -1,7 +1,7 @@
 import logging
 import os
 from contextlib import contextmanager
-import mysql.connector
+import mysql
 
 logger = logging.getLogger(__name__)
 
