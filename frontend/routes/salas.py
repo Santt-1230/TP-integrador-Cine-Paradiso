@@ -27,14 +27,14 @@ def elegir_butacas(id_sala):
                 elegidas.append(id_butaca)
 
         if not elegidas:
-            error = "Elegi al menos una"
+            error = "Elegi al menos una butaca"
 
         else:
             butacas_elegidas = []
             for id_butaca in elegidas:
                 butacas_elegidas.append(int(id_butaca))
 
-        session['id_sala'] = id_sala
-        session['butacas_elegidas'] = butacas_elegidas
-        return redirect('/')
-    return render_template('butacas.html', butacass = butacas, error = error)
+            session['id_sala'] = id_sala
+            session['butacas_elegidas'] = butacas_elegidas
+            return redirect('/')
+    return render_template('butacas.html', butacas = butacas,id_sala = id_sala, error = error)

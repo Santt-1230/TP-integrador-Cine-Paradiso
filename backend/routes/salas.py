@@ -1,4 +1,3 @@
-import logging
 from flask import Blueprint, jsonify, request
 import mysql.connector
 import utils as ut

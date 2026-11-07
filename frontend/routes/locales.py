@@ -48,14 +48,18 @@ def elegir_cine(id_local):
 
 @locales_bp.route('/admin/locales', methods=['GET'])
 def admin_locales():
+    locales = []
+    error = None
+
     try:
         locales = api.get_lista('/api/locales', 'locales')
         salas = api.pedir('GET', '/api/salas')['salas']
         for local in locales:
-            local['salas'] = [
-                sala for sala in salas
-                if sala['id_local'] == local['id_local']]
-        error = None
+            local['salas'] = []
+            for sala in salas:
+                if sala['id_local'] == local['id_local']:
+                    local['salas'].append(sala)
+        
     except api.ApiError as error_api:
         if error_api.estado in (401, 403):
             return redirect(url_for('usuarios.login'))
