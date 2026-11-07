@@ -307,3 +307,12 @@ INSERT  IGNORE INTO `pelicula_genero` (`id_pelicula`, `id_genero`) VALUES (5,13)
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
+INSERT INTO productos (nombre, tipo, descripcion, precio) VALUES
+  ('Pochoclo mediano', 'comida', NULL, 3000),
+  ('Gaseosa 750 ml', 'bebida', NULL, 2000),
+  ('Acceso por vehículo', 'estacionamiento', NULL, 3000);
+
+INSERT INTO promociones (titulo, descripcion) VALUES
+  ('2x1 los martes', 'Entradas 2x1'),
+  ('Combo pareja', 'Pochoclo + 2 gaseosas');
+

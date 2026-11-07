@@ -5,15 +5,19 @@ servicios_bp = Blueprint("servicios", __name__)
 
 TIPOS = ("comida, bebida, estacionamiento, vip")
 
-def es_admin():
-    return session.get("rol") == "administrador"
-
 
 
 @servicios_bp.route("/servicios")
 def servicios():
     try:
-        comidas = api.pedir("GET", "/api/servicios")
+        todos = api.pedir("GET", "/api/servicios")
+        promociones = api.pedir("GET", "/api/promociones")
     except api.ApiError as e:
-        return render_template("servicios.html",)
-   
+        return render_template("servicios.html", comidas=[], promociones=[], error=e.mensaje)
+    comidas = []
+    for servicio in todos:
+        if servicio["tipo"] in ("comida", "bebida"):
+            comidas.append(servicio)
+
+    return render_template("servicios.html", comidas=comidas, promociones=promociones)
+

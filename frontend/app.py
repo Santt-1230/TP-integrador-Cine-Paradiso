@@ -9,7 +9,7 @@ from routes.usuarios import usuarios_bp
 from routes.validar_qr import validar_qr_bp
 from routes.locales import locales_bp
 from routes.perfil import perfil_bp
-from routes.servicios import servicios_front_bp
+from routes.servicios import servicios_bp
 
 
 load_dotenv()
