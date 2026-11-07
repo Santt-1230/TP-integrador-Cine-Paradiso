@@ -7,6 +7,7 @@ from routes.estadisticas import estadisticas_bp
 from routes.peliculas import peliculas_front_bp
 from routes.usuarios import usuarios_bp
 from routes.validar_qr import validar_qr_bp
+from routes.locales import locales_bp
 from routes.perfil import perfil_bp
 
 
@@ -26,7 +27,12 @@ app.register_blueprint(estadisticas_bp)
 app.register_blueprint(peliculas_front_bp)
 app.register_blueprint(usuarios_bp)
 app.register_blueprint(validar_qr_bp)
+app.register_blueprint(locales_bp)
 app.register_blueprint(perfil_bp)
+@app.route('/mis-compras')
+def mis_compras():
+    return render_template('mis_compras.html')
+
 
 
 if __name__ == "__main__":
