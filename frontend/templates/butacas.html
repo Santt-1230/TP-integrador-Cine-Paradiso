@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block titulo %}Elegí tu/tus butaca/butacas - Cine Paradiso{% endblock %}
+
+{% block contenido %}
+<form method="post">
+    {% for fila, butacas_fila in butacas|groupby('fila') %}
+    <div class="fila">
+        <span>{{ fila }}</span>
+        {% for butaca in butacas_fila|sort(atributte='numero', reverse=true) %}
+        <label>
+            <input type="checkbox" name="butacas" value="{{ butaca.id_butaca }}">
+            {{ fila }}{{ butaca.numero }}
+        </label>
+        {% endfor %}
+    </div>
+    {% endfor %}
+    <button>CONTINUAR</button>
+</form>
+{% endblock %}
