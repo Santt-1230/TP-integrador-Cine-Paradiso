@@ -208,9 +208,13 @@ def obtener_entradas_vendidas_por_franja(periodo=30):
             AND c.fecha_confirmacion >= %s
             AND c.fecha_confirmacion <= NOW()
 
-        GROUP BY HOUR(f.fecha_hora_inicio)
+        GROUP BY
+            CONCAT(
+                LPAD(HOUR(f.fecha_hora_inicio), 2, '0'),
+                ':00'
+            )
 
-        ORDER BY HOUR(f.fecha_hora_inicio) ASC;
+        ORDER BY franja ASC;
     """
 
     return ejecutar_consulta(consulta, (fecha_desde,))
