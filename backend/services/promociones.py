@@ -1,9 +1,9 @@
-from backend.repositories.promociones import obtener_promociones
+from repositories.promociones import obtener_promociones
 
 
 def listar_promociones():
     activas = []
     for promocion in obtener_promociones():
         if promocion["activo"]:
-            activos.append(promocion)
+            activas.append(promocion)
     return activas
