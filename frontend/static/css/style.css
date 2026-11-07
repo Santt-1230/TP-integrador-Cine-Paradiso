@@ -8,10 +8,9 @@ body {
     flex-direction: column;
 }
 
-/* CAMBIALO POR ESTO: */
 header, footer {
     background-color: #ff6464;
-    flex-shrink: 0; /* ← ESTO OBLIGA AL NAVEGADOR A RESPETAR SU TAMAÑO Y NO APLASTARLO */
+    flex-shrink: 0;
 }
 
 .header-principal {
@@ -263,8 +262,20 @@ footer {
 }
 
 .sidebar-menu a.active {
-    background-color: #a00000; 
-    color: #ffffff;
+    background-color: #ba2b30; 
+}
+
+.sidebar-menu > form {
+    background-color: #b30000;
+    width: 40%;
+    padding: 0.6rem;
+    margin-left: 1.5rem;
+    margin-top: 1rem;
+    border-radius: 0.4rem;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: small;
+    text-align:center;
 }
 
 .page-with-sidebar > section {
@@ -387,7 +398,6 @@ footer {
         flex-direction: column;
     }
 }
-
 
 /* -- ADMIN -- */
 

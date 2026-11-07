@@ -1,4 +1,11 @@
 {% extends "base.html" %}
+
+{% block estilos %}
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='css/admin.css') }}">
+{% endblock %}
+
+
 {% block encabezado %}
 <header class="admin-header">
     <a href="/admin" class="logo">CINE PARADISO</a>
@@ -7,8 +14,11 @@
 </header>
 {% endblock %}
 
+
 {% block contenido %}
-<div class="admin-layaout">
+
+<div class="admin-layout">
+
     <aside class="admin-sidebar">
         <nav>
             <a href="/admin|">Inicio</a>
@@ -17,11 +27,17 @@
             <a href="/admin/locales">Locales y salas</a>
             <a href="/admin/servicios">Servicios</a>
             <a href="/admin/estadisticas">Estadísticas</a>
-            <a href="/admin/usuarios"></a>
+            <a href="/admin/usuarios">Usuarios</a>
+            <a href="/admin/qr">Escaneo de QR</a>
         </nav>
     </aside>
+
     <div class="admin-contenido">
-        {% block contenido_admin %}{% endblock %}
+        {% block contenido_admin %}
+        <script src="{{ url_for('static', filename='js/admin.js') }}" defer></script>
+        {% endblock %}
     </div>
+
 </div>
+
 {% endblock %}

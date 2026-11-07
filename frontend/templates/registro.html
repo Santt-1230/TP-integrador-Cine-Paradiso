@@ -10,7 +10,7 @@
 <section class="pagina-formulario">
     <h1>Crear cuenta</h1>
 
-    <form class="tarjeta-formulario" method="post" action="{{ url_for('registro') }}">
+    <form class="tarjeta-formulario" method="post" action="{{ url_for('usuarios.registro') }}">
         {% if error %}
             <p class="mensaje-error">{{ error }}</p>
         {% endif %}
@@ -28,7 +28,7 @@
         </label>
 
         <label>Fecha de nacimiento
-            <input type="text" name="fecha_nacimiento" placeholder="YYYY-MM-DD" pattern="\d{4}-\d{2}-\d{2}" max="{{fecha_maxima}}" title="El formato debe ser YYYY-MM-DD" required>
+            <input type="date" name="fecha_nacimiento" max="{{fecha_maxima}}" required>
         </label>
 
         <label>Contraseña
