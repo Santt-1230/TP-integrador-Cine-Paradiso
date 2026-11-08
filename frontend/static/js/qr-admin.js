@@ -7,43 +7,90 @@
 
         if (!contenedor) return;
 
-        const urlValidacion = contenedor.dataset.validarUrl;
+        // URLs del backend.
+        const urlValidarEntrada = contenedor.dataset.validarEntradaUrl;
+        const urlValidarProducto = contenedor.dataset.validarProductoUrl;
 
+        // Pantallas.
+        const pantallaTipos = document.getElementById("qr-pantalla-tipos");
+        const pantallaCategorias = document.getElementById("qr-pantalla-categorias");
+        const pantallaLector = document.getElementById("qr-pantalla-lector");
+
+        // Selección.
+        const botonesTipo = contenedor.querySelectorAll("[data-tipo]");
+        const botonesCategoria = contenedor.querySelectorAll("[data-categoria]");
+        const botonVolverTipos = document.getElementById("qr-volver-tipos");
+        const botonVolverSeleccion = document.getElementById("qr-volver-seleccion");
+
+        // Cámara.
         const lectorElemento = document.getElementById("qr-reader");
         const botonIniciar = document.getElementById("qr-iniciar");
         const botonDetener = document.getElementById("qr-detener");
+
+        // Formulario manual.
         const formularioManual = document.getElementById("qr-form-manual");
         const campoCodigo = document.getElementById("qr-codigo");
+        const botonValidarManual = document.getElementById("qr-validar-manual");
 
+        // Contexto del escáner.
         const estadoCamara = document.getElementById("qr-estado");
+        const contextoTipo = document.getElementById("qr-contexto-tipo");
+        const contextoTitulo = document.getElementById("qr-contexto-titulo");
+        const contextoDescripcion = document.getElementById("qr-contexto-descripcion");
+
+        // Resultado.
         const resultado = document.getElementById("qr-resultado");
+        const resultadoTitulo = document.getElementById("qr-resultado-titulo");
         const resultadoEstado = document.getElementById("qr-resultado-estado");
         const resultadoMensaje = document.getElementById("qr-resultado-mensaje");
         const resultadoDetalles = document.getElementById("qr-resultado-detalles");
 
+
         const elementosNecesarios = [
+            pantallaTipos,
+            pantallaCategorias,
+            pantallaLector,
+            botonVolverTipos,
+            botonVolverSeleccion,
             lectorElemento,
             botonIniciar,
             botonDetener,
             formularioManual,
             campoCodigo,
+            botonValidarManual,
             estadoCamara,
+            contextoTipo,
+            contextoTitulo,
+            contextoDescripcion,
             resultado,
+            resultadoTitulo,
             resultadoEstado,
             resultadoMensaje,
             resultadoDetalles
         ];
 
-        if (elementosNecesarios.some((elemento) => elemento === null)) {
-            console.error("La página de QR no contiene todos los elementos HTML necesarios.");
+        if (elementosNecesarios.some(elemento => !elemento)) {
+            console.error(
+                "La página de validación QR no contiene todos los elementos HTML necesarios."
+            );
             return;
         }
 
+        if (!urlValidarEntrada || !urlValidarProducto) {
+            console.error("No se configuraron las URLs de validación QR.");
+            return;
+        }
+
+
         let lector = null;
+
         let camaraActiva = false;
+        let iniciandoCamara = false;
         let validacionEnCurso = false;
         let codigoProcesado = false;
 
+        let tipoSeleccionado = null;
+        let categoriaSeleccionada = null;
 
 
         function mostrarEstadoCamara(mensaje, tipo = "") {
@@ -58,50 +105,199 @@
         }
 
 
+        function mostrarPantalla(pantalla) {
 
-        function mostrarResultado(tipo, etiqueta, mensaje, datos = null) {
+            pantallaTipos.hidden = true;
+            pantallaCategorias.hidden = true;
+            pantallaLector.hidden = true;
+
+            pantalla.hidden = false;
+        }
+
+
+        function limpiarResultado() {
+
+            resultado.hidden = true;
+
+            resultado.removeAttribute("data-resultado");
+
+            resultadoMensaje.textContent = "";
+            resultadoEstado.textContent = "";
+
+            resultadoDetalles.replaceChildren();
+            resultadoDetalles.hidden = true;
+        }
+
+
+        function limpiarSeleccion() {
+
+            tipoSeleccionado = null;
+            categoriaSeleccionada = null;
+
+            codigoProcesado = false;
+
+            campoCodigo.value = "";
+
+            limpiarResultado();
+        }
+
+
+        function seleccionarTipo(tipo) {
+
+            tipoSeleccionado = tipo;
+            categoriaSeleccionada = null;
+
+            if (tipo === "entrada") {
+
+                abrirEscaner();
+
+            } else if (tipo === "producto") {
+
+                mostrarPantalla(pantallaCategorias);
+
+            }
+        }
+
+
+        function seleccionarCategoria(categoria) {
+
+            categoriaSeleccionada = categoria;
+
+            abrirEscaner();
+        }
+
+
+        function abrirEscaner() {
+
+            limpiarResultado();
+
+            campoCodigo.value = "";
+            codigoProcesado = false;
+
+            if (tipoSeleccionado === "entrada") {
+
+                contextoTipo.textContent = "ENTRADAS";
+
+                contextoTitulo.textContent = "Validación de entradas";
+
+                contextoDescripcion.textContent =
+                    "Escaneá el QR de la entrada para comprobar el acceso.";
+
+            } else {
+
+                const nombresCategorias = {
+                    bebida: "Bebidas",
+                    comida: "Comidas",
+                    estacionamiento: "Estacionamiento",
+                    vip: "VIP"
+                };
+
+                contextoTipo.textContent = "PRODUCTOS";
+
+                contextoTitulo.textContent = "Validación de productos";
+
+                contextoDescripcion.textContent =
+                    `Categoría seleccionada: ${nombresCategorias[categoriaSeleccionada]}.`;
+            }
+
+            mostrarEstadoCamara("La cámara está apagada.");
+
+            mostrarPantalla(pantallaLector);
+        }
+
+
+        async function volverSeleccion() {
+
+            await detenerCamara();
+
+            limpiarResultado();
+
+            campoCodigo.value = "";
+            codigoProcesado = false;
+
+            if (tipoSeleccionado === "producto") {
+
+                categoriaSeleccionada = null;
+
+                mostrarPantalla(pantallaCategorias);
+
+            } else {
+
+                limpiarSeleccion();
+
+                mostrarPantalla(pantallaTipos);
+            }
+        }
+
+
+        function mostrarResultado(valido, mensaje, datos = null) {
 
             resultado.hidden = false;
-            resultado.dataset.resultado = tipo;
 
-            resultadoEstado.textContent = etiqueta;
+            resultado.dataset.resultado =
+                valido ? "valido" : "invalido";
+
+            resultadoTitulo.textContent =
+                valido ? "Validación aceptada" : "Validación rechazada";
+
+            resultadoEstado.textContent =
+                valido ? "VÁLIDO" : "NO VÁLIDO";
+
             resultadoMensaje.textContent = mensaje;
 
             resultadoDetalles.replaceChildren();
 
             const camposPermitidos = [
+
                 ["pelicula", "Película"],
-                ["nombre_pelicula", "Película"],
-                ["funcion", "Función"],
-                ["fecha_hora", "Fecha y hora"],
                 ["fecha", "Fecha"],
                 ["hora", "Hora"],
                 ["sala", "Sala"],
                 ["butaca", "Butaca"],
+                ["id_entrada", "N.º de entrada"],
+
+                // Datos de productos.
+                ["producto", "Producto"],
+                ["categoria", "Categoría"],
+                ["cantidad", "Cantidad"],
+                ["precio_unitario", "Precio unitario"],
+                ["subtotal", "Subtotal"],
+
+                ["id_compra", "N.º de compra"],
+                ["id_compra_producto", "Detalle de compra"],
                 ["numero_factura", "Factura"],
-                ["id_entrada", "N.º de entrada"]
+                ["fecha_uso", "Fecha de uso"],
+                ["estado_entrada", "Estado de entrada"],
+                ["estado_compra", "Estado de compra"]
+
             ];
 
             if (datos && typeof datos === "object") {
 
-                camposPermitidos.forEach(([clave, etiquetaCampo]) => {
+                camposPermitidos.forEach(([clave, etiqueta]) => {
 
                     const valor = datos[clave];
 
-                    if (valor === undefined || valor === null || valor === "") {
+                    if (
+                        valor === undefined ||
+                        valor === null ||
+                        valor === ""
+                    ) {
                         return;
                     }
 
                     const fila = document.createElement("div");
+
                     const titulo = document.createElement("dt");
                     const contenido = document.createElement("dd");
 
-                    titulo.textContent = etiquetaCampo;
+                    titulo.textContent = etiqueta;
                     contenido.textContent = String(valor);
 
                     fila.append(titulo, contenido);
 
                     resultadoDetalles.append(fila);
+
                 });
             }
 
@@ -117,7 +313,10 @@
 
         async function detenerCamara() {
 
-            if (!lector || !camaraActiva) {
+            if (!lector) {
+
+                camaraActiva = false;
+                iniciandoCamara = false;
 
                 botonDetener.disabled = true;
                 botonIniciar.disabled = false;
@@ -125,68 +324,33 @@
                 return;
             }
 
+            const lectorActual = lector;
+
             try {
 
-                await lector.stop();
+                if (camaraActiva) {
+                    await lectorActual.stop();
+                }
 
             } catch (error) {
 
-                console.warn("No se pudo detener el lector QR:", error);
+                console.warn("No se pudo detener la cámara:", error);
 
             } finally {
 
                 camaraActiva = false;
+                iniciandoCamara = false;
+
+                try {
+                    await lectorActual.clear();
+                } catch (error) {
+                    console.warn("No se pudo limpiar el lector:", error);
+                }
+
+                lector = null;
 
                 botonDetener.disabled = true;
                 botonIniciar.disabled = false;
-            }
-        }
-
-        function interpretarRespuesta(datos) {
-
-            const mensaje =
-                datos.mensaje ||
-                datos.message ||
-                datos.error ||
-                "El servidor no indicó explícitamente el resultado.";
-
-            const valido =
-                datos.valido ??
-                datos.es_valido ??
-                datos.valid ??
-                datos.success;
-
-            const detalles =
-                datos.entrada ||
-                datos.detalles ||
-                datos;
-
-            if (valido === true) {
-
-                mostrarResultado(
-                    "valido",
-                    "Entrada válida",
-                    mensaje,
-                    detalles
-                );
-
-            } else if (valido === false || datos.error) {
-
-                mostrarResultado(
-                    "invalido",
-                    "Entrada no válida",
-                    mensaje,
-                    detalles
-                );
-
-            } else {
-
-                mostrarResultado(
-                    "pendiente",
-                    "Respuesta del servidor",
-                    mensaje,
-                    detalles
-                );
             }
         }
 
@@ -197,8 +361,7 @@
             if (!codigoLimpio) {
 
                 mostrarResultado(
-                    "invalido",
-                    "Código vacío",
+                    false,
                     "Ingresá o escaneá un código QR."
                 );
 
@@ -207,12 +370,38 @@
 
             if (validacionEnCurso) return;
 
-            if (!urlValidacion) {
+            let urlValidacion;
+
+            const datosEnvio = {
+                token: codigoLimpio
+            };
+
+
+            if (tipoSeleccionado === "entrada") {
+
+                urlValidacion = urlValidarEntrada;
+
+            } else if (tipoSeleccionado === "producto") {
+
+                urlValidacion = urlValidarProducto;
+
+                datosEnvio.categoria = categoriaSeleccionada;
+
+            } else {
 
                 mostrarResultado(
-                    "invalido",
-                    "Falta configurar la ruta",
-                    "No se configuró la URL del endpoint de validación."
+                    false,
+                    "Primero seleccioná qué querés validar."
+                );
+
+                return;
+            }
+
+            if (tipoSeleccionado === "producto" && !categoriaSeleccionada) {
+
+                mostrarResultado(
+                    false,
+                    "Primero seleccioná una categoría de producto."
                 );
 
                 return;
@@ -221,13 +410,7 @@
             validacionEnCurso = true;
 
             botonIniciar.disabled = true;
-
-            const botonManual =
-                formularioManual.querySelector('button[type="submit"]');
-
-            if (botonManual) {
-                botonManual.disabled = true;
-            }
+            botonValidarManual.disabled = true;
 
             mostrarEstadoCamara(
                 "Enviando el código al servidor para validarlo..."
@@ -238,13 +421,13 @@
                 "Accept": "application/json"
             };
 
-            // Token CSRF, si utilizan Flask-WTF.
+
+
             const metaCsrf = document.querySelector(
                 'meta[name="csrf-token"]'
             );
 
             if (metaCsrf && metaCsrf.content) {
-
                 encabezados["X-CSRFToken"] = metaCsrf.content;
             }
 
@@ -252,16 +435,14 @@
 
                 const respuesta = await fetch(urlValidacion, {
 
-                    method: "POST",
+                    method: "PATCH",
 
                     credentials: "same-origin",
 
                     headers: encabezados,
 
-                    // Flask recibe el código mediante request.get_json().
-                    body: JSON.stringify({
-                        qr: codigoLimpio
-                    })
+                    body: JSON.stringify(datosEnvio)
+
                 });
 
                 const tipoContenido =
@@ -278,51 +459,58 @@
                     const texto = await respuesta.text();
 
                     datos = {
-                        message: texto || "El servidor devolvió una respuesta sin contenido JSON."
+                        mensaje: texto ||
+                            `El servidor devolvió una respuesta HTTP ${respuesta.status}.`
                     };
                 }
 
-                if (!respuesta.ok) {
+                const valido =
+                    respuesta.ok && datos.valido === true;
 
-                    const mensajeError =
-                        datos.error ||
-                        datos.message ||
-                        `Error HTTP ${respuesta.status}`;
+                const mensaje =
+                    datos.mensaje ||
+                    datos.message ||
+                    datos.error ||
+                    `No se pudo validar el código. HTTP ${respuesta.status}`;
 
-                    mostrarResultado(
-                        "invalido",
-                        "No se pudo validar",
-                        mensajeError,
-                        datos.entrada || null
-                    );
+                const detalles =
+                    datos.entrada ||
+                    datos.detalles ||
+                    null;
+
+                mostrarResultado(
+                    valido,
+                    mensaje,
+                    detalles
+                );
+
+                if (valido) {
 
                     mostrarEstadoCamara(
-                        mensajeError,
+                        "QR validado correctamente.",
+                        "exito"
+                    );
+
+                } else {
+
+                    mostrarEstadoCamara(
+                        mensaje,
                         "error"
                     );
 
-                    return;
                 }
-
-                interpretarRespuesta(datos);
-
-                mostrarEstadoCamara(
-                    "El servidor respondió la solicitud.",
-                    "exito"
-                );
 
             } catch (error) {
 
                 console.error("Error al validar el QR:", error);
 
                 mostrarResultado(
-                    "invalido",
-                    "Error de conexión",
+                    false,
                     "No se pudo contactar al servidor. Revisá tu conexión e intentá nuevamente."
                 );
 
                 mostrarEstadoCamara(
-                    "No se pudo contactar al servidor.",
+                    "Error de conexión.",
                     "error"
                 );
 
@@ -330,11 +518,9 @@
 
                 validacionEnCurso = false;
 
-                if (botonManual) {
-                    botonManual.disabled = false;
-                }
+                botonValidarManual.disabled = false;
 
-                if (!camaraActiva) {
+                if (!camaraActiva && !iniciandoCamara) {
                     botonIniciar.disabled = false;
                 }
             }
@@ -346,16 +532,23 @@
             if (!window.Html5Qrcode) {
 
                 mostrarEstadoCamara(
-                    "No se pudo cargar la biblioteca para leer QR. Revisá la conexión y la etiqueta script.",
+                    "No se pudo cargar la biblioteca para leer QR. Revisá la conexión.",
                     "error"
                 );
 
                 return;
             }
 
-            if (camaraActiva) return;
+            if (camaraActiva || iniciandoCamara || validacionEnCurso) {
+                return;
+            }
 
             try {
+
+                limpiarResultado();
+
+                codigoProcesado = false;
+                iniciandoCamara = true;
 
                 botonIniciar.disabled = true;
 
@@ -371,20 +564,27 @@
 
                     {
                         fps: 10,
+
                         qrbox: {
                             width: 230,
                             height: 230
                         },
+
                         aspectRatio: 1
                     },
 
                     async (textoDecodificado) => {
 
-                        if (validacionEnCurso || codigoProcesado) {
+                        if (
+                            validacionEnCurso ||
+                            codigoProcesado
+                        ) {
                             return;
                         }
 
                         codigoProcesado = true;
+
+                        campoCodigo.value = textoDecodificado;
 
                         mostrarEstadoCamara(
                             "QR detectado. Deteniendo la cámara y validando..."
@@ -396,12 +596,11 @@
                     },
 
                     () => {
-                    }
+                     }
                 );
 
                 camaraActiva = true;
-
-                codigoProcesado = false;
+                iniciandoCamara = false;
 
                 botonIniciar.disabled = true;
                 botonDetener.disabled = false;
@@ -418,27 +617,65 @@
                     error
                 );
 
-                camaraActiva = false;
-
-                botonIniciar.disabled = false;
-                botonDetener.disabled = true;
+                await detenerCamara();
 
                 mostrarEstadoCamara(
-                    "No se pudo iniciar la cámara. Revisá los permisos y que el sitio use HTTPS o localhost.",
+                    "No se pudo iniciar la cámara. Revisá los permisos y que el sitio utilice HTTPS o localhost.",
                     "error"
                 );
+
             }
         }
 
 
-        botonIniciar.addEventListener("click", iniciarCamara);
+        botonesTipo.forEach((boton) => {
 
+            boton.addEventListener("click", () => {
+
+                seleccionarTipo(boton.dataset.tipo);
+
+            });
+
+        });
+
+
+        botonesCategoria.forEach((boton) => {
+
+            boton.addEventListener("click", () => {
+
+                seleccionarCategoria(boton.dataset.categoria);
+
+            });
+
+        });
+
+
+        botonVolverTipos.addEventListener("click", () => {
+
+            limpiarSeleccion();
+
+            mostrarPantalla(pantallaTipos);
+
+        });
+
+
+        botonVolverSeleccion.addEventListener("click", async () => {
+
+            await volverSeleccion();
+
+        });
+
+
+        botonIniciar.addEventListener("click", iniciarCamara);
 
         botonDetener.addEventListener("click", async () => {
 
             await detenerCamara();
 
+            codigoProcesado = false;
+
             mostrarEstadoCamara("Cámara detenida.");
+
         });
 
 
@@ -446,20 +683,25 @@
 
             evento.preventDefault();
 
+            if (validacionEnCurso) return;
+
             codigoProcesado = true;
 
             await detenerCamara();
 
             await validarCodigo(campoCodigo.value);
+
         });
 
 
         campoCodigo.addEventListener("input", () => {
 
             codigoProcesado = false;
+
         });
 
 
+  
         window.addEventListener("pagehide", () => {
 
             if (lector && camaraActiva) {
@@ -470,9 +712,13 @@
                         "No se pudo cerrar la cámara:",
                         error
                     );
+
                 });
             }
         });
+
+
+        mostrarPantalla(pantallaTipos);
 
     });
 

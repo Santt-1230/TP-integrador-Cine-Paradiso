@@ -13,6 +13,7 @@ from routes.cancelaciones import cancelaciones_bp
 from routes.admin import admin_bp
 from routes.estadisticas import estadisticas_bp
 from routes.promociones import promociones_bp
+from routes.validar_qr import validar_qr_bp
 
 # 1. Cargar variables de entorno
 load_dotenv()
@@ -36,6 +37,7 @@ app.register_blueprint(admin_bp)
 app.register_blueprint(estadisticas_bp)
 app.register_blueprint(peliculas_bp)
 app.register_blueprint(promociones_bp)
+app.register_blueprint(validar_qr_bp)   
 
 
 # 4. Manejador global de errores
