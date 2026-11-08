@@ -45,6 +45,8 @@ def login():
     try:
         respuesta = api.pedir("POST", "/api/auth/login", datos)
     except api.ApiError as e:
+        if e.estado == 403: #Email sin confirmar, se ofrece reenviar el maal
+            return render_template("confirmar_email.html", email=datos["email"], error=e.mensaje)
         return render_template("login.html", error=e.mensaje)
 
     guardar_sesion(respuesta["usuario"])
@@ -60,13 +62,31 @@ def registro():
     datos = {campo: request.form.get(campo, "") for campo in campos}
     try:
         api.pedir("POST", "/api/auth/registro", datos)
-        respuesta = api.pedir("POST", "/api/auth/login",
-                              {"email": datos["email"], "contrasena": datos["contrasena"]})
     except api.ApiError as e:
+        if e.estado == 502:  # la cuenta se creó pero falló el envío del mail
+            return render_template("confirmar_email.html", email=datos["email"], error=e.mensaje)
         return render_template("registro.html", error=e.mensaje, fecha_maxima=ayer)
 
-    guardar_sesion(respuesta["usuario"])
-    return redirect(url_for("peliculas_front.inicio"))
+    return render_template("confirmar_email.html", email=datos["email"])
+
+@usuarios_bp.route("/verificar-email")
+def verificar_email():
+    token = request.args.get("token", "")
+    try:
+        api.pedir("POST", "/api/auth/verificar-email", {"token": token})
+    except api.ApiError as e:
+        return render_template("verificar_email.html", error=e.mensaje)
+    return render_template("verificar_email.html", ok=True)
+
+
+@usuarios_bp.route("/reenviar-verificacion", methods=["POST"])
+def reenviar_verificacion():
+    email = request.form.get("email", "")
+    try:
+        api.pedir("POST", "/api/auth/reenviar-verificacion", {"email": email})
+    except api.ApiError as e:
+        return render_template("confirmar_email.html", email=email, error=e.mensaje)
+    return render_template("confirmar_email.html", email=email,mensaje="Si el email está pendiente de confirmación, te enviamos un nuevo mail.")
 
 @usuarios_bp.route("/mi-cuenta", methods=["GET", "POST"])
 def mi_cuenta():
