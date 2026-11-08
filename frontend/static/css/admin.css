@@ -702,6 +702,23 @@ a {
     font-size: 10px;
     line-height: 1.5;
 }
+.tabla-salas td.estado-activa{
+    color: green;
+    font-weight: bold;
+}
+.tabla-salas td.estado-inactiva{
+    color: gray;
+    font-weight: bold;
+}
+.boton-agregar{
+    background-color: #ff6464;
+    color: #222;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 18px;
+    font-weight: bold;
+    cursor: pointer;
+}
 
 @media (max-width: 950px) {
     .estadisticas-admin__graficos {

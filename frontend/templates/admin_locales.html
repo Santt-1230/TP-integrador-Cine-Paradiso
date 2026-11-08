@@ -27,7 +27,7 @@
                     </p>
                 </div>
 
-                <a href="{{ url_for('locales.probar_nueva_sala', id_local=local.id_local) }}">Agregar sala</a>
+                <a href="{{ url_for('locales.mostrar_locales', id_local=local.id_local) }}">Agregar sala</a>
             </div>
             <table class="tabla-salas">
                 <thead>
@@ -42,8 +42,9 @@
                         <tr>
                             <td>Sala {{ sala.numero_sala }}</td>
                             <td>{{ sala.capacidad }} butacas</td>
+                            <td class="estado-{{ sala.estado }}">Estado: {{ sala.estado|capitalize }}</td>
                             <td>
-                                <a href="{{ url_for('locales.probar_editar_sala', id_sala=sala.id_sala, id_local=local.id_local) }}">Editar</a>
+                                <a href="{{ url_for('salas.editar_sala', id_sala=sala.id_sala) }}">Editar</a>
                                 <button type="button">Dar de baja</button>
                             </td>
                         </tr>

@@ -24,7 +24,10 @@
             <a href="/admin|">Inicio</a>
             <a href="/admin/peliculas">Películas</a>
             <a href="/admin/funciones">Funciones</a>
-            <a href="/admin/locales">Locales y salas</a>
+            <a href="{{ url_for('locales.admin_locales') }}" 
+            class="{% if request.endpoint == 'locales.admin_locales' %}activo{% endif %}">
+            Locales
+            </a>
             <a href="/admin/servicios">Servicios</a>
             <a href="/admin/estadisticas">Estadísticas</a>
             <a href="/admin/usuarios">Usuarios</a>
@@ -35,6 +38,7 @@
     <div class="admin-contenido">
         {% block contenido_admin %}
         <script src="{{ url_for('static', filename='js/admin.js') }}" defer></script>
+        <script src="{{ url_for('static', filename='js/estadisticas.js') }}" defer></script>
         {% endblock %}
     </div>
 

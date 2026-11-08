@@ -90,7 +90,7 @@ def obtener_butacas_sala(id_sala):
         return jsonify(ut.construir_error_db()), 500
 
 
-@salas_bp.route('/salas<id_sala>', methods = ['PATCH'])
+@salas_bp.route('/salas/<id_sala>', methods = ['PATCH'])
 @ut.admin_requerido
 def actualizar_sala(id_sala):
     datos = request.get_json(silent=True)
