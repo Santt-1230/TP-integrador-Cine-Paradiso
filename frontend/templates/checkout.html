@@ -1,6 +1,10 @@
 {% extends "base_funciones.html" %}
 
 {% block titulo %}Checkout - Cine Paradiso{% endblock %}
+{% block estilos_extra %}
+    {{ super() }}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/checkout.css') }}">
+{% endblock %}
 
 {% block contenido %}
 <section class="funciones-pagina checkout-pagina" data-checkout-expira-en="{{ checkout_expira_en }}">
