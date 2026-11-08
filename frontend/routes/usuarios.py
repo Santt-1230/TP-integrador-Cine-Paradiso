@@ -106,4 +106,4 @@ def logout():
     except api.ApiError:
         pass  # aunque el back falle, se cierra la sesión del front igual
     limpiar_sesion()
-    return redirect(url_for("usuarios.login"))
+    return redirect(url_for("peliculas_front.inicio"))
