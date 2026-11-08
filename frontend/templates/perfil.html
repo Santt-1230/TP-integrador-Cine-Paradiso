@@ -35,8 +35,23 @@
         </section>
         <section id="peliculas-vistas" class="seccion-contenido">
         <h2>Películas vistas</h2>
-        <p>Aquí verás tu historial de películas.</p>
-        <h3>{{ session.get('peliculas-vistas') }}</h3>
+        <div class="contenedor-compras">
+            {% for compra in compras %}
+                <div class="tarjeta-compra">
+                    <img src="{{ compra.poster_url }}" alt="{{ compra.titulo }}" class="poster">
+                    
+                    <div class="detalles-compra">
+                        <h2>{{ compra.titulo }}</h2>
+                        <p><strong>Fecha de compra:</strong> {{ compra.fecha_compra }}</p>
+                        <p><strong>Monto total:</strong> ${{ compra.monto_total }}</p>
+                        <p><strong>Duración:</strong> {{ compra.duracion_min }} min</p>
+                        <p><strong>Clasificación:</strong> {{ compra.clasificacion }}</p>
+                    </div>
+                </div>
+            {% else %}
+                <p>No se encontraron peliculas en tu historial.</p>
+            {% endfor %}
+            </div>
         </section>
         <section id="mis-compras" class="seccion-contenido">
             <h2>Mis compras</h2>
@@ -56,7 +71,7 @@
             {% else %}
                 <p>No se encontraron compras en tu historial.</p>
             {% endfor %}
-</div>
+            </div>
         </section>
          <section id="resenas" class="seccion-contenido">
             <h2>Reseñas</h2>
