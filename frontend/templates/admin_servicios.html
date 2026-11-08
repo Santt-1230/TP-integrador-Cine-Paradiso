@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block titulo %}Servicios · Administración{% endblock %}
+
+{% block contenido %}
+<div class="contenedor">
+    <h1>Servicios</h1>
+
+    {% if error %}
+        <p class="vacio">{{ error }}</p>
+    {% endif %}
+
+    <table>
+        <thead>
+            <tr>
+                <th>Servicios</th>
+                <th>Categoria</th>
+                <th>Precio</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for servicio in servicios %}
+            <tr>
+                <td>{{ servicio.nombre }}</td>
+                <td>{{ servicio.tipo }}</td>
+                <td>$ {{ servicio.precio }}</td>
+                <td>{{ 'Activo' if servicio.activo else  'Inactivo' }}</td>
+                <td>
+                    {% if servicio.activo %}
+                    <form method="post" action="{{ url_for('servicios.admin_servicio_dar_de_baja', id_producto=servicio.id_producto) }}">
+                        <button type="submit">Dar de baja</button>
+                    </form>
+                    {% else %}
+                    <form method="post" action="{{ url_for('servicios.admin_servicio_activar', id_producto=servicio.id_producto) }}">
+                        <button type="submit">Activar</button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5">Todavía no hay servicios.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

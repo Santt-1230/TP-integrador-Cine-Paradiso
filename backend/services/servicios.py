@@ -7,8 +7,10 @@ from repositories.servicios import (
 )
 
 
-def listar_servicios():
+def listar_servicios(incluir_inactivos=False):
     servicios = obtener_servicios()
+    if incluir_inactivos:
+        return servicios
     activos = []
     for servicio in servicios:
         if servicio["activo"]:

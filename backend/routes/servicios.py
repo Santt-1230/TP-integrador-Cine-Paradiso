@@ -23,7 +23,8 @@ def error_no_encontrado(id_producto):
 
 @servicios_bp.route('/servicios', methods=['GET'])
 def obtener_servicios_route():
-    servicios = listar_servicios()
+    incluir_inactivos = request.args.get('incluir_inactivos') == 'true'
+    servicios = listar_servicios(incluir_inactivos)
     return jsonify(servicios), 200
 
 
@@ -59,7 +60,7 @@ def modificar_servicio_route(id_producto):
     return jsonify(datos), 200
 
 
-@servicios_bp.route('/servicios/<id_producto>', methods=['PATCH'])
+@servicios_bp.route('/servicios/<id_producto>', methods=['DELETE'])
 def dar_de_baja_servicio_route(id_producto):
     se_dio_de_baja = dar_de_baja_servicio(id_producto)
     if not se_dio_de_baja:
