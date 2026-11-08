@@ -20,7 +20,7 @@ def crear_sala(datos):
     if local is None:
         raise ValueError(ut.construir_error_api(
             code=const.ERROR_CODE_LOCAL_NOT_FOUND,
-            message='Local no encontrada',
+            message='Local no encontrado',
             description=f"No existe un local con el ID '{id_local}'."
         ))
     if not local['activo']:
@@ -29,8 +29,7 @@ def crear_sala(datos):
             message='Local inactivo',
             description=f"No se puede crear una sala en el local '{id_local}'"
         ))
-    sala_existente = salas_repository.existe_sala(id_local, numero_sala)
-    if sala_existente:
+    if salas_repository.existe_sala_crear(id_local, numero_sala):
         raise ValueError(ut.construir_error_api(
             code=const.ERROR_CODE_SALA_CONFLICT,
             message='Numero de sala ocupado',
@@ -67,7 +66,7 @@ def actualizar_sala(id_sala, datos):
         ))
     if 'numero_sala' in cambios:
         numero_nuevo = cambios['numero_sala']
-        if salas_repository.existe_sala(sala['id_local'], numero_nuevo, id_sala):
+        if salas_repository.existe_sala_editar(sala['id_local'], numero_nuevo, id_sala):
             raise ValueError(ut.construir_error_api(
                 code=const.ERROR_CODE_SALA_CONFLICT,
                 message='Numero de sala ocupado',

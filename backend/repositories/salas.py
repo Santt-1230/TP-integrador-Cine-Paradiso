@@ -4,11 +4,15 @@ from db import (
 )
 import constants as const
 
-def existe_sala(id_local, numero_sala, id_sala):
-    sql = 'SELECT id_sala FROM salas WHERE id_local = %s AND numero_sala = %s AND id_sala != %s'
-    parametros = (id_local, numero_sala, id_sala)
+def existe_sala_crear(id_local, numero_sala):
+    sql = 'SELECT id_sala FROM salas WHERE id_local = %s AND numero_sala = %s'
+    parametros = (id_local, numero_sala)
     return bool(ejecutar_consulta(sql, parametros))
 
+def existe_sala_editar(id_local, numero_sala, id_sala):
+    sql = 'SELECT id_sala FROM salas WHERE id_local = %s AND numero_sala =%s AND id_sala != %s'
+    parametros = (id_local, numero_sala, id_sala)
+    return bool(ejecutar_consulta(sql, parametros))
 def listar_salas_por_local(id_local = None)->list[dict]:
     sql = 'SELECT s.* , l.nombre AS nombre_local FROM salas s ' \
     'INNER JOIN locales l ON l.id_local = s.id_local'
@@ -33,13 +37,18 @@ def crear_sala(id_local:int, numero_sala:int, capacidad:int):
     
 
 def insertar_butacas(id_sala:int, capacidad:int):
-    sql = 'INSERT INTO butacas (id_sala, fila, numero)'\
-    ' VALUES (%s, %s, %s)'
+    grupos = []
+    parametros = []
     for i in range(capacidad):
         fila= chr(ord('A') + i // const.BUTACAS_POR_FILA)
         numero = i % const.BUTACAS_POR_FILA + 1
-        parametros = (id_sala, fila, numero)
-        ejecutar_mutacion(sql, parametros)
+        grupos.append('(%s, %s, %s)')
+        parametros.append(id_sala)
+        parametros.append(fila)
+        parametros.append(numero)
+
+    sql = 'INSERT INTO butacas (id_sala, fila, numero) VALUES '+ ', '.join((grupos)) 
+    ejecutar_mutacion(sql, tuple(parametros))
 
 def crear_sala_con_butacas(id_local, numero_sala, capacidad):
     id_sala = crear_sala(id_local, numero_sala, capacidad)
