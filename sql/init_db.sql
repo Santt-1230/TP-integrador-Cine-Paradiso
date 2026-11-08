@@ -231,7 +231,7 @@ CREATE TABLE IF NOT EXISTS qr (
 
     tipo ENUM('entrada', 'producto') NOT NULL,
 
-    token_qr VARCHAR(255) NOT NULL UNIQUE,
+    token VARCHAR(255) NOT NULL UNIQUE,
 
     fecha_generacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     fecha_uso DATETIME NULL,
