@@ -10,13 +10,13 @@ CREATE TABLE IF NOT EXISTS locales(
 	id_local INT AUTO_INCREMENT PRIMARY KEY,
 	nombre VARCHAR(50) NOT NULL UNIQUE,
 	direccion VARCHAR(200) NOT NULL UNIQUE,
-	activo  BOOLEAN NOT NULL DEFAULT TRUE)
-CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+	activo BOOLEAN NOT NULL DEFAULT TRUE
+)CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS salas(
 	id_sala INT AUTO_INCREMENT PRIMARY KEY,
 	id_local INT NOT NULL,
-	numero_sala INT NOT NULL NULL,
+	numero_sala INT NOT NULL,
 	capacidad INT NOT NULL,
 	estado ENUM('activa', 'inactiva') NOT NULL DEFAULT 'activa',
 	FOREIGN KEY(id_local) REFERENCES locales(id_local),
@@ -24,6 +24,21 @@ CREATE TABLE IF NOT EXISTS salas(
     CONSTRAINT chk_salas_numero CHECK (numero_sala > 0),
 	CONSTRAINT chk_salas_capacidad CHECK (capacidad > 0)
 )CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS peliculas (
+	id_pelicula INT AUTO_INCREMENT PRIMARY KEY,
+	id_externo VARCHAR(30) NULL UNIQUE,
+	nombre VARCHAR(255) NOT NULL,
+	sinopsis TEXT,
+	poster_url VARCHAR(500),
+	duracion_min INT NOT NULL,
+	clasificacion VARCHAR(20),
+	cartelera_desde DATE,
+	cartelera_hasta DATE,
+	activo BOOLEAN NOT NULL DEFAULT TRUE,
+	CONSTRAINT chk_peliculas_duracion CHECK (duracion_min > 0),
+	CONSTRAINT chk_pelicula_cartelera CHECK (cartelera_desde IS NULL OR cartelera_hasta IS NULL OR cartelera_hasta >= cartelera_desde)
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS butacas (
 	id_butaca INT AUTO_INCREMENT PRIMARY KEY,
@@ -35,24 +50,6 @@ CREATE TABLE IF NOT EXISTS butacas (
     CONSTRAINT chk_butacas_numero CHECK (numero > 0)
 );
 -- Peliculas y cartelera
-CREATE TABLE IF NOT EXISTS peliculas (
-  id_pelicula      INT AUTO_INCREMENT PRIMARY KEY,
-  id_externo       VARCHAR(30) NULL,
-  nombre           VARCHAR(255) NOT NULL,
-  sinopsis         TEXT NULL,
-  poster_url       VARCHAR(500) NULL,
-  duracion_min     INT NOT NULL,
-  clasificacion    VARCHAR(20) NULL,
-  cartelera_desde  DATE NULL,
-  cartelera_hasta  DATE NULL,
-  activo           BOOLEAN NOT NULL DEFAULT TRUE,
-  UNIQUE KEY uq_peliculas_id_externo (id_externo),
-  CONSTRAINT chk_pelicula_duracion CHECK (duracion_min > 0),
-  CONSTRAINT chk_pelicula_cartelera CHECK (
-    cartelera_desde IS NULL OR cartelera_hasta IS NULL OR cartelera_hasta >= cartelera_desde
-  )
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
 CREATE TABLE IF NOT EXISTS generos (
   id_genero  INT AUTO_INCREMENT PRIMARY KEY,
   nombre     VARCHAR(50) NOT NULL,
@@ -79,20 +76,8 @@ CREATE TABLE IF NOT EXISTS usuarios (
 
 )CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS peliculas (
-	id_pelicula INT AUTO_INCREMENT PRIMARY KEY,
-	id_externo VARCHAR(30) NULL UNIQUE,
-	nombre VARCHAR(255) NOT NULL,
-	sinopsis TEXT,
-	poster_url VARCHAR(500),
-	duracion_min INT NOT NULL,
-	clasificacion VARCHAR(20),
-	cartelera_desde DATE,
-	cartelera_hasta DATE,
-	activo BOOLEAN NOT NULL DEFAULT TRUE,
-	CONSTRAINT chk_peliculas_duracion CHECK (duracion_min > 0)
-) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
+SET NAMES utf8mb4;
 
 
 CREATE TABLE IF NOT EXISTS funciones (
@@ -109,41 +94,6 @@ CREATE TABLE IF NOT EXISTS funciones (
 	CONSTRAINT chk_funciones_precio CHECK (precio_entrada >= 0)
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
-SET NAMES utf8mb4;
-
-CREATE TABLE IF NOT EXISTS peliculas (
-  id_pelicula      INT AUTO_INCREMENT PRIMARY KEY,
-  id_externo       VARCHAR(30) NULL,
-  nombre           VARCHAR(255) NOT NULL,
-  sinopsis         TEXT NULL,
-  poster_url       VARCHAR(500) NULL,
-  duracion_min     INT NOT NULL,
-  clasificacion    VARCHAR(20) NULL,
-  cartelera_desde  DATE NULL,
-  cartelera_hasta  DATE NULL,
-  activo           BOOLEAN NOT NULL DEFAULT TRUE,
-  UNIQUE KEY uq_peliculas_id_externo (id_externo),
-  CONSTRAINT chk_pelicula_duracion CHECK (duracion_min > 0),
-  CONSTRAINT chk_pelicula_cartelera CHECK (
-    cartelera_desde IS NULL OR cartelera_hasta IS NULL OR cartelera_hasta >= cartelera_desde
-  )
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE IF NOT EXISTS generos (
-  id_genero  INT AUTO_INCREMENT PRIMARY KEY,
-  nombre     VARCHAR(50) NOT NULL,
-  UNIQUE KEY uq_generos_nombre (nombre)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE IF NOT EXISTS pelicula_genero (
-  id_pelicula  INT NOT NULL,
-  id_genero    INT NOT NULL,
-  PRIMARY KEY (id_pelicula, id_genero),
-  CONSTRAINT fk_pg_pelicula FOREIGN KEY (id_pelicula) REFERENCES peliculas (id_pelicula),
-  CONSTRAINT fk_pg_genero   FOREIGN KEY (id_genero)   REFERENCES generos (id_genero)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-
 CREATE TABLE IF NOT EXISTS compras (
 	id_compra INT AUTO_INCREMENT PRIMARY KEY,
 	id_usuario INT NOT NULL,
@@ -151,30 +101,34 @@ CREATE TABLE IF NOT EXISTS compras (
 	estado ENUM('pendiente', 'confirmada', 'cancelada', 'expirada') NOT NULL DEFAULT 'pendiente',
 	fecha_creacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	expira_en DATETIME NOT NULL,
-	fecha_confirmacion DATETIME NOT NULL,
+	fecha_confirmacion DATETIME NULL,
 	total DECIMAL(10,2) NOT NULL DEFAULT 0,
 	numero_factura VARCHAR(30) NULL UNIQUE,
 	fecha_cancelacion DATETIME NULL,
-	motivo_cancelacion ENUM('cliente', ' funcion_cancelada') NULL,
+	motivo_cancelacion ENUM('cliente', 'funcion_cancelada') NULL,
 	monto_reembolsado DECIMAL(10,2) NULL,
-	Foreign Key (id_usuario) REFERENCES usuarios(id_usuario),
-	Foreign Key (id_funcion) REFERENCES funciones(id_funcion)
-);
+	FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario),
+	FOREIGN KEY (id_funcion) REFERENCES funciones(id_funcion)
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS entradas(
+CREATE TABLE IF NOT EXISTS entradas (
 	id_entrada INT AUTO_INCREMENT PRIMARY KEY,
 	id_compra INT NOT NULL,
 	id_funcion INT NOT NULL,
 	id_butaca INT NOT NULL,
 	precio_unitario DECIMAL(10,2) NOT NULL,
 	estado ENUM('reservada', 'confirmada', 'utilizada', 'cancelada') NOT NULL DEFAULT 'reservada',
-	token_qr VARCHAR(255) NULL UNIQUE,
+    token_qr VARCHAR(255) NULL UNIQUE,
     fecha_uso DATETIME NULL,
-	butaca_ocupada INT GENERATED ALWAYS AS (CASE WHEN estado = 'cancelada' THEN NULL ELSE id_butaca END) STORED,
-	Foreign Key (id_compra) REFERENCES compras(id_compra),
-	Foreign Key (id_funcion) REFERENCES funciones(id_funcion),
-	Foreign Key (id_butaca) REFERENCES butacas(id_butaca)
-);
+	butaca_ocupada INT GENERATED ALWAYS AS (
+		CASE WHEN estado = 'cancelada' THEN NULL ELSE id_butaca END
+	) STORED,
+	fecha_compra DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	FOREIGN KEY (id_compra) REFERENCES compras(id_compra),
+	FOREIGN KEY (id_funcion) REFERENCES funciones(id_funcion),
+	FOREIGN KEY (id_butaca) REFERENCES butacas(id_butaca),
+	CONSTRAINT uq_entradas_butaca_funcion UNIQUE (id_funcion, butaca_ocupada)
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS productos (
 	id_producto INT AUTO_INCREMENT PRIMARY KEY,
@@ -193,23 +147,6 @@ CREATE TABLE IF NOT EXISTS promociones (
 	vigente_desde DATE NOT NULL,
 	vigente_hasta DATE NOT NULL,
 	activa BOOLEAN NOT NULL DEFAULT TRUE
-);
-
-CREATE TABLE IF NOT EXISTS compras (
-	id_compra INT AUTO_INCREMENT PRIMARY KEY,
-	id_usuario INT NOT NULL,
-	id_funcion INT NOT NULL,
-	estado ENUM('pendiente', 'confirmada', 'cancelada', 'expirada') NOT NULL DEFAULT 'pendiente',
-	fecha_creacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	expira_en DATETIME NOT NULL,
-	fecha_confirmacion DATETIME NOT NULL,
-	total DECIMAL(10,2) NOT NULL DEFAULT 0,
-	numero_factura VARCHAR(30) NULL UNIQUE,
-	fecha_cancelacion DATETIME NULL,
-	motivo_cancelacion ENUM('cliente', ' funcion_cancelada') NULL,
-	monto_reembolsado DECIMAL(10,2) NULL,
-	Foreign Key (id_usuario) REFERENCES usuarios(id_usuario),
-	Foreign Key (id_funcion) REFERENCES funciones(id_funcion)
 );
 
 CREATE TABLE IF NOT EXISTS compra_productos (
@@ -267,22 +204,20 @@ INSERT INTO usuarios (nombre, apellido, email, fecha_nacimiento, contrasena_hash
 'scrypt:32768:8:1$XogwXYeb1jrrnFYg$44a1bc2bc965551d7375ccb96e0b662cc87cf91ce52cfa37b3a547b99ca8e59b60ec7ba5243baa8a7dc199e36064d06ed0d4ccf83cb46af5cefc4e12c24fd819', 'administrador'); 
 
 
-
 INSERT INTO locales (nombre, direccion) VALUES
     ('Paradiso Centro', 'Calle Falsa 123'),
     ('Paradiso Norte', 'Avenida Ejemplo 456'),
     ('Paradiso Sur', 'Calle de Prueba 789');
 INSERT INTO salas (id_local, numero_sala, capacidad) VALUES
-    (1, 1, 6),
-    (2, 1, 6);
+    (1, 1, 100),
+    (2, 1, 200);
+	(3, 1, 150);
 
 INSERT INTO butacas (id_sala, fila, numero) VALUES
     (1, 'A', 1), (1, 'A', 2), (1, 'A', 3),
     (1, 'B', 1), (1, 'B', 2), (1, 'B', 3),
     (2, 'A', 1), (2, 'A', 2), (2, 'A', 3),
     (2, 'B', 1), (2, 'B', 2), (2, 'B', 3);
-
-
 
 
 -- Datos de ejemplo: peliculas, generos y relaciones

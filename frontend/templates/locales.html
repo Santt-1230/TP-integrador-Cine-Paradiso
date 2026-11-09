@@ -16,7 +16,7 @@
                     <p>{{ local.direccion }}</p>
                 {% endif %}
 
-                <a class="boton-elegir-local" href="{{ url_for('elegir_cine', id_local=local.id_local)}}">
+                <a class="boton-elegir-local" href="{{ url_for('locales.elegir_cine', id_local=local.id_local)}}">
                     Elegir este cine
                 </a>
             </article>

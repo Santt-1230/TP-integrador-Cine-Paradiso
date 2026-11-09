@@ -336,6 +336,22 @@ a {
     font-size: 12px;
 }
 
+.formulario-admin{
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 1.5rem;
+    background-color: white;
+    border-radius: 10px;
+}
+.formulario-admin,
+.campo-formulario{
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+.formulario-admin{
+    gap: 1.2rem;
+}
 @media (max-width: 900px) {
     .admin-sidebar {
         flex-basis: 190px;

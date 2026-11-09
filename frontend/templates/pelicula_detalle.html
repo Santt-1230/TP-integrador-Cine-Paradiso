@@ -30,9 +30,29 @@
             <h2>Sinopsis</h2>
             <p>{{ p.sinopsis or "Sin sinopsis disponible." }}</p>
 
-            <h2>Horarios</h2>
-            {# Las funciones son del modulo de Max (P5). Cuando exista GET /api/funciones se listan aca. #}
-            <p class="vacio caja">Los horarios se publicarán próximamente.</p>
+            <h2>Funciones disponibles</h2>
+            {% if funciones %}
+                {% for grupo in funciones %}
+                <section class="dia-funciones">
+                    <h3>{{ grupo.dia }}</h3>
+                    <ul class="funciones">
+                        {% for f in grupo.funciones %}
+                        <li class="funcion caja">
+                            <span class="funcion-hora">{{ f.hora_inicio }}</span>
+                            <span class="funcion-detalle">
+                                {{ f.local }} · Sala {{ f.numero_sala }}
+                                <small>Termina {{ f.hora_fin }}</small>
+                            </span>
+                            <span class="precio">{{ f.precio_entrada | precio_ar }}</span>
+                            <a class="boton" href="{{ f.url_compra }}">Comprar</a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </section>
+                {% endfor %}
+            {% else %}
+                <p class="vacio caja">Sin funciones próximas.</p>
+            {% endif %}
         </div>
     </article>
 

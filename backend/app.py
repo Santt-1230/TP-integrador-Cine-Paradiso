@@ -1,10 +1,13 @@
 import os
 from dotenv import load_dotenv
+
+load_dotenv() #Lee el archivo .env y carga las variables
+
 from flask import Flask, jsonify
 
 from utils import construir_error_api
-from routes.servicios import servicios_bp
 from routes.salas import salas_bp
+from routes.servicios import servicios_bp
 from routes.locales import locales_bp
 from routes.usuarios import usuarios_bp
 from routes.peliculas import peliculas_bp
@@ -14,6 +17,7 @@ from routes.admin import admin_bp
 from routes.estadisticas import estadisticas_bp
 from routes.promociones import promociones_bp
 from routes.validar_qr import validar_qr_bp
+from routes.funciones import funciones_bp
 
 # 1. Cargar variables de entorno
 load_dotenv()
@@ -38,7 +42,7 @@ app.register_blueprint(estadisticas_bp)
 app.register_blueprint(peliculas_bp)
 app.register_blueprint(promociones_bp)
 app.register_blueprint(validar_qr_bp)   
-
+app.register_blueprint(funciones_bp)
 
 # 4. Manejador global de errores
 @app.errorhandler(RuntimeError)
