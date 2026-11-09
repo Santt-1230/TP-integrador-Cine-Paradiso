@@ -25,55 +25,132 @@
             <h2>Mi Perfil</h2>
             <div class="perfil-card">
                 <div class="perfil-info">
-                    <p><strong>Nombre:</strong> {{ session.get('nombre') }} {{ session.get('apellido') }}</p>
-                    <p><strong>Email:</strong> {{ session.get('mail') }}</p>
-                    <p><strong>Fecha de nacimiento:</strong> {{ session.get('fecha_nacimiento') }}</p>
-                    <p><strong>Contraseña:</strong> {{ session.get('contrasena_hash') }}</p>
+                    <p><strong>Nombre:</strong> {{ perfil.nombre }} {{ perfil.apellido }}</p>
+                    <p><strong>Email:</strong> {{ perfil.email }}</p>
+                    <p><strong>Fecha de nacimiento:</strong> {{ perfil.fecha_nacimiento }}</p>
                 </div>
                 <button class="btn-editar">Editar Datos</button>
+                <div class="bloque-perfil-desplegable">
+                <!-- Botón para mostrar/ocultar -->
+                <button type="button" id="btn-toggle-clave" class="btn-desplegar">
+                    <span><i class="bi bi-key"></i> Cambiar Contraseña</span>
+                    <span id="flecha-clave" class="flecha">▼</span>
+                </button>
+
+                <!-- Contenedor oculto por defecto -->
+                <div id="contenedor-cambiar-clave" class="desplegable-contenido" style="display: none;">
+                    <form id="form-cambiar-clave">
+                        <div class="form-group">
+                            <label for="clave_actual">Contraseña actual:</label>
+                            <input type="password" id="clave_actual" name="clave_actual" required class="form-control">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="nueva_clave">Nueva contraseña:</label>
+                            <input type="password" id="nueva_clave" name="nueva_clave" required minlength="6" class="form-control">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="confirmar_clave">Confirmar nueva contraseña:</label>
+                            <input type="password" id="confirmar_clave" name="confirmar_clave" required class="form-control">
+                        </div>
+
+                        <button type="submit" class="btn-guardar-clave">Actualizar Contraseña</button>
+                    </form>
+
+                    <div id="mensaje-clave" class="mensaje-alerta" style="display: none;"></div>
+                </div>
+                </div>
             </div>
         </section>
         <section id="peliculas-vistas" class="seccion-contenido">
-        <h2>Películas vistas</h2>
-        <div class="contenedor-compras">
-            {% for compra in compras %}
-                <div class="tarjeta-compra">
-                    <img src="{{ compra.poster_url }}" alt="{{ compra.titulo }}" class="poster">
-                    
-                    <div class="detalles-compra">
-                        <h2>{{ compra.titulo }}</h2>
-                        <p><strong>Fecha de compra:</strong> {{ compra.fecha_compra }}</p>
-                        <p><strong>Monto total:</strong> ${{ compra.monto_total }}</p>
-                        <p><strong>Duración:</strong> {{ compra.duracion_min }} min</p>
-                        <p><strong>Clasificación:</strong> {{ compra.clasificacion }}</p>
-                    </div>
+            <h2>Películas que viste</h2>
+            <div class="grid-peliculas">
+            {% for pelicula in historial.peliculas_vistas %}
+                <div class="tarjeta-pelicula">
+                    <img src="{{ pelicula.poster_url }}" alt="{{ pelicula.titulo }}">
+                    <h4>{{ pelicula.titulo }}</h4>
+                    <p>{{ pelicula.duracion_min }} min · {{ pelicula.clasificacion }}</p>
                 </div>
             {% else %}
-                <p>No se encontraron peliculas en tu historial.</p>
+                <p>Aún no tenés películas registradas como vistas.</p>
             {% endfor %}
             </div>
         </section>
         <section id="mis-compras" class="seccion-contenido">
-            <h2>Mis compras</h2>
-            <div class="contenedor-compras">
-            {% for compra in compras %}
-                <div class="tarjeta-compra">
-                    <img src="{{ compra.poster_url }}" alt="{{ compra.titulo }}" class="poster">
-                    
-                    <div class="detalles-compra">
-                        <h2>{{ compra.titulo }}</h2>
-                        <p><strong>Fecha de compra:</strong> {{ compra.fecha_compra }}</p>
-                        <p><strong>Monto total:</strong> ${{ compra.monto_total }}</p>
-                        <p><strong>Duración:</strong> {{ compra.duracion_min }} min</p>
-                        <p><strong>Clasificación:</strong> {{ compra.clasificacion }}</p>
-                    </div>
+    <h2>MIS COMPRAS</h2>
+
+    <div class="contenedor-lista-compras">
+        {% for compra in historial.compras %}
+            <div class="tarjeta-compra-layout">
+                
+                <!-- Fecha de la Compra -->
+                <div class="header-fecha">
+                    <h3>{{ compra.fecha_creacion }}</h3>
                 </div>
-            {% else %}
-                <p>No se encontraron compras en tu historial.</p>
-            {% endfor %}
+
+                <div class="cuerpo-compra-grid">
+                    
+                    <!-- 1. Película -->
+                    <div class="columna-item">
+                        <div class="contenedor-poster pastel-purpura">
+                            {% if compra.poster_url %}
+                                <img src="{{ compra.poster_url }}" alt="{{ compra.titulo_pelicula }}" class="poster-img">
+                            {% endif %}
+                        </div>
+                        <span class="etiqueta-categoria">{{ compra.genero | default('CINE') | upper }}</span>
+                        <h4 class="titulo-item">{{ compra.titulo_pelicula | upper }}</h4>
+                    </div>
+
+                    <!-- 2. Comida / Combos -->
+                    <div class="columna-item">
+                        {% if compra.servicios %}
+                            {% for servicio in compra.servicios %}
+                                <div class="contenedor-poster pastel-azul">
+                                    {% if servicio.imagen_url %}
+                                        <img src="{{ servicio.imagen_url }}" alt="{{ servicio.nombre }}" class="poster-img">
+                                    {% endif %}
+                                </div>
+                                <span class="etiqueta-categoria">COMBO</span>
+                                <h4 class="titulo-item">{{ servicio.nombre | upper }}</h4>
+                                <span class="badge-retirar">RETIRAR</span>
+                            {% endfor %}
+                        {% else %}
+                            <!-- Sin snacks o combos comprados -->
+                            <div class="contenedor-poster pastel-azul"></div>
+                            <span class="etiqueta-categoria">COMBO</span>
+                            <h4 class="titulo-item">SIN COMBO</h4>
+                        {% endif %}
+                    </div>
+
+                    <!-- 3. Entrada y QR -->
+                    <div class="columna-qr">
+                        <h4 class="titulo-qr">TUS ENTRADAS</h4>
+                        <div class="contenedor-qr-box">
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=COMPRA-{{ compra.id_compra }}" 
+                                 alt="QR Compra #{{ compra.id_compra }}" 
+                                 class="imagen-qr">
+                        </div>
+                        <p class="instruccion-qr">
+                            PRESENTÁ TU QR EN LA ENTRADA<br>A LAS SALAS DE TU CINE
+                        </p>
+                    </div>
+
+                </div>
             </div>
-        </section>
-         <section id="resenas" class="seccion-contenido">
+        {% else %}
+            <p class="sin-compras">No se encontraron compras registradas en tu historial.</p>
+        {% endfor %}
+    </div>
+
+    <!-- Botón Volver -->
+    <div class="footer-acciones">
+        <button type="button" onclick="window.history.back()" class="btn-volver">
+            <span class="icono-volver">↺</span> VOLVER
+        </button>
+    </div>
+</section>
+        <section id="resenas" class="seccion-contenido">
             <h2>Reseñas</h2>
            {% for compra in compras %}
                 <div class="tarjeta-compra">
