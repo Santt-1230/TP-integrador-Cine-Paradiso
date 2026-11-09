@@ -3,6 +3,9 @@ import mysql.connector
 import utils as ut
 import constants as const
 from services import salas as salas_services
+
+
+logger = logging.getLogger(__name__)
 salas_bp = Blueprint('salas', __name__, url_prefix='/api')
 
 @salas_bp.route('/salas' , methods= ['GET'])
