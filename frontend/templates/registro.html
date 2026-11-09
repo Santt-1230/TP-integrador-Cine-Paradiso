@@ -16,15 +16,15 @@
         {% endif %}
 
         <label>Nombre
-            <input type="text" name="nombre" maxlength="150" required>
+            <input type="text" name="nombre" placeholder="ej. Juan" maxlength="150" required>
         </label>
 
         <label>Apellido
-            <input type="text" name="apellido" maxlength="150" required>
+            <input type="text" name="apellido" placeholder="ej. Perez" maxlength="150" required>
         </label>
 
         <label>Mail
-            <input type="email" name="email" maxlength="200" required>
+            <input type="email" name="email"  placeholder="ej. usuario@ejemplo.com" maxlength="200" required>
         </label>
 
         <label>Fecha de nacimiento
@@ -38,7 +38,10 @@
         <label>Repetir contraseña
             <input type="password" name="repetir_contrasena" minlength="8" required>
         </label>
-
+        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; text-transform: none;">
+            <span>Mostrar contraseña</span>
+            <input type="checkbox" style="width: auto; margin: 0;" onchange="this.closest('form').querySelectorAll('input[name*=contrasena]').forEach(i => i.type = this.checked ? 'text' : 'password')">
+        </label>
         <button type="submit" class="boton-oscuro">Crear cuenta</button>
     </form>
 </section>

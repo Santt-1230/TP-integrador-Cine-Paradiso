@@ -82,6 +82,8 @@
     <div class="admin-contenido">
 
         {% block contenido_admin %}
+        <script src="{{ url_for('static', filename='js/admin.js') }}" defer></script>
+        <script src="{{ url_for('static', filename='js/estadisticas.js') }}" defer></script>
         {% endblock %}
 
     </div>
