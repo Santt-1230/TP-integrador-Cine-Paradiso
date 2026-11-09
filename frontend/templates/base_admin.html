@@ -21,7 +21,7 @@
 
     <aside class="admin-sidebar">
         <nav>
-            <a href="/admin|">Inicio</a>
+            <a href="/admin/">Inicio</a>
             <a href="/admin/peliculas">Películas</a>
             <a href="/admin/funciones">Funciones</a>
             <a href="{{ url_for('locales.admin_locales') }}" 
@@ -37,11 +37,13 @@
 
     <div class="admin-contenido">
         {% block contenido_admin %}
-        <script src="{{ url_for('static', filename='js/admin.js') }}" defer></script>
-        <script src="{{ url_for('static', filename='js/estadisticas.js') }}" defer></script>
         {% endblock %}
     </div>
 
 </div>
+
+<script src="{{ url_for('static', filename='js/admin.js') }}" defer></script>
+{% block scripts_admin %}
+{% endblock %}
 
 {% endblock %}

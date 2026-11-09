@@ -13,6 +13,7 @@ def existe_sala_editar(id_local, numero_sala, id_sala):
     sql = 'SELECT id_sala FROM salas WHERE id_local = %s AND numero_sala =%s AND id_sala != %s'
     parametros = (id_local, numero_sala, id_sala)
     return bool(ejecutar_consulta(sql, parametros))
+
 def listar_salas_por_local(id_local = None)->list[dict]:
     sql = 'SELECT s.* , l.nombre AS nombre_local FROM salas s ' \
     'INNER JOIN locales l ON l.id_local = s.id_local'

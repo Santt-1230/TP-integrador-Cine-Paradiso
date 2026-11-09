@@ -9,6 +9,9 @@ def sesion_invalida(error_api):
 def redirigir_al_login():
     return redirect(url_for('usuarios.login'))
 
+def redirigir_al_inicio():
+    return redirect(url_for('peliculas_front.inicio'))
+
 def leer_formulario(campos):
     datos = {}
     for campo in campos:
@@ -95,8 +98,14 @@ def admin_locales():
             )
         
     except api.ApiError as error_api:
-        if error_api.estado in (401, 403):
-            return redirect(url_for('usuarios.login'))
+        if error_api.estado == 401:
+            return redirigir_al_login()
+            
+        if error_api.estado == 403:
+            return redirigir_al_inicio()
+            
+        error = error_api.mensaje
+    
         locales = []
         error = error_api.mensaje
     return render_template("admin_locales.html", locales=locales, error=error)

@@ -6,8 +6,7 @@ salas_bp = Blueprint('salas', __name__)
 CAMPOS_NUEVA_SALA = ['id_local', 'numero_sala', 'capacidad']
 CAMPOS_EDITAR_SALA = ['numero_sala', 'estado']
 CAMPOS_ENTEROS_SALA = ['numero_sala']
-def sesion_invalida(error_api):
-    return error_api.estado in (401, 403)
+
 
 def redirigir_al_login():
     return redirect(url_for('usuarios.login'))
@@ -70,46 +69,6 @@ def crear_sala():
 
     return render_template('admin_editar_sala.html', datos=datos,id_sala=None, error=error )
 
-@salas_bp.route('/salas/<int:id_sala>/butacas', methods = ['GET', 'POST'])
-def elegir_butacas(id_sala):
-    if not session.get('id_usuario'):
-        return redirigir_al_login()
-    butacas = []
-    error = None
-
-    try:
-        butacas = api.get(f'/api/salas/{id_sala}/butacas')['butacas']
-
-    except api.ApiError as error_api:
-        if error_api.estado == 401:
-            return redirigir_al_login()
-            
-        if error_api.estado == 403:
-            return redirigir_al_inicio()
-            
-        error = error_api.mensaje
-
-    if request.method == 'POST' and error is None:
-        ids_validos = []
-        for butaca in butacas:
-            ids_validos.append(str(butaca['id_butaca']))
-        elegidas = []
-        for id_butaca in request.form.getlist('butacas'):
-            if id_butaca in ids_validos:
-                elegidas.append(id_butaca)
-
-        if not elegidas:
-            error = "Elegi al menos una butaca"
-
-        else:
-            butacas_elegidas = []
-            for id_butaca in elegidas:
-                butacas_elegidas.append(int(id_butaca))
-
-            session['id_sala'] = id_sala
-            session['butacas_elegidas'] = butacas_elegidas
-            return redirect('/')
-    return render_template('butacas.html', butacas = butacas,id_sala = id_sala, error = error)
 
 @salas_bp.route('/admin/salas/<int:id_sala>/editar', methods = ['GET', 'POST'])
 def editar_sala(id_sala):
@@ -157,13 +116,21 @@ def editar_sala(id_sala):
 
 @salas_bp.route('/admin/salas/<int:id_sala>/dar_baja', methods = ['POST'])
 def desactivar_sala(id_sala):
+    respuesta = verificar_admin()
+    if respuesta:
+        return respuesta
+    
     try:
         api.pedir('DELETE', f'/api/salas/{id_sala}')
         flash('La sala se dio de baja correctamente')
 
     except api.ApiError as error_api:
-        if sesion_invalida(error_api):
-            redirigir_al_login()
+        if error_api.estado == 401:
+            return redirigir_al_login()
+                
+        if error_api.estado == 403:
+            return redirigir_al_inicio()
+                
         flash(error_api.mensaje)
 
     return redirect(url_for('locales.admin_locales'))

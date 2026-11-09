@@ -50,8 +50,8 @@
                                     {% if sala.estado == 'activa' %}
                                         <form method="post" 
                                             action="{{ url_for('salas.desactivar_sala', id_sala=sala.id_sala) }}"
-                                            onsubmit="return confirm('¿Dar de baja la sala {{ sala.numero_sala }}?');">
-                                        <button type="submit" class="boton-tabla boton-tabla--baja">Dar de baja</button>
+                                            data-numero-sala="{{ sala.numero_sala }}">
+                                            <button type="submit" class="boton-tabla boton-tabla--baja">Dar de baja</button>
                                         </form>
                                     {% endif %}
                                 </div>
@@ -65,4 +65,8 @@
         <p>No hay locales para mostrar</p>
     {% endfor %}
 </div>
+{% endblock %}
+
+{% block scripts_admin %}
+    <script src="{{ url_for('static', filename='js/salas.js') }}" defer></script>
 {% endblock %}
