@@ -30,9 +30,6 @@ app.register_blueprint(validar_qr_bp)
 app.register_blueprint(locales_bp)
 app.register_blueprint(perfil_bp)
 app.register_blueprint(salas_bp)
-@app.route('/mis-compras')
-def mis_compras():
-    return render_template('mis_compras.html')
 
 
 
