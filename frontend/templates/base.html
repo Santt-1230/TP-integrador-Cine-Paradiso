@@ -11,7 +11,7 @@
 <body>
 <header>
     <div class="header-principal">
-        <a href="#" class="logo">CINE PARADISO</a>
+        <a href="/" class="logo">CINE PARADISO</a>
 
         <nav class="menu-principal">
             <details class="desplegable">
@@ -39,7 +39,10 @@
                     <i class="bi bi-person-fill"></i>
                 </summary>
                 <div class="panel-usuario">
-                    {% include "perfil.html" %}
+                    <a href="{{ url_for('perfil.perfil') }}">Mi perfil</a>
+                    <form method="post" action="{{ url_for('usuarios.logout') }}">
+                        <button type="submit" class="boton-texto">Cerrar sesión</button>
+                    </form>
                 </div>
             {% else %}
                 <summary class="usuario" aria-label="Ingresar"><i class="bi bi-person-fill"></i></summary>
