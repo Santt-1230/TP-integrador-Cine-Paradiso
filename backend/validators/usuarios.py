@@ -109,3 +109,15 @@ def validar_cambio_contrasena(datos):
     if nueva == actual:
         return error_validacion("La contraseña nueva debe ser distinta a la actual")
     return validar_contrasena(nueva, repetir_contrasena)
+
+
+def validar_token(datos):
+    if not isinstance(datos, dict) or texto(datos, "token").strip() == "":
+        return error_validacion("Falta el token de confirmacion")
+    return None
+
+
+def validar_reenvio(datos):
+    if not isinstance(datos, dict):
+        return error_validacion("Falta ingresar el email")
+    return validar_email(texto(datos, "email").strip())

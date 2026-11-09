@@ -70,7 +70,10 @@
         <label>Repetir contraseña nueva
             <input type="password" name="repetir_contrasena" minlength="8" required>
         </label>
-
+        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; text-transform: none;">
+            <span>Mostrar contraseña</span>
+            <input type="checkbox" style="width: auto; margin: 0;" onchange="this.closest('form').querySelectorAll('input[name*=contrasena]').forEach(i => i.type = this.checked ? 'text' : 'password')">
+        </label>
         <button type="submit" class="boton-oscuro">Cambiar contraseña</button>
     </form>
 </section>

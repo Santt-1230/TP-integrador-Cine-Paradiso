@@ -72,8 +72,18 @@ CREATE TABLE IF NOT EXISTS usuarios (
     contrasena_hash VARCHAR(255) NOT NULL,
 	fecha_nacimiento DATE NOT NULL,
     rol ENUM('cliente', 'administrador') NOT NULL DEFAULT 'cliente',
-    activo BOOLEAN NOT NULL DEFAULT TRUE
+    activo BOOLEAN NOT NULL DEFAULT TRUE,
+	email_verificado BOOLEAN NOT NULL DEFAULT FALSE
+)CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS tokens_usuario (
+    id_token INT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT NOT NULL,
+    tipo ENUM('verificar_email', 'recuperar_contrasena') NOT NULL,
+    token_hash CHAR(64) NOT NULL UNIQUE,
+    expira_en DATETIME NOT NULL,
+    usado BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario)
 )CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 
@@ -161,9 +171,9 @@ CREATE TABLE IF NOT EXISTS compra_productos (
 );
 
 
-INSERT INTO usuarios (nombre, apellido, email, fecha_nacimiento, contrasena_hash, rol) VALUES (
+INSERT INTO usuarios (nombre, apellido, email, fecha_nacimiento, contrasena_hash, rol, email_verificado) VALUES (
 	'Admin', 'Cine Paradiso', 'admin@cineparadiso.com', '1990-01-01', 
-'scrypt:32768:8:1$XogwXYeb1jrrnFYg$44a1bc2bc965551d7375ccb96e0b662cc87cf91ce52cfa37b3a547b99ca8e59b60ec7ba5243baa8a7dc199e36064d06ed0d4ccf83cb46af5cefc4e12c24fd819', 'administrador'); 
+'scrypt:32768:8:1$XogwXYeb1jrrnFYg$44a1bc2bc965551d7375ccb96e0b662cc87cf91ce52cfa37b3a547b99ca8e59b60ec7ba5243baa8a7dc199e36064d06ed0d4ccf83cb46af5cefc4e12c24fd819', 'administrador', TRUE); 
 
 
 INSERT INTO locales (nombre, direccion) VALUES
@@ -172,7 +182,7 @@ INSERT INTO locales (nombre, direccion) VALUES
     ('Paradiso Sur', 'Calle de Prueba 789');
 INSERT INTO salas (id_local, numero_sala, capacidad) VALUES
     (1, 1, 100),
-    (2, 1, 200);
+    (2, 1, 200),
 	(3, 1, 150);
 
 INSERT INTO butacas (id_sala, fila, numero) VALUES

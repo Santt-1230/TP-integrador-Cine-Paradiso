@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block titulo %}Confirmación de email - Cine Paradiso{% endblock %}
+
+{% block estilos_extra %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/usuarios.css') }}">
+{% endblock %}
+
+{% block contenido %}
+<section class="pagina-formulario">
+    <h1>Confirmación de email</h1>
+
+    <div class="tarjeta-formulario tarjeta-angosta">
+        {% if ok %}
+            <p class="mensaje-ok">¡Listo! Tu email fue confirmado.</p>
+            <a class="boton-oscuro" href="{{ url_for('usuarios.login') }}">Iniciar sesión</a>
+        {% else %}
+            <p class="mensaje-error">{{ error }}</p>
+            <p>Si tu cuenta sigue sin confirmar, intentá iniciar sesión y pedí que te reenviemos el mail.</p>
+            <a class="boton-oscuro" href="{{ url_for('usuarios.login') }}">Ir a iniciar sesión</a>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
