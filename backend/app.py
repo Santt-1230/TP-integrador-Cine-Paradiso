@@ -17,6 +17,7 @@ from routes.admin import admin_bp
 from routes.estadisticas import estadisticas_bp
 from routes.promociones import promociones_bp
 from routes.funciones import funciones_bp
+from routes.compras import compras_bp
 
 # 1. Cargar variables de entorno
 load_dotenv()
@@ -41,6 +42,7 @@ app.register_blueprint(estadisticas_bp)
 app.register_blueprint(peliculas_bp)
 app.register_blueprint(promociones_bp)
 app.register_blueprint(funciones_bp)
+app.register_blueprint(compras_bp)
 
 
 # 4. Manejador global de errores
