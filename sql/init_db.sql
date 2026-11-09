@@ -310,9 +310,11 @@ INSERT  IGNORE INTO `pelicula_genero` (`id_pelicula`, `id_genero`) VALUES (5,13)
 INSERT INTO productos (nombre, tipo, descripcion, precio) VALUES
   ('Pochoclo mediano', 'comida', NULL, 3000),
   ('Gaseosa 750 ml', 'bebida', NULL, 2000),
-  ('Acceso por vehículo', 'estacionamiento', NULL, 3000);
+  ('Acceso por vehículo', 'estacionamiento', NULL, 3000),
+  ('Ingreso prioritario a la sala', 'vip', NULL, 5000);
 
 INSERT INTO promociones (titulo, descripcion) VALUES
   ('2x1 los martes', 'Entradas 2x1'),
   ('Combo pareja', 'Pochoclo + 2 gaseosas');
+  ('Descuento en entradas', NULL)
 
