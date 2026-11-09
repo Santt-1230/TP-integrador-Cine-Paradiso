@@ -902,10 +902,6 @@ a {
     transition: none;
 }
 
-/* =====================================================
-   OCUPACIÓN POR PELÍCULA
-===================================================== */
-
 .ocupacion-peliculas {
     display: flex;
     flex-direction: column;
@@ -1635,5 +1631,360 @@ a {
 
     #qr-admin .qr-resultado__detalles {
         grid-template-columns: 1fr;
+    }
+}
+
+#usuarios-admin [hidden] {
+    display: none !important;
+}
+
+
+.usuarios-admin__herramientas {
+    display: flex;
+    align-items: flex-end;
+    gap: 14px;
+    margin-bottom: 20px;
+    padding: 16px 19px;
+    background: var(--admin-blanco);
+    border: 1px solid rgba(225, 227, 233, 0.8);
+    border-radius: 12px;
+    box-shadow: var(--admin-sombra);
+}
+
+.usuarios-admin__busqueda {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+.usuarios-admin__busqueda label,
+.usuarios-admin__campo label {
+    color: var(--admin-texto-suave);
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.usuarios-admin__busqueda input,
+.usuarios-admin__campo input,
+.usuarios-admin__campo select {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    min-height: 40px;
+    padding: 0 12px;
+    border: 1px solid var(--admin-borde);
+    border-radius: 8px;
+    background: #ffffff;
+    color: var(--admin-texto);
+    font: inherit;
+    font-size: 13px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.usuarios-admin__busqueda input::placeholder,
+.usuarios-admin__campo input::placeholder {
+    color: #a0a3ad;
+}
+
+.usuarios-admin__busqueda input:focus,
+.usuarios-admin__campo input:focus,
+.usuarios-admin__campo select:focus {
+    outline: none;
+    border-color: var(--admin-rojo);
+    box-shadow: 0 0 0 3px rgba(255, 98, 104, 0.12);
+}
+
+
+.usuarios-admin__boton-actualizar,
+.usuarios-admin__boton-cancelar,
+.usuarios-admin__boton-guardar {
+    flex-shrink: 0;
+    min-height: 40px;
+    padding: 0 18px;
+    border: 0;
+    border-radius: 8px;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color 0.2s ease, opacity 0.2s ease;
+}
+
+.usuarios-admin__boton-actualizar,
+.usuarios-admin__boton-guardar {
+    background: var(--admin-rojo);
+    color: #ffffff;
+}
+
+.usuarios-admin__boton-actualizar:hover:not(:disabled),
+.usuarios-admin__boton-guardar:hover:not(:disabled) {
+    background: var(--admin-rojo-oscuro);
+}
+
+.usuarios-admin__boton-cancelar {
+    background: #f0f1f4;
+    color: #555966;
+}
+
+.usuarios-admin__boton-cancelar:hover:not(:disabled) {
+    background: #e4e5e9;
+}
+
+.usuarios-admin__boton-actualizar:disabled,
+.usuarios-admin__boton-cancelar:disabled,
+.usuarios-admin__boton-guardar:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.usuarios-admin__boton-actualizar:focus-visible,
+.usuarios-admin__boton-cancelar:focus-visible,
+.usuarios-admin__boton-guardar:focus-visible,
+.usuarios-admin__cerrar:focus-visible,
+.acciones-tabla .boton-tabla:focus-visible {
+    outline: 3px solid rgba(237, 79, 87, 0.35);
+    outline-offset: 2px;
+}
+
+
+.usuarios-admin__mensaje {
+    margin-bottom: 18px;
+    padding: 13px 16px;
+    border: 1px solid var(--admin-borde);
+    border-radius: 9px;
+    background: #ffffff;
+    color: #555966;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.5;
+}
+
+.usuarios-admin__mensaje[data-tipo="exito"] {
+    border-color: #c4e8d3;
+    background: #e5f6ec;
+    color: #37865b;
+}
+
+.usuarios-admin__mensaje[data-tipo="error"] {
+    border-color: #f3c6c6;
+    background: #fff0f0;
+    color: #a73535;
+}
+
+
+.usuarios-admin__panel {
+    overflow: hidden;
+    background: var(--admin-blanco);
+    border: 1px solid rgba(225, 227, 233, 0.8);
+    border-radius: 12px;
+    box-shadow: var(--admin-sombra);
+}
+
+.usuarios-admin__panel-encabezado {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 19px 21px 15px;
+}
+
+.usuarios-admin__panel-encabezado h2 {
+    margin: 0 0 5px;
+    color: var(--admin-texto);
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.usuarios-admin__panel-encabezado p {
+    margin: 0;
+    color: var(--admin-texto-suave);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.usuarios-admin__contador {
+    flex-shrink: 0;
+    padding: 7px 11px;
+    border-radius: 20px;
+    background: #fff0f0;
+    color: var(--admin-rojo-oscuro);
+    font-size: 10px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+
+.tabla-admin td.usuarios-admin__cargando,
+.tabla-admin td.usuarios-admin__vacio {
+    padding: 28px 21px;
+    color: var(--admin-texto-suave);
+    font-size: 12px;
+    font-weight: 400;
+    text-align: center;
+}
+
+
+.usuarios-admin__rol {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 23px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: #eff0f3;
+    color: #686c77;
+    font-size: 10px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.usuarios-admin__rol--cliente {
+    background: #e5f6ec;
+    color: #37865b;
+}
+
+.usuarios-admin__rol--administrador {
+    background: #fff0f0;
+    color: var(--admin-rojo-oscuro);
+}
+
+
+.usuarios-admin__modal {
+    width: min(460px, calc(100vw - 30px));
+    max-height: calc(100vh - 30px);
+    padding: 0;
+    overflow: auto;
+    border: 0;
+    border-radius: 13px;
+    background: var(--admin-blanco);
+    color: var(--admin-texto);
+    box-shadow: 0 18px 48px rgba(34, 39, 49, 0.22);
+}
+
+.usuarios-admin__modal::backdrop {
+    background: rgba(34, 39, 49, 0.45);
+}
+
+.usuarios-admin__formulario {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 24px;
+}
+
+.usuarios-admin__modal-encabezado {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.usuarios-admin__modal-encabezado p {
+    margin: 0 0 8px;
+    color: #a0a3ad;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.65px;
+    text-transform: uppercase;
+}
+
+.usuarios-admin__modal-encabezado h2 {
+    margin: 0;
+    color: var(--admin-texto);
+    font-size: 19px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.usuarios-admin__cerrar {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 0;
+    border-radius: 8px;
+    background: #f0f1f4;
+    color: #555966;
+    font-family: inherit;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.usuarios-admin__cerrar:hover:not(:disabled) {
+    background: #e4e5e9;
+}
+
+.usuarios-admin__cerrar:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.usuarios-admin__campo {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.usuarios-admin__error {
+    margin: 0;
+    padding: 11px 13px;
+    border: 1px solid #f3c6c6;
+    border-radius: 8px;
+    background: #fff0f0;
+    color: #a73535;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.5;
+}
+
+.usuarios-admin__acciones {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 4px;
+}
+
+
+@media (max-width: 650px) {
+    .usuarios-admin__herramientas {
+        align-items: stretch;
+        flex-direction: column;
+        padding: 15px;
+    }
+
+    .usuarios-admin__boton-actualizar {
+        width: 100%;
+    }
+
+    .usuarios-admin__panel-encabezado {
+        align-items: flex-start;
+        padding: 17px 15px 13px;
+    }
+
+    .usuarios-admin__panel-encabezado h2 {
+        font-size: 14px;
+    }
+
+    .usuarios-admin__formulario {
+        padding: 18px;
+    }
+
+    .usuarios-admin__acciones {
+        flex-direction: column-reverse;
+        align-items: stretch;
+    }
+
+    .usuarios-admin__acciones button {
+        width: 100%;
+        min-height: 44px;
     }
 }

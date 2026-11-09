@@ -54,7 +54,6 @@ def validar_qr_por_tipo(tipo: str):
             else:
                 codigo_http = 409
 
-    # Validar producto.
     elif tipo == "producto":
 
         if not validar_categoria(categoria):

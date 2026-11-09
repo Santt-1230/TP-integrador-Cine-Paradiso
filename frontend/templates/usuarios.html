@@ -1,0 +1,285 @@
+{% extends "base_admin.html" %}
+
+{% block titulo %}
+    Usuarios - Cine Paradiso
+{% endblock %}
+
+{% block contenido_admin %}
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+<script src="{{ url_for('static', filename='js/admin_usuarios.js') }}" defer></script>
+
+{% set total = usuarios | length %}
+
+<section class="estadisticas-admin" id="usuarios-admin">
+
+    <!-- ENCABEZADO -->
+    <header class="estadisticas-admin__encabezado">
+
+        <div>
+            <p class="estadisticas-admin__migas">
+                ADMINISTRACIÓN / USUARIOS
+            </p>
+
+            <h1>Usuarios</h1>
+
+            <p class="estadisticas-admin__descripcion">
+                Gestiona los usuarios del sistema.
+            </p>
+        </div>
+
+    </header>
+
+
+    <!-- BARRA DE BÚSQUEDA -->
+    <div class="usuarios-admin__herramientas">
+
+        <div class="usuarios-admin__busqueda">
+            <label for="buscar-usuarios">Buscar usuario</label>
+
+            <input
+                type="search"
+                id="buscar-usuarios"
+                placeholder="Buscar por nombre, correo o rol..."
+                autocomplete="off"
+                aria-controls="tabla-usuarios"
+            >
+        </div>
+
+        <button
+            type="button"
+            class="usuarios-admin__boton-actualizar"
+            id="btn-actualizar-usuarios"
+            data-url="{{ url_for('admin.admin_usuarios') }}"
+        >
+            Actualizar lista
+        </button>
+
+    </div>
+
+
+    <!-- MENSAJES -->
+    <div
+        id="mensaje-usuarios"
+        class="usuarios-admin__mensaje"
+        role="status"
+        aria-live="polite"
+        {% if aviso %}data-tipo="{{ aviso[0] }}"{% else %}hidden{% endif %}
+    >{% if aviso %}{{ aviso[1] }}{% endif %}</div>
+
+
+    <!-- TABLA -->
+    <section class="usuarios-admin__panel">
+
+        <div class="usuarios-admin__panel-encabezado">
+
+            <div>
+                <h2>Usuarios registrados</h2>
+                <p>Listado de usuarios del sistema.</p>
+            </div>
+
+            <span id="cantidad-usuarios" class="usuarios-admin__contador">
+                {{ total }} {{ 'usuario' if total == 1 else 'usuarios' }}
+            </span>
+
+        </div>
+
+
+        <div class="tabla-contenedor">
+
+            <table class="tabla-admin">
+
+                <thead>
+                    <tr>
+                        <th scope="col">Usuario</th>
+                        <th scope="col">Correo electrónico</th>
+                        <th scope="col">Rol</th>
+                        <th scope="col">Acciones</th>
+                    </tr>
+                </thead>
+
+                <tbody id="tabla-usuarios">
+
+                    {% for u in usuarios %}
+                    <tr data-usuario>
+                        <td>{{ u.nombre }}</td>
+                        <td>{{ u.email }}</td>
+                        <td>
+                            <span class="usuarios-admin__rol usuarios-admin__rol--{{ u.rol | lower }}">
+                                {{ u.rol | capitalize }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="acciones-tabla">
+                                <button
+                                    type="button"
+                                    class="boton-tabla boton-tabla--editar"
+                                    data-accion="editar"
+                                    data-url="{{ url_for('admin.admin_usuario_editar', id=u.id_usuario) }}"
+                                    data-nombre="{{ u.nombre }}"
+                                    data-email="{{ u.email }}"
+                                    data-rol="{{ u.rol }}"
+                                    aria-label="Editar a {{ u.nombre }}"
+                                >
+                                    Editar
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="usuarios-admin__vacio">
+                            Todavía no hay usuarios registrados.
+                        </td>
+                    </tr>
+                    {% endfor %}
+
+                    <tr id="fila-sin-resultados" hidden>
+                        <td colspan="4" class="usuarios-admin__vacio">
+                            No hay usuarios que coincidan con la búsqueda.
+                        </td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+
+    <!-- MODAL PARA EDITAR USUARIO -->
+    <dialog
+        id="modal-editar-usuario"
+        class="usuarios-admin__modal"
+        aria-labelledby="titulo-modal-usuario"
+        {% if editando %}data-reabrir{% endif %}
+    >
+
+        <form
+            id="form-editar-usuario"
+            class="usuarios-admin__formulario"
+            method="post"
+            action="{% if editando %}{{ url_for('admin.admin_usuario_editar', id=editando.id_usuario) }}{% endif %}"
+            novalidate
+        >
+
+            {% if csrf_token is defined %}
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            {% endif %}
+
+            <div class="usuarios-admin__modal-encabezado">
+
+                <div>
+                    <p>ADMINISTRACIÓN</p>
+                    <h2 id="titulo-modal-usuario">Editar usuario</h2>
+                </div>
+
+                <button
+                    type="button"
+                    class="usuarios-admin__cerrar"
+                    id="cerrar-modal-usuario"
+                    aria-label="Cerrar"
+                >
+                    &times;
+                </button>
+
+            </div>
+
+
+            <!-- NOMBRE -->
+            <div class="usuarios-admin__campo">
+
+                <label for="usuario-nombre">
+                    Nombre
+                </label>
+
+                <input
+                    type="text"
+                    id="usuario-nombre"
+                    name="nombre"
+                    value="{{ editando.nombre if editando else '' }}"
+                    required
+                    maxlength="100"
+                    autocomplete="off"
+                >
+
+            </div>
+
+
+            <!-- EMAIL -->
+            <div class="usuarios-admin__campo">
+
+                <label for="usuario-email">
+                    Correo electrónico
+                </label>
+
+                <input
+                    type="email"
+                    id="usuario-email"
+                    name="email"
+                    value="{{ editando.email if editando else '' }}"
+                    required
+                    maxlength="150"
+                    autocomplete="off"
+                >
+
+            </div>
+
+
+            <!-- ROL -->
+            <div class="usuarios-admin__campo">
+
+                {% set rol_actual = editando.rol if editando else 'cliente' %}
+
+                <label for="usuario-rol">
+                    Rol
+                </label>
+
+                <select id="usuario-rol" name="rol" required>
+
+                    <option value="cliente" {{ 'selected' if rol_actual == 'cliente' }}>Cliente</option>
+                    <option value="administrador" {{ 'selected' if rol_actual == 'administrador' }}>Administrador</option>
+
+                </select>
+
+            </div>
+
+
+            <p
+                id="error-formulario-usuario"
+                class="usuarios-admin__error"
+                role="alert"
+                {% if not (editando and editando.error) %}hidden{% endif %}
+            >{% if editando and editando.error %}{{ editando.error }}{% endif %}</p>
+
+
+            <!-- BOTONES -->
+            <div class="usuarios-admin__acciones">
+
+                <button
+                    type="button"
+                    class="usuarios-admin__boton-cancelar"
+                    id="cancelar-edicion-usuario"
+                >
+                    Cancelar
+                </button>
+
+                <button
+                    type="submit"
+                    class="usuarios-admin__boton-guardar"
+                    id="guardar-usuario"
+                >
+                    Guardar cambios
+                </button>
+
+            </div>
+
+        </form>
+
+    </dialog>
+
+</section>
+
+{% endblock %}
