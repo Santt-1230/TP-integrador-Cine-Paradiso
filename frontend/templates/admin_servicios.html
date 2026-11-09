@@ -6,6 +6,8 @@
 <div class="contenedor">
     <h1>Servicios</h1>
 
+    <a href="{{ url_for('servicios.admin_servicio_nuevo') }}">+ Agregar servicio</a>
+
     {% if error %}
         <p class="vacio">{{ error }}</p>
     {% endif %}
@@ -28,6 +30,7 @@
                 <td>$ {{ servicio.precio }}</td>
                 <td>{{ 'Activo' if servicio.activo else  'Inactivo' }}</td>
                 <td>
+                    <a href="{{ url_for('servicios.admin_servicio_editar', id_producto=servicio.id_producto) }}">Editar</a>
                     {% if servicio.activo %}
                     <form method="post" action="{{ url_for('servicios.admin_servicio_dar_de_baja', id_producto=servicio.id_producto) }}">
                         <button type="submit">Dar de baja</button>
