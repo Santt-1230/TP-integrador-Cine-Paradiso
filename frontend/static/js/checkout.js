@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (formularioButacas) {
         const casillas = [...formularioButacas.querySelectorAll('input[name="butacas"]:not(:disabled)')];
         const aviso = document.querySelector("#aviso-seleccion-butacas");
+        const contador = document.querySelector("#contador");
         const mostrarAviso = (mensaje) => {
             if (!aviso) return;
             aviso.textContent = mensaje;
@@ -12,8 +13,10 @@ document.addEventListener("DOMContentLoaded", () => {
         casillas.forEach((casilla) => {
             casilla.addEventListener("change", () => {
                 const elegidas = casillas.filter((item) => item.checked).length;
+                if (contador) contador.textContent = elegidas;
                 if (elegidas > 6) {
                     casilla.checked = false;
+                    if (contador) contador.textContent = elegidas - 1;
                     mostrarAviso("Podés elegir hasta seis butacas.");
                     return;
                 }
