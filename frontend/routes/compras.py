@@ -1,7 +1,8 @@
 from decimal import Decimal, InvalidOperation
 import time
 
-from flask import Blueprint, abort, flash, jsonify, redirect, render_template, request, session, url_for
+from flask import Blueprint, Response, abort, flash, jsonify, redirect, render_template, request, session, url_for
+import requests
 
 import api
 
@@ -179,12 +180,3 @@ def render_checkout(id_funcion, ids_butacas, error=None, productos_seleccionados
         checkout_expira_en=expiracion_checkout,
         locales=[],
     )
-
-
-@compras_bp.get("/mi-cuenta/compras")
-def mis_compras():
-    pass
-
-@compras_bp.get("/mi-cuenta/compras/<int:id_compra>")
-def detalle_compra(id_compra):
-    pass
