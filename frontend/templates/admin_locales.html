@@ -27,13 +27,14 @@
                     </p>
                 </div>
 
-                <a href="{{ url_for('locales.probar_nueva_sala', id_local=local.id_local) }}">Agregar sala</a>
+                <a class="boton-tabla boton-tabla--agregar" href="{{ url_for('salas.crear_sala', id_local=local.id_local) }}">Agregar sala</a>
             </div>
-            <table class="tabla-salas">
+            <table class="tabla-admin tabla-salas">
                 <thead>
                     <tr>
                         <th>Salas</th>
                         <th>Capacidad</th>
+                        <th>Estado</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
@@ -42,9 +43,18 @@
                         <tr>
                             <td>Sala {{ sala.numero_sala }}</td>
                             <td>{{ sala.capacidad }} butacas</td>
+                            <td class="estado-{{ sala.estado }}">{{ sala.estado|capitalize }}</td>
                             <td>
-                                <a href="{{ url_for('locales.probar_editar_sala', id_sala=sala.id_sala, id_local=local.id_local) }}">Editar</a>
-                                <button type="button">Dar de baja</button>
+                                <div class="acciones-tabla">
+                                    <a class="boton-tabla boton-tabla--editar" href="{{ url_for('salas.editar_sala', id_sala=sala.id_sala) }}">Editar</a>
+                                    {% if sala.estado == 'activa' %}
+                                        <form method="post" 
+                                            action="{{ url_for('salas.desactivar_sala', id_sala=sala.id_sala) }}"
+                                            onsubmit="return confirm('¿Dar de baja la sala {{ sala.numero_sala }}?');">
+                                        <button type="submit" class="boton-tabla boton-tabla--baja">Dar de baja</button>
+                                        </form>
+                                    {% endif %}
+                                </div>
                             </td>
                         </tr>
                     {% endfor %}
