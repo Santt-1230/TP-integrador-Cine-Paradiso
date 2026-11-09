@@ -12,7 +12,6 @@ def validar_qr_por_tipo(tipo: str):
     token = request.form.get("token", "").strip()
     categoria = request.form.get("categoria", "").strip()
 
-    # Validar formato del token.
     if not validar_token(token):
 
         resultado = {
@@ -21,8 +20,7 @@ def validar_qr_por_tipo(tipo: str):
         }
 
         codigo_http = 400
-
-    # Validar entrada.
+    
     elif tipo == "entrada":
 
         try:
@@ -116,14 +114,14 @@ def validar_qr_por_tipo(tipo: str):
 
 
 
-@validar_qr_bp.route('/entradas/validar', methods=['PATCH'])
+@validar_qr_bp.route('/entradas/validar', methods=['POST'])
 @admin_requerido
 def validar_entrada():
 
     return validar_qr_por_tipo("entrada")
 
 
-@validar_qr_bp.route('/productos/validar', methods=['PATCH'])
+@validar_qr_bp.route('/productos/validar', methods=['POST'])
 @admin_requerido
 def validar_producto():
 

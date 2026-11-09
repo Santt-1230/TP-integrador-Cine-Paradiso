@@ -9,8 +9,7 @@
 <section
     class="qr-admin"
     id="qr-admin"
-    data-validar-entrada-url="{{ url_for('qr_api.validar_entrada') }}"
-    data-validar-producto-url="{{ url_for('qr_api.validar_producto') }}"
+    data-validar-url="{{ url_for('validar_qr.validar_qr') }}"
 >
 
     <header class="qr-admin__encabezado">
@@ -186,7 +185,6 @@
 
         <div class="qr-admin__columnas">
 
-
             <section class="qr-panel">
 
                 <div class="qr-panel__encabezado">
@@ -238,7 +236,6 @@
             </section>
 
 
-
             <section class="qr-panel">
 
                 <div class="qr-panel__encabezado">
@@ -253,7 +250,14 @@
                     id="qr-form-manual"
                     class="qr-form-manual"
                     method="POST"
+                    target="qr-respuesta"
                 >
+
+                    <input
+                        type="hidden"
+                        name="tipo"
+                        id="qr-tipo"
+                    >
 
                     <input
                         type="hidden"
@@ -284,6 +288,13 @@
 
                 </form>
 
+                <iframe
+                    id="qr-respuesta"
+                    name="qr-respuesta"
+                    src="about:blank"
+                    hidden
+                ></iframe>
+
                 <div class="qr-admin__aviso">
                     <strong>Importante</strong>
 
@@ -296,7 +307,6 @@
             </section>
 
         </div>
-
 
 
         <section
@@ -335,7 +345,6 @@
     </section>
 
 </section>
-
 
 
 <script

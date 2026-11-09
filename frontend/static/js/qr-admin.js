@@ -3,54 +3,45 @@
 
     document.addEventListener("DOMContentLoaded", () => {
 
-        // Contenedor principal.
         const contenedor = document.getElementById("qr-admin");
 
         if (!contenedor) return;
 
-        // URLs del backend.
-        const urlValidarEntrada = contenedor.dataset.validarEntradaUrl;
-        const urlValidarProducto = contenedor.dataset.validarProductoUrl;
+        const urlValidar = contenedor.dataset.validarUrl;
 
-        // Pantallas.
         const pantallaTipos = document.getElementById("qr-pantalla-tipos");
         const pantallaCategorias = document.getElementById("qr-pantalla-categorias");
         const pantallaLector = document.getElementById("qr-pantalla-lector");
 
-        // Selección.
         const botonesTipo = contenedor.querySelectorAll("[data-tipo]");
         const botonesCategoria = contenedor.querySelectorAll("[data-categoria]");
         const botonVolverTipos = document.getElementById("qr-volver-tipos");
         const botonVolverSeleccion = document.getElementById("qr-volver-seleccion");
 
-        // Cámara.
         const lectorElemento = document.getElementById("qr-reader");
         const botonIniciar = document.getElementById("qr-iniciar");
         const botonDetener = document.getElementById("qr-detener");
 
-        // Formulario.
         const formularioManual = document.getElementById("qr-form-manual");
         const campoCodigo = document.getElementById("qr-codigo");
+        const campoTipo = document.getElementById("qr-tipo");
         const campoCategoria = document.getElementById("qr-categoria");
         const botonValidarManual = document.getElementById("qr-validar-manual");
 
-        // Iframe que recibe la respuesta del backend.
         const iframeRespuesta = document.getElementById("qr-respuesta");
 
-        // Contexto del escáner.
         const estadoCamara = document.getElementById("qr-estado");
         const contextoTipo = document.getElementById("qr-contexto-tipo");
         const contextoTitulo = document.getElementById("qr-contexto-titulo");
         const contextoDescripcion = document.getElementById("qr-contexto-descripcion");
 
-        // Resultado.
         const resultado = document.getElementById("qr-resultado");
         const resultadoTitulo = document.getElementById("qr-resultado-titulo");
         const resultadoEstado = document.getElementById("qr-resultado-estado");
         const resultadoMensaje = document.getElementById("qr-resultado-mensaje");
         const resultadoDetalles = document.getElementById("qr-resultado-detalles");
 
-        // Comprobar elementos HTML necesarios.
+
         const elementosNecesarios = [
             pantallaTipos,
             pantallaCategorias,
@@ -62,6 +53,7 @@
             botonDetener,
             formularioManual,
             campoCodigo,
+            campoTipo,
             campoCategoria,
             botonValidarManual,
             iframeRespuesta,
@@ -83,21 +75,20 @@
             return;
         }
 
-        if (!urlValidarEntrada || !urlValidarProducto) {
-            console.error("No se configuraron las URLs de validación QR.");
+        if (!urlValidar) {
+            console.error("No se configuró la URL de validación QR.");
             return;
         }
 
-        // Comprobar que el iframe tenga un nombre.
         if (!iframeRespuesta.name) {
             iframeRespuesta.name = "qr-respuesta";
         }
 
-        // Asegurar que el formulario envíe la respuesta al iframe.
-        formularioManual.target = iframeRespuesta.name;
+        formularioManual.action = urlValidar;
         formularioManual.method = "POST";
+        formularioManual.target = iframeRespuesta.name;
 
-        // Variables del escáner.
+
         let lector = null;
 
         let camaraActiva = false;
@@ -106,14 +97,11 @@
         let codigoProcesado = false;
         let envioEnCurso = false;
 
+        let temporizadorRespuesta = null;
+
         let tipoSeleccionado = null;
         let categoriaSeleccionada = null;
 
-        let temporizadorRespuesta = null;
-
-        // --------------------------------------------------
-        // ESTADOS Y PANTALLAS
-        // --------------------------------------------------
 
         function mostrarEstadoCamara(mensaje, tipo = "") {
 
@@ -159,15 +147,12 @@
             codigoProcesado = false;
 
             campoCodigo.value = "";
+            campoTipo.value = "";
             campoCategoria.value = "";
 
             limpiarResultado();
         }
 
-
-        // --------------------------------------------------
-        // SELECCIÓN DE TIPO Y CATEGORÍA
-        // --------------------------------------------------
 
         function seleccionarTipo(tipo) {
 
@@ -199,6 +184,7 @@
             limpiarResultado();
 
             campoCodigo.value = "";
+            campoTipo.value = "";
             campoCategoria.value = "";
 
             codigoProcesado = false;
@@ -242,6 +228,7 @@
             limpiarResultado();
 
             campoCodigo.value = "";
+            campoTipo.value = "";
             campoCategoria.value = "";
 
             codigoProcesado = false;
@@ -260,10 +247,6 @@
             }
         }
 
-
-        // --------------------------------------------------
-        // MOSTRAR RESULTADO
-        // --------------------------------------------------
 
         function mostrarResultado(valido, mensaje, datos = null) {
 
@@ -291,7 +274,6 @@
                 ["butaca", "Butaca"],
                 ["id_entrada", "N.º de entrada"],
 
-                // Datos de productos.
                 ["producto", "Producto"],
                 ["categoria", "Categoría"],
                 ["cantidad", "Cantidad"],
@@ -346,10 +328,6 @@
         }
 
 
-        // --------------------------------------------------
-        // DETENER CÁMARA
-        // --------------------------------------------------
-
         async function detenerCamara() {
 
             if (!lector) {
@@ -394,17 +372,12 @@
         }
 
 
-        // --------------------------------------------------
-        // PREPARAR TOKEN Y ENVIAR FORMULARIO
-        // --------------------------------------------------
-
         function prepararTokenCSRF() {
 
             const metaCsrf = document.querySelector(
                 'meta[name="csrf-token"]'
             );
 
-            // Si no hay meta CSRF, no se agrega ningún campo.
             if (!metaCsrf || !metaCsrf.content) {
                 return;
             }
@@ -429,7 +402,9 @@
 
         async function enviarFormulario() {
 
-            if (validacionEnCurso) return;
+            if (validacionEnCurso || envioEnCurso) {
+                return;
+            }
 
             const codigoLimpio = campoCodigo.value.trim();
 
@@ -443,30 +418,8 @@
                 return;
             }
 
-            // Determinar la ruta según el tipo seleccionado.
-            if (tipoSeleccionado === "entrada") {
-
-                formularioManual.action = urlValidarEntrada;
-
-                campoCategoria.value = "";
-
-            } else if (tipoSeleccionado === "producto") {
-
-                if (!categoriaSeleccionada) {
-
-                    mostrarResultado(
-                        false,
-                        "Primero seleccioná una categoría de producto."
-                    );
-
-                    return;
-                }
-
-                formularioManual.action = urlValidarProducto;
-
-                campoCategoria.value = categoriaSeleccionada;
-
-            } else {
+            if (tipoSeleccionado !== "entrada" &&
+                tipoSeleccionado !== "producto") {
 
                 mostrarResultado(
                     false,
@@ -476,12 +429,30 @@
                 return;
             }
 
-            // Preparar los datos del formulario.
+            if (
+                tipoSeleccionado === "producto" &&
+                !categoriaSeleccionada
+            ) {
+
+                mostrarResultado(
+                    false,
+                    "Primero seleccioná una categoría de producto."
+                );
+
+                return;
+            }
+
             campoCodigo.value = codigoLimpio;
+
+            campoTipo.value = tipoSeleccionado;
+
+            campoCategoria.value =
+                tipoSeleccionado === "producto"
+                    ? categoriaSeleccionada
+                    : "";
 
             prepararTokenCSRF();
 
-            // Bloquear nuevos envíos.
             validacionEnCurso = true;
             codigoProcesado = true;
 
@@ -492,20 +463,15 @@
                 "Enviando el código al servidor para validarlo..."
             );
 
-            // Detener la cámara antes de enviar.
             await detenerCamara();
 
-            // detenerCamara habilita los botones al finalizar,
-            // por eso volvemos a bloquearlos durante el envío.
             botonIniciar.disabled = true;
             botonValidarManual.disabled = true;
 
             try {
 
-                // Indicamos que esperamos una respuesta del iframe.
                 envioEnCurso = true;
 
-                // Evitar esperar indefinidamente si no hay respuesta.
                 temporizadorRespuesta = setTimeout(() => {
 
                     if (!envioEnCurso) return;
@@ -527,8 +493,7 @@
                     botonValidarManual.disabled = false;
                     botonIniciar.disabled = false;
 
-                }, 20000);
-
+                }, 30000);
 
                 formularioManual.submit();
 
@@ -561,13 +526,8 @@
         }
 
 
-        // --------------------------------------------------
-        // RECIBIR RESPUESTA DEL BACKEND EN EL IFRAME
-        // --------------------------------------------------
-
         iframeRespuesta.addEventListener("load", () => {
 
-            // Ignorar las cargas que no corresponden a un envío.
             if (!envioEnCurso) return;
 
             envioEnCurso = false;
@@ -579,21 +539,24 @@
                 const documento = iframeRespuesta.contentDocument;
 
                 if (!documento) {
-                    throw new Error("No se pudo acceder al documento del iframe.");
+                    throw new Error(
+                        "No se pudo acceder al documento del iframe."
+                    );
                 }
 
-                // Obtener el contenido enviado por Flask.
                 const textoRespuesta = (
+                    documento.body?.innerText ||
                     documento.body?.textContent ||
                     documento.documentElement?.textContent ||
                     ""
                 ).trim();
 
                 if (!textoRespuesta) {
-                    throw new Error("El servidor devolvió una respuesta vacía.");
+                    throw new Error(
+                        "El servidor devolvió una respuesta vacía."
+                    );
                 }
 
-                // Interpretar el JSON enviado por Flask.
                 const datos = JSON.parse(textoRespuesta);
 
                 if (
@@ -601,7 +564,9 @@
                     typeof datos !== "object" ||
                     Array.isArray(datos)
                 ) {
-                    throw new Error("El servidor devolvió un JSON inválido.");
+                    throw new Error(
+                        "El servidor devolvió un JSON inválido."
+                    );
                 }
 
                 const valido = datos.valido === true;
@@ -617,7 +582,6 @@
                     datos.detalles ||
                     null;
 
-                // Mostrar el resultado.
                 mostrarResultado(
                     valido,
                     mensaje,
@@ -649,7 +613,7 @@
 
                 mostrarResultado(
                     false,
-                    "No se pudo interpretar la respuesta del servidor. Comprobá que la sesión siga activa y que Flask devuelva JSON."
+                    "No se pudo interpretar la respuesta del servidor. Comprobá que la sesión siga activa y que el frontend devuelva JSON."
                 );
 
                 mostrarEstadoCamara(
@@ -671,10 +635,6 @@
         });
 
 
-        // --------------------------------------------------
-        // INICIAR CÁMARA
-        // --------------------------------------------------
-
         async function iniciarCamara() {
 
             if (!window.Html5Qrcode) {
@@ -687,7 +647,11 @@
                 return;
             }
 
-            if (camaraActiva || iniciandoCamara || validacionEnCurso) {
+            if (
+                camaraActiva ||
+                iniciandoCamara ||
+                validacionEnCurso
+            ) {
                 return;
             }
 
@@ -738,14 +702,13 @@
                             "QR detectado. Deteniendo la cámara y enviando el código..."
                         );
 
-                        // El envío del formulario se encargará
-                        // de detener la cámara y enviar el token.
+                        await detenerCamara();
+
                         formularioManual.requestSubmit();
 
                     },
 
                     () => {
-                        // Se ignoran los errores de lectura de cada fotograma.
                     }
                 );
 
@@ -777,10 +740,6 @@
             }
         }
 
-
-        // --------------------------------------------------
-        // EVENTOS DE SELECCIÓN
-        // --------------------------------------------------
 
         botonesTipo.forEach((boton) => {
 
@@ -820,10 +779,6 @@
         });
 
 
-        // --------------------------------------------------
-        // EVENTOS DE CÁMARA
-        // --------------------------------------------------
-
         botonIniciar.addEventListener("click", iniciarCamara);
 
         botonDetener.addEventListener("click", async () => {
@@ -837,16 +792,11 @@
         });
 
 
-        // --------------------------------------------------
-        // ENVÍO DEL FORMULARIO
-        // --------------------------------------------------
+        formularioManual.addEventListener("submit", async (evento) => {
 
-        formularioManual.addEventListener("submit", (evento) => {
-
-            // Evita que el navegador reemplace la página principal.
             evento.preventDefault();
 
-            enviarFormulario();
+            await enviarFormulario();
 
         });
 
@@ -857,10 +807,6 @@
 
         });
 
-
-        // --------------------------------------------------
-        // CERRAR CÁMARA AL ABANDONAR LA PÁGINA
-        // --------------------------------------------------
 
         window.addEventListener("pagehide", () => {
 

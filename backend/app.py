@@ -44,7 +44,7 @@ app.register_blueprint(promociones_bp)
 app.register_blueprint(validar_qr_bp)   
 app.register_blueprint(funciones_bp)
 
-# 4. Manejador global de errores
+
 @app.errorhandler(RuntimeError)
 def error_de_conexion(error):
     respuesta = construir_error_api(
