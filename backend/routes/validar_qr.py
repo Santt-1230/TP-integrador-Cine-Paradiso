@@ -1,8 +1,6 @@
 from flask import Blueprint,request, jsonify, session
-from services.validar_qr import procesar_validacion_qr
 from validators.validar_qr import validar_token
 from utils import admin_requerido
-
 from services.validar_qr import (procesar_validacion_entrada, procesar_validacion_producto)
 from validators.validar_qr import (validar_token, validar_categoria)
 from utils import admin_requerido
