@@ -245,7 +245,7 @@ INSERT INTO locales (nombre, direccion) VALUES
     ('Paradiso Sur', 'Calle de Prueba 789');
 INSERT INTO salas (id_local, numero_sala, capacidad) VALUES
     (1, 1, 100),
-    (2, 1, 200);
+    (2, 1, 200),
 	(3, 1, 150);
 
 INSERT INTO butacas (id_sala, fila, numero) VALUES
