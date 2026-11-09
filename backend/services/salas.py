@@ -20,7 +20,7 @@ def crear_sala(datos):
     if local is None:
         raise ValueError(ut.construir_error_api(
             code=const.ERROR_CODE_LOCAL_NOT_FOUND,
-            message='Local no encontrada',
+            message='Local no encontrado',
             description=f"No existe un local con el ID '{id_local}'."
         ))
     if not local['activo']:
@@ -29,8 +29,7 @@ def crear_sala(datos):
             message='Local inactivo',
             description=f"No se puede crear una sala en el local '{id_local}'"
         ))
-    sala_existente = salas_repository.existe_sala(id_local, numero_sala)
-    if sala_existente:
+    if salas_repository.existe_sala_crear(id_local, numero_sala):
         raise ValueError(ut.construir_error_api(
             code=const.ERROR_CODE_SALA_CONFLICT,
             message='Numero de sala ocupado',
@@ -56,15 +55,24 @@ def actualizar_sala(id_sala, datos):
             message='Sala no encontrada',
             description=f"No existe una sala con el ID '{id_sala}'."
         ))
-    numero_nuevo = cambios.get('numero_sala', sala['numero_sala'])
-    estado_nuevo = cambios.get('estado', sala['estado'])
-    if (estado_nuevo == 'activa' and (numero_nuevo != sala['numero_sala'] or sala['estado'] == 'inactiva')):
-        if salas_repository.existe_sala(sala['id_local'], numero_nuevo):
+    for campo in list(cambios):
+        if sala[campo] == cambios[campo]:
+            del cambios[campo]
+    if not cambios:
+        raise ValueError(ut.construir_error_api(
+            code=const.ERROR_CODE_INVALID_PARAMETER,
+            message='Sin cambios',
+            description='Debes modificar al menos un campo de la sala'
+        ))
+    if 'numero_sala' in cambios:
+        numero_nuevo = cambios['numero_sala']
+        if salas_repository.existe_sala_editar(sala['id_local'], numero_nuevo, id_sala):
             raise ValueError(ut.construir_error_api(
                 code=const.ERROR_CODE_SALA_CONFLICT,
                 message='Numero de sala ocupado',
                 description=f"Ya existe una sala con el numero {numero_nuevo} en el local {sala['id_local']}."
             ))
+    
     return salas_repository.actualizar_sala(id_sala, cambios)
 
 
