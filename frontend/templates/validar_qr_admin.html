@@ -9,8 +9,8 @@
 <section
     class="qr-admin"
     id="qr-admin"
-    data-validar-entrada-url=api/qr/entradas/validar
-    data-validar-producto-url=api/qr/productos/validar
+    data-validar-entrada-url="{{ url_for('qr_api.validar_entrada') }}"
+    data-validar-producto-url="{{ url_for('qr_api.validar_producto') }}"
 >
 
     <header class="qr-admin__encabezado">
@@ -252,7 +252,14 @@
                 <form
                     id="qr-form-manual"
                     class="qr-form-manual"
+                    method="POST"
                 >
+
+                    <input
+                        type="hidden"
+                        name="categoria"
+                        id="qr-categoria"
+                    >
 
                     <label for="qr-codigo">
                         Código QR

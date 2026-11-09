@@ -3,6 +3,7 @@
 
     document.addEventListener("DOMContentLoaded", () => {
 
+        // Contenedor principal.
         const contenedor = document.getElementById("qr-admin");
 
         if (!contenedor) return;
@@ -27,10 +28,14 @@
         const botonIniciar = document.getElementById("qr-iniciar");
         const botonDetener = document.getElementById("qr-detener");
 
-        // Formulario manual.
+        // Formulario.
         const formularioManual = document.getElementById("qr-form-manual");
         const campoCodigo = document.getElementById("qr-codigo");
+        const campoCategoria = document.getElementById("qr-categoria");
         const botonValidarManual = document.getElementById("qr-validar-manual");
+
+        // Iframe que recibe la respuesta del backend.
+        const iframeRespuesta = document.getElementById("qr-respuesta");
 
         // Contexto del escáner.
         const estadoCamara = document.getElementById("qr-estado");
@@ -45,7 +50,7 @@
         const resultadoMensaje = document.getElementById("qr-resultado-mensaje");
         const resultadoDetalles = document.getElementById("qr-resultado-detalles");
 
-
+        // Comprobar elementos HTML necesarios.
         const elementosNecesarios = [
             pantallaTipos,
             pantallaCategorias,
@@ -57,7 +62,9 @@
             botonDetener,
             formularioManual,
             campoCodigo,
+            campoCategoria,
             botonValidarManual,
+            iframeRespuesta,
             estadoCamara,
             contextoTipo,
             contextoTitulo,
@@ -81,17 +88,32 @@
             return;
         }
 
+        // Comprobar que el iframe tenga un nombre.
+        if (!iframeRespuesta.name) {
+            iframeRespuesta.name = "qr-respuesta";
+        }
 
+        // Asegurar que el formulario envíe la respuesta al iframe.
+        formularioManual.target = iframeRespuesta.name;
+        formularioManual.method = "POST";
+
+        // Variables del escáner.
         let lector = null;
 
         let camaraActiva = false;
         let iniciandoCamara = false;
         let validacionEnCurso = false;
         let codigoProcesado = false;
+        let envioEnCurso = false;
 
         let tipoSeleccionado = null;
         let categoriaSeleccionada = null;
 
+        let temporizadorRespuesta = null;
+
+        // --------------------------------------------------
+        // ESTADOS Y PANTALLAS
+        // --------------------------------------------------
 
         function mostrarEstadoCamara(mensaje, tipo = "") {
 
@@ -137,10 +159,15 @@
             codigoProcesado = false;
 
             campoCodigo.value = "";
+            campoCategoria.value = "";
 
             limpiarResultado();
         }
 
+
+        // --------------------------------------------------
+        // SELECCIÓN DE TIPO Y CATEGORÍA
+        // --------------------------------------------------
 
         function seleccionarTipo(tipo) {
 
@@ -172,6 +199,8 @@
             limpiarResultado();
 
             campoCodigo.value = "";
+            campoCategoria.value = "";
+
             codigoProcesado = false;
 
             if (tipoSeleccionado === "entrada") {
@@ -213,6 +242,8 @@
             limpiarResultado();
 
             campoCodigo.value = "";
+            campoCategoria.value = "";
+
             codigoProcesado = false;
 
             if (tipoSeleccionado === "producto") {
@@ -229,6 +260,10 @@
             }
         }
 
+
+        // --------------------------------------------------
+        // MOSTRAR RESULTADO
+        // --------------------------------------------------
 
         function mostrarResultado(valido, mensaje, datos = null) {
 
@@ -311,6 +346,10 @@
         }
 
 
+        // --------------------------------------------------
+        // DETENER CÁMARA
+        // --------------------------------------------------
+
         async function detenerCamara() {
 
             if (!lector) {
@@ -354,9 +393,45 @@
             }
         }
 
-        async function validarCodigo(codigo) {
 
-            const codigoLimpio = String(codigo || "").trim();
+        // --------------------------------------------------
+        // PREPARAR TOKEN Y ENVIAR FORMULARIO
+        // --------------------------------------------------
+
+        function prepararTokenCSRF() {
+
+            const metaCsrf = document.querySelector(
+                'meta[name="csrf-token"]'
+            );
+
+            // Si no hay meta CSRF, no se agrega ningún campo.
+            if (!metaCsrf || !metaCsrf.content) {
+                return;
+            }
+
+            let campoCsrf = formularioManual.querySelector(
+                'input[name="csrf_token"]'
+            );
+
+            if (!campoCsrf) {
+
+                campoCsrf = document.createElement("input");
+
+                campoCsrf.type = "hidden";
+                campoCsrf.name = "csrf_token";
+
+                formularioManual.appendChild(campoCsrf);
+            }
+
+            campoCsrf.value = metaCsrf.content;
+        }
+
+
+        async function enviarFormulario() {
+
+            if (validacionEnCurso) return;
+
+            const codigoLimpio = campoCodigo.value.trim();
 
             if (!codigoLimpio) {
 
@@ -368,24 +443,28 @@
                 return;
             }
 
-            if (validacionEnCurso) return;
-
-            let urlValidacion;
-
-            const datosEnvio = {
-                token: codigoLimpio
-            };
-
-
+            // Determinar la ruta según el tipo seleccionado.
             if (tipoSeleccionado === "entrada") {
 
-                urlValidacion = urlValidarEntrada;
+                formularioManual.action = urlValidarEntrada;
+
+                campoCategoria.value = "";
 
             } else if (tipoSeleccionado === "producto") {
 
-                urlValidacion = urlValidarProducto;
+                if (!categoriaSeleccionada) {
 
-                datosEnvio.categoria = categoriaSeleccionada;
+                    mostrarResultado(
+                        false,
+                        "Primero seleccioná una categoría de producto."
+                    );
+
+                    return;
+                }
+
+                formularioManual.action = urlValidarProducto;
+
+                campoCategoria.value = categoriaSeleccionada;
 
             } else {
 
@@ -397,17 +476,14 @@
                 return;
             }
 
-            if (tipoSeleccionado === "producto" && !categoriaSeleccionada) {
+            // Preparar los datos del formulario.
+            campoCodigo.value = codigoLimpio;
 
-                mostrarResultado(
-                    false,
-                    "Primero seleccioná una categoría de producto."
-                );
+            prepararTokenCSRF();
 
-                return;
-            }
-
+            // Bloquear nuevos envíos.
             validacionEnCurso = true;
+            codigoProcesado = true;
 
             botonIniciar.disabled = true;
             botonValidarManual.disabled = true;
@@ -416,68 +492,132 @@
                 "Enviando el código al servidor para validarlo..."
             );
 
-            const encabezados = {
-                "Content-Type": "application/json",
-                "Accept": "application/json"
-            };
+            // Detener la cámara antes de enviar.
+            await detenerCamara();
 
-
-
-            const metaCsrf = document.querySelector(
-                'meta[name="csrf-token"]'
-            );
-
-            if (metaCsrf && metaCsrf.content) {
-                encabezados["X-CSRFToken"] = metaCsrf.content;
-            }
+            // detenerCamara habilita los botones al finalizar,
+            // por eso volvemos a bloquearlos durante el envío.
+            botonIniciar.disabled = true;
+            botonValidarManual.disabled = true;
 
             try {
 
-                const respuesta = await fetch(urlValidacion, {
+                // Indicamos que esperamos una respuesta del iframe.
+                envioEnCurso = true;
 
-                    method: "PATCH",
+                // Evitar esperar indefinidamente si no hay respuesta.
+                temporizadorRespuesta = setTimeout(() => {
 
-                    credentials: "same-origin",
+                    if (!envioEnCurso) return;
 
-                    headers: encabezados,
+                    envioEnCurso = false;
+                    validacionEnCurso = false;
+                    codigoProcesado = false;
 
-                    body: JSON.stringify(datosEnvio)
+                    mostrarResultado(
+                        false,
+                        "El servidor no respondió. Revisá la conexión e intentá nuevamente."
+                    );
 
-                });
+                    mostrarEstadoCamara(
+                        "Tiempo de espera agotado.",
+                        "error"
+                    );
 
-                const tipoContenido =
-                    respuesta.headers.get("content-type") || "";
+                    botonValidarManual.disabled = false;
+                    botonIniciar.disabled = false;
 
-                let datos;
+                }, 20000);
 
-                if (tipoContenido.includes("application/json")) {
 
-                    datos = await respuesta.json();
+                formularioManual.submit();
 
-                } else {
+            } catch (error) {
 
-                    const texto = await respuesta.text();
+                console.error(
+                    "Error al enviar el formulario:",
+                    error
+                );
 
-                    datos = {
-                        mensaje: texto ||
-                            `El servidor devolvió una respuesta HTTP ${respuesta.status}.`
-                    };
+                envioEnCurso = false;
+                validacionEnCurso = false;
+                codigoProcesado = false;
+
+                clearTimeout(temporizadorRespuesta);
+
+                mostrarResultado(
+                    false,
+                    "No se pudo enviar el código al servidor."
+                );
+
+                mostrarEstadoCamara(
+                    "Error al enviar el formulario.",
+                    "error"
+                );
+
+                botonValidarManual.disabled = false;
+                botonIniciar.disabled = false;
+            }
+        }
+
+
+        // --------------------------------------------------
+        // RECIBIR RESPUESTA DEL BACKEND EN EL IFRAME
+        // --------------------------------------------------
+
+        iframeRespuesta.addEventListener("load", () => {
+
+            // Ignorar las cargas que no corresponden a un envío.
+            if (!envioEnCurso) return;
+
+            envioEnCurso = false;
+
+            clearTimeout(temporizadorRespuesta);
+
+            try {
+
+                const documento = iframeRespuesta.contentDocument;
+
+                if (!documento) {
+                    throw new Error("No se pudo acceder al documento del iframe.");
                 }
 
-                const valido =
-                    respuesta.ok && datos.valido === true;
+                // Obtener el contenido enviado por Flask.
+                const textoRespuesta = (
+                    documento.body?.textContent ||
+                    documento.documentElement?.textContent ||
+                    ""
+                ).trim();
+
+                if (!textoRespuesta) {
+                    throw new Error("El servidor devolvió una respuesta vacía.");
+                }
+
+                // Interpretar el JSON enviado por Flask.
+                const datos = JSON.parse(textoRespuesta);
+
+                if (
+                    !datos ||
+                    typeof datos !== "object" ||
+                    Array.isArray(datos)
+                ) {
+                    throw new Error("El servidor devolvió un JSON inválido.");
+                }
+
+                const valido = datos.valido === true;
 
                 const mensaje =
                     datos.mensaje ||
                     datos.message ||
                     datos.error ||
-                    `No se pudo validar el código. HTTP ${respuesta.status}`;
+                    "No se pudo validar el código.";
 
                 const detalles =
                     datos.entrada ||
                     datos.detalles ||
                     null;
 
+                // Mostrar el resultado.
                 mostrarResultado(
                     valido,
                     mensaje,
@@ -502,21 +642,25 @@
 
             } catch (error) {
 
-                console.error("Error al validar el QR:", error);
+                console.error(
+                    "Error al interpretar la respuesta del servidor:",
+                    error
+                );
 
                 mostrarResultado(
                     false,
-                    "No se pudo contactar al servidor. Revisá tu conexión e intentá nuevamente."
+                    "No se pudo interpretar la respuesta del servidor. Comprobá que la sesión siga activa y que Flask devuelva JSON."
                 );
 
                 mostrarEstadoCamara(
-                    "Error de conexión.",
+                    "Error al procesar la respuesta.",
                     "error"
                 );
 
             } finally {
 
                 validacionEnCurso = false;
+                codigoProcesado = false;
 
                 botonValidarManual.disabled = false;
 
@@ -524,8 +668,12 @@
                     botonIniciar.disabled = false;
                 }
             }
-        }
+        });
 
+
+        // --------------------------------------------------
+        // INICIAR CÁMARA
+        // --------------------------------------------------
 
         async function iniciarCamara() {
 
@@ -587,16 +735,18 @@
                         campoCodigo.value = textoDecodificado;
 
                         mostrarEstadoCamara(
-                            "QR detectado. Deteniendo la cámara y validando..."
+                            "QR detectado. Deteniendo la cámara y enviando el código..."
                         );
 
-                        await detenerCamara();
+                        // El envío del formulario se encargará
+                        // de detener la cámara y enviar el token.
+                        formularioManual.requestSubmit();
 
-                        await validarCodigo(textoDecodificado);
                     },
 
                     () => {
-                     }
+                        // Se ignoran los errores de lectura de cada fotograma.
+                    }
                 );
 
                 camaraActiva = true;
@@ -627,6 +777,10 @@
             }
         }
 
+
+        // --------------------------------------------------
+        // EVENTOS DE SELECCIÓN
+        // --------------------------------------------------
 
         botonesTipo.forEach((boton) => {
 
@@ -666,6 +820,10 @@
         });
 
 
+        // --------------------------------------------------
+        // EVENTOS DE CÁMARA
+        // --------------------------------------------------
+
         botonIniciar.addEventListener("click", iniciarCamara);
 
         botonDetener.addEventListener("click", async () => {
@@ -679,17 +837,16 @@
         });
 
 
-        formularioManual.addEventListener("submit", async (evento) => {
+        // --------------------------------------------------
+        // ENVÍO DEL FORMULARIO
+        // --------------------------------------------------
 
+        formularioManual.addEventListener("submit", (evento) => {
+
+            // Evita que el navegador reemplace la página principal.
             evento.preventDefault();
 
-            if (validacionEnCurso) return;
-
-            codigoProcesado = true;
-
-            await detenerCamara();
-
-            await validarCodigo(campoCodigo.value);
+            enviarFormulario();
 
         });
 
@@ -701,7 +858,10 @@
         });
 
 
-  
+        // --------------------------------------------------
+        // CERRAR CÁMARA AL ABANDONAR LA PÁGINA
+        // --------------------------------------------------
+
         window.addEventListener("pagehide", () => {
 
             if (lector && camaraActiva) {

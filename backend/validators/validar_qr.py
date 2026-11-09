@@ -1,4 +1,5 @@
 
+
 def validar_token(token: str) -> bool:
 
     if not isinstance(token, str):
