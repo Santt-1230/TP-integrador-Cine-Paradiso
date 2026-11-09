@@ -13,14 +13,47 @@ class ApiError(Exception):
         self.mensaje = mensaje
 
 def _mensaje(respuesta):
-    try:
-        errores = respuesta.json().get("errors") or []
-        if errores:
-            return errores[0].get("description") or errores[0].get("message")
-    except (ValueError, AttributeError):
-        pass
-    return "El servidor respondio con un error."
 
+    try:
+        datos = respuesta.json()
+    except ValueError:
+        return f"El servidor devolvió una respuesta inválida (HTTP {respuesta.status_code})."
+
+    if not isinstance(datos, dict):
+        return f"El servidor respondió con un error HTTP {respuesta.status_code}."
+
+    # Formato con lista de errores
+    errores = datos.get("errors")
+
+    if isinstance(errores, list) and errores:
+        error = errores[0]
+
+        if isinstance(error, dict):
+            return (
+                error.get("description")
+                or error.get("message")
+                or error.get("title")
+                or "Error en el servidor."
+            )
+
+    # Otros formatos posibles
+    for clave in ("mensaje", "message", "description"):
+        if datos.get(clave):
+            return datos[clave]
+
+    error = datos.get("error")
+
+    if isinstance(error, str):
+        return error
+
+    if isinstance(error, dict):
+        return (
+            error.get("description")
+            or error.get("message")
+            or "Error en el servidor."
+        )
+
+    return f"El servidor respondió con un error HTTP {respuesta.status_code}."
 
 def get(ruta, params=None):
     try:
@@ -28,7 +61,7 @@ def get(ruta, params=None):
     except requests.RequestException:
         raise ApiError(503, "No se pudo conectar con el servidor. Intenta de nuevo en unos minutos.")
     if not r.ok:
-        raise ApiError(404 if r.status_code == 404 else 502, _mensaje(r))
+        raise ApiError(r.status_code, _mensaje(r))
     try:
         return r.json()
     except ValueError:
@@ -52,9 +85,9 @@ def cookies_backend():
     return {}
 
 
-def pedir(metodo, ruta, datos=None):
+def pedir(metodo, ruta, datos=None,params=None):
     try:
-        r = requests.request(metodo, f"{BACKEND_URL}{ruta}", json=datos, cookies=cookies_backend(), timeout=10) #Si no hay conexion o se agota el tiempo de espera
+        r = requests.request(metodo, f"{BACKEND_URL}{ruta}", json=datos, params=params, cookies=cookies_backend(), timeout=10) #Si no hay conexion o se agota el tiempo de espera
     except requests.RequestException:
         raise ApiError(503, "No se pudo conectar con el servidor. Intenta de nuevo en unos minutos.")
 

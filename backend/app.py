@@ -44,6 +44,7 @@ app.register_blueprint(promociones_bp)
 app.register_blueprint(funciones_bp)
 app.register_blueprint(compras_bp)
 
+
 # 4. Manejador global de errores
 @app.errorhandler(RuntimeError)
 def error_de_conexion(error):
