@@ -61,3 +61,7 @@ def desactivar_usuario(id_usuario):
              SET activo = FALSE, email = CONCAT('baja_', %s, '@eliminado.local')
              WHERE id_usuario = %s"""
     ejecutar_mutacion(sql, (id_usuario, id_usuario))
+
+def marcar_email_verificado(id_usuario):
+    sql = "UPDATE usuarios SET email_verificado = TRUE where id_usuario = %s"
+    ejecutar_mutacion(sql, (id_usuario,))

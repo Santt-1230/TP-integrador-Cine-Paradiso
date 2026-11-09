@@ -15,21 +15,46 @@ def registro():
     usuario, error = usuarios_service.registrar_usuario(
         datos.get("nombre", "").strip(), datos.get("apellido", "").strip(),datos.get("email", "").strip(), datos.get("fecha_nacimiento", "").strip(), datos.get("contrasena", ""))
     if error:
-        return jsonify(construir_error_api(*error)), 409
+        estado = 502 if error[0] == "MAIL_NO_ENVIADO" else 409
+        return jsonify(construir_error_api(*error)), estado
 
-    return jsonify(usuario), 201
+    return jsonify({"usuario":usuario,"mensaje":"Te enviamos un mail para verificar tu cuenta"}), 201
+
+@usuarios_bp.route("/auth/verificar-email", methods=["POST"])
+def verificar_email():
+    datos = request.get_json(silent=True)
+    error = usuarios_validator.validar_token(datos)
+    if error:
+        return jsonify(construir_error_api(*error)), 400
+
+    exito, error = usuarios_service.verificar_email(datos["token"].strip())
+    if not exito:
+        return jsonify(construir_error_api(*error)), 400
+    return jsonify({"mensaje": "Email confirmado correctamente"}), 200
+
+
+@usuarios_bp.route("/auth/reenviar-verificacion", methods=["POST"])
+def reenviar_verificacion():
+    datos = request.get_json(silent=True)
+    error = usuarios_validator.validar_reenvio(datos)
+    if error:
+        return jsonify(construir_error_api(*error)), 400
+
+    usuarios_service.reenviar_verificacion(datos["email"].strip())
+    return jsonify({"mensaje": "Si el email esta pendiente de confirmacion, te enviamos un nuevo mail"}), 200
 
 @usuarios_bp.route("/auth/login", methods=["POST"])
 def login():
     datos = request.get_json(silent=True)
     error = usuarios_validator.validar_login(datos)
-    if error: #Valida el formato en el cual el usuario escribio
+    if error: 
         return jsonify(construir_error_api(*error)), 400
 
     usuario, error = usuarios_service.autenticar_usuario(
         datos.get("email", "").strip(), datos.get("contrasena", ""))
-    if error: #Valida los datos contra la base de datos
-        return jsonify(construir_error_api(*error)), 401
+    if error: 
+        estado = 403 if error[0] == "EMAIL_NO_VERIFICADO" else 401
+        return jsonify(construir_error_api(*error)), estado
 
     session.clear() #Borra cualquier dato de sesion previa antes de inicaiar una nueva
     session["id_usuario"] = usuario["id_usuario"] #Guarda una cookie con el id de la persona autenticad

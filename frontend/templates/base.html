@@ -18,7 +18,7 @@
                 <summary>Elegí por cine ↓</summary>
                 <ul>
                     {% for local in locales %}
-                        <a href="{{ url_for('locales.elegir_cine', id_local=local.id_local) }}">{{ local.nombre }}</a>
+                        <li><a href="{{ url_for('elegir_cine', id_local=local.id_local) }}">{{ local.nombre }}</a></li>
                     {% endfor %}
                 </ul>
             </details>
@@ -58,6 +58,11 @@
 </header>
 
     <main>
+        {% with mensajes = get_flashed_messages(with_categories=true) %}
+        {% for categoria, mensaje in mensajes %}
+        <div class="{{ categoria }}">{{ mensaje }}</div>
+        {% endfor %}
+        {% endwith %}
         {% block contenido %}{% endblock %}
     </main>
 
@@ -77,6 +82,7 @@
         <a href="#">Política de cookies</a>
     </nav>
     </footer>
+    
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>

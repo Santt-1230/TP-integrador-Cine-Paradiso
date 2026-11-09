@@ -1,35 +1,46 @@
 {% extends "base_admin.html" %}
 
-{% block titulo %}Editar sala - Cine Paradiso{% endblock %}
+{% block titulo %}{% if id_sala %}Editar sala{% else %}Nueva Sala{% endif %}{% endblock %}
 
 {% block contenido_admin %}
 <div class="formulario-admin">
-    <p class="migas">Administración / Locales y salas / Editar sala</p>
-    <h1>Editar sala {{ sala.numero_sala }}</h1>
-    <p> Local: {{ local.nombre }}</p>
-    <form class="formulario-sala">
+    <h1>{% if id_sala %}Editar sala {{ id_sala }}{% else %}Nueva Sala{% endif %}</h1>
+    {% if error %}
+    <div class="alert alert-danger">{{ error }}</div>
+    {% endif %}
+    <form method="post" action="{% if id_sala %}{{ url_for('salas.editar_sala', id_sala=id_sala) }}{% else %}
+    {{ url_for('salas.crear_sala') }}{% endif %}" class="formulario-sala">
+        {% if not id_sala %}
+          <input type="hidden" name="id_local" value="{{ datos.id_local }}">
+            <div class="campo-formulario">
+            <label for="capacidad">Capacidad</label>
+            <input type="number" id="capacidad" name="capacidad"
+            min="1" value="{{ datos.capacidad }}" required>
+            </div>
+        {% endif %}
         <div class="campo-formulario">
-            <label for="numero_sala">Número de sala</label>
-            <input 
-            type="number" id="numero_sala" name="numero_sala"
-            min="1" value="{{ sala.numero_sala }}" required>
+        <label for="numero_sala">Número de sala</label>
+        <input 
+        type="number" id="numero_sala" name="numero_sala"
+        min="1" value="{{ datos.numero_sala }}" required>
         </div>
+        {% if id_sala %}
         <div class="campo-formulario">
             <label for="estado">Estado</label>
             <select id="estado" name="estado">
                 <option value="activa" 
-                    {% if sala.estado == 'activa' %}selected{% endif %}>
+                    {% if datos.estado == 'activa' %}selected{% endif %}>
                     Activa
                 </option>
-                <option value="inactiva" {% if sala.estado == 'inactiva' %}
+                <option value="inactiva" {% if datos.estado == 'inactiva' %}
                 selected{% endif %}>Inactiva
                 </option>
             </select>
         </div>
-
+        {% endif %}
         <div class="acciones-formulario">
-            <a class="boton-agregar" href="{{ url_for('locales.probar_admin_locales') }}">Cancelar</a>
-            <button type="button">Guardar cambios</button>
+            <a class="boton-agregar" href="{{ url_for('locales.admin_locales')}}">Cancelar</a>
+            <button type="submit" class="boton-agregar">Guardar cambios</button>
         </div>
     </form>
 </div>
