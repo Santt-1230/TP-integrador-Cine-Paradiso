@@ -56,7 +56,7 @@ def login():
 
     # Redireccionar según el rol
     if usuario["rol"] == "administrador":
-        return redirect("/admin")
+        return redirect(url_for("admin.admin"))
 
     return redirect(url_for("peliculas_front.inicio"))
 
