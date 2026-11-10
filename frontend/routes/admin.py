@@ -1,25 +1,64 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, session, request
-from api import ApiError, pedir, admin_front_requerido, limpiar_sesion_front
+from flask import Blueprint, render_template, url_for, flash, request, redirect
+
+from api import (
+    verificar_estado,
+    pedir,
+    mensaje_error,
+    admin_front_requerido
+)
+
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
 
 
-
 @admin_bp.route("/")
+@admin_front_requerido
 def admin():
+
     cantidad_peliculas_activas = None
     ocupacion_promedio = None
     cantidad_funciones_programadas = None
 
-    try:
-        respuesta = pedir( "GET","/api/admin/peliculas/activa")
+    # --------------------------------
+    # PELÍCULAS ACTIVAS
+    # --------------------------------
+
+    estado, respuesta = pedir(
+        "GET",
+        "/api/admin/peliculas/activa"
+    )
+
+    redireccion = verificar_estado(estado)
+
+    if redireccion:
+        return redireccion
+
+    if estado == 200 and isinstance(respuesta, dict):
+
         cantidad_peliculas_activas = respuesta.get("total", 0)
 
-    except ApiError as error:
-        print(f"Error al obtener películas activas: {error.mensaje}")
+    else:
+        print(
+            "Error al obtener películas activas:",
+            mensaje_error(respuesta)
+        )
 
-    try:
-        ocupacion_por_funcion = pedir("GET","/api/estadisticas/ocupacion", params={"periodo": "30"})
+    # --------------------------------
+    # OCUPACIÓN DE FUNCIONES
+    # --------------------------------
+
+    estado, ocupacion_por_funcion = pedir(
+        "GET",
+        "/api/estadisticas/ocupacion",
+        params={"periodo": "30"}
+    )
+
+    redireccion = verificar_estado(estado)
+
+    if redireccion:
+        return redireccion
+
+    if estado == 200 and isinstance(ocupacion_por_funcion, list):
 
         capacidad_total = sum(
             float(funcion.get("capacidad_total") or 0)
@@ -36,22 +75,47 @@ def admin():
             if capacidad_total > 0 else 0
         )
 
-    except ApiError as error:
-        print(f"Error al obtener ocupación: {error.mensaje}")
+    else:
+        print(
+            "Error al obtener ocupación:",
+            mensaje_error(ocupacion_por_funcion)
+        )
 
-    try:
-        respuesta_funciones = pedir("GET","/api/admin/funciones/programadas")
+    # --------------------------------
+    # FUNCIONES PROGRAMADAS
+    # --------------------------------
+
+    estado, respuesta_funciones = pedir(
+        "GET",
+        "/api/admin/funciones/programadas"
+    )
+
+    redireccion = verificar_estado(estado)
+
+    if redireccion:
+        return redireccion
+
+    if estado == 200 and isinstance(respuesta_funciones, dict):
+
         cantidad_funciones_programadas = respuesta_funciones.get("total", 0)
 
-    except ApiError as error:
-        print(f"Error al obtener las funciones programadas: {error.mensaje}")
+    else:
+        print(
+            "Error al obtener las funciones programadas:",
+            mensaje_error(respuesta_funciones)
+        )
 
     return render_template(
         "inicio_admin.html",
         cantidad_peliculas_activas=cantidad_peliculas_activas,
         ocupacion_promedio=ocupacion_promedio,
         cantidad_funciones_programadas=cantidad_funciones_programadas
-        )
+    )
+
+
+# ====================================
+# ADMINISTRACIÓN DE USUARIOS
+# ====================================
 
 @admin_bp.route("/usuarios", methods=["GET"])
 @admin_front_requerido
@@ -59,24 +123,37 @@ def admin_usuarios():
 
     buscar = request.args.get("buscar", "").strip()
     editar_id = request.args.get("editar", type=int)
+
     usuario_editar = None
     error = None
 
-    try:
-        usuarios = pedir("GET","/api/admin/usuarios")
+    # --------------------------------
+    # OBTENER USUARIOS
+    # --------------------------------
 
-    except ApiError as e:
+    estado, usuarios = pedir(
+        "GET",
+        "/api/admin/usuarios"
+    )
 
-        if e.estado == 401:
-            limpiar_sesion_front()
-            return redirect(url_for("usuarios.login"))
+    redireccion = verificar_estado(estado)
 
-        if e.estado == 403:
-            flash(e.mensaje, "error")
-            return redirect(url_for("peliculas_front.inicio"))
+    if redireccion:
+        return redireccion
 
+    if estado != 200:
+
+        error = mensaje_error(usuarios)
         usuarios = []
-        error = e.mensaje
+
+    elif not isinstance(usuarios, list):
+
+        error = "El servidor devolvió un formato de usuarios inválido."
+        usuarios = []
+
+    # --------------------------------
+    # FILTRAR USUARIOS
+    # --------------------------------
 
     if buscar:
 
@@ -89,34 +166,38 @@ def admin_usuarios():
             or termino in (usuario.get("rol") or "").casefold()
         ]
 
+    # --------------------------------
+    # OBTENER USUARIO PARA EDITAR
+    # --------------------------------
+
     if editar_id is not None:
 
         print("ID RECIBIDO:", editar_id)
 
-        try:
+        estado, usuario_editar = pedir(
+            "GET",
+            f"/api/admin/usuarios/{editar_id}/editar"
+        )
 
-            usuario_editar = pedir(
-                "GET",
-                f"/api/admin/usuarios/{editar_id}/editar"
+        redireccion = verificar_estado(estado)
+
+        if redireccion:
+            return redireccion
+
+        if estado != 200:
+
+            print(
+                "ERROR:",
+                estado,
+                mensaje_error(usuario_editar)
             )
 
+            flash(mensaje_error(usuario_editar), "error")
+            usuario_editar = None
+
+        else:
             print("USUARIO OBTENIDO:", usuario_editar)
 
-        except ApiError as e:
-
-            print("ERROR:", e.estado, e.mensaje)
-
-            if e.estado == 401:
-                limpiar_sesion_front()
-                return redirect(url_for("usuarios.login"))
-
-            if e.estado == 403:
-                flash(e.mensaje, "error")
-                return redirect(url_for("peliculas_front.inicio"))
-
-            flash(e.mensaje, "error")
-
-            
     return render_template(
         "usuarios.html",
         usuarios=usuarios,
@@ -126,6 +207,10 @@ def admin_usuarios():
         error=error
     )
 
+
+# ====================================
+# ACTUALIZAR USUARIO
+# ====================================
 
 @admin_bp.route("/usuarios/<int:id>/editar", methods=["POST"])
 @admin_front_requerido
@@ -139,39 +224,34 @@ def actualizar_usuario_front(id):
         "rol": request.form.get("rol", "").strip()
     }
 
-    try:
+    estado, respuesta = pedir(
+        "PATCH",
+        f"/api/admin/usuarios/{id}/editar",
+        datos=datos
+    )
 
-        pedir(
-            "PATCH",
-            f"/api/admin/usuarios/{id}/editar",
-            datos=datos
-        )
+    redireccion = verificar_estado(estado)
+
+    if redireccion:
+        return redireccion
+
+    if 200 <= estado < 300:
 
         flash("Usuario actualizado correctamente.", "success")
-
-    except ApiError as e:
-
-        if e.estado == 401:
-            limpiar_sesion_front()
-            return redirect(url_for("usuarios.login"))
-
-        if e.estado == 403:
-            flash(e.mensaje, "error")
-            return redirect(url_for("peliculas.inicio"))
-
-        flash(e.mensaje, "error")
 
         return redirect(
             url_for(
                 "admin.admin_usuarios",
-                editar=id,
                 buscar=buscar
             )
         )
 
+    flash(mensaje_error(respuesta), "error")
+
     return redirect(
         url_for(
             "admin.admin_usuarios",
+            editar=id,
             buscar=buscar
         )
     )
