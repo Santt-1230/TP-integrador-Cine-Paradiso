@@ -213,7 +213,7 @@ footer {
     gap: 0.75rem;
 }
 
-/* BUSCÁ ESTO Y CAMBIALO: */
+
 .page-with-sidebar {
     display: flex;
     flex: 1; /* ← En lugar de min-height, esto le dice que use el espacio que sobra de forma perfecta */
@@ -858,3 +858,53 @@ header { position: relative; }
         width: auto;
     }
 }
+
+.servicios-cliente {
+    width: min(68.75rem, calc(100% - 2rem));
+    margin: 2rem auto;
+}
+
+.servicios-cliente h2 {
+    margin: 2rem 0 1rem;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+}
+
+.servicios-cliente__grilla {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+    gap: 1.2rem;
+}
+
+.servicios-cliente__tarjeta {
+    padding: 1rem 1.2rem;
+    background-color: white;
+    border-radius: 0.8rem;
+}
+
+.servicios-cliente__tarjeta img {
+    display: block;
+    width: 100%;
+    margin-bottom: 0.6rem;
+    border-radius: 0.5rem;
+}
+
+.servicios-cliente__tarjeta h3 {
+    margin: 0 0 0.25rem;
+    font-size: 1.05rem;
+}
+
+.servicios-cliente__tarjeta p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #333;
+}
+
+.servicios-cliente__precio {
+    display: block;
+    margin-top: 0.25rem;
+    font-weight: 700;
+    color: #b30000;
+}
+
+.servicios-cliente__vacio { color: #555; }

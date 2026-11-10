@@ -767,3 +767,76 @@ a {
         font-size: 9px;
     }
 }
+
+.servicios-admin { width: 100%; max-width: 1250px; margin: 0 auto; }
+
+.servicios-admin__encabezado {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    gap: 24px; margin-bottom: 24px;
+}
+.servicios-admin__migas {
+    margin: 0 0 10px; color: #a0a3ad; font-size: 10px; font-weight: 700;
+    letter-spacing: 0.65px; text-transform: uppercase;
+}
+.servicios-admin__encabezado h1 {
+    margin: 0 0 6px; color: var(--admin-texto);
+    font-size: clamp(22px, 2.2vw, 29px); line-height: 1.2;
+}
+.servicios-admin__descripcion { margin: 0; color: var(--admin-texto-suave); font-size: 13px; }
+
+.servicios-admin__boton {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-height: 38px; padding: 0 18px; border: 0; border-radius: 8px;
+    background: var(--admin-rojo); color: #fff; font: inherit;
+    font-size: 12px; font-weight: 700; text-decoration: none;
+    cursor: pointer; white-space: nowrap;
+}
+.servicios-admin__boton:hover { background: var(--admin-rojo-oscuro); }
+
+.servicios-admin__tarjeta {
+    overflow: hidden; background: var(--admin-blanco);
+    border: 1px solid rgba(225, 227, 233, 0.8);
+    border-radius: 12px; box-shadow: var(--admin-sombra);
+}
+.servicios-admin__pie {
+    padding: 14px 19px; border-top: 1px solid #f0f1f4;
+    color: #a0a3ad; font-size: 10px;
+}
+
+.estado-admin--inactivo { background: #eef0f3; color: #7b7f8a; }
+
+.servicios-admin__acciones { display: flex; align-items: center; gap: 6px; }
+.servicios-admin__acciones form { margin: 0; }
+.servicios-admin__accion {
+    display: inline-flex; align-items: center; min-height: 28px; padding: 0 11px;
+    border: 1px solid var(--admin-borde); border-radius: 6px;
+    background: var(--admin-blanco); color: #555966; font: inherit;
+    font-size: 11px; font-weight: 600; text-decoration: none; cursor: pointer;
+}
+.servicios-admin__accion:hover { background: #fff0f0; color: var(--admin-rojo-oscuro); }
+.servicios-admin__accion--baja { color: #bd5555; }
+
+.servicios-admin__aviso {
+    margin: 16px 0 0; padding: 13px 16px; border-radius: 8px;
+    background: #fff8df; color: #8a7a43; font-size: 11px; line-height: 1.5;
+}
+.servicios-admin__error {
+    margin: 0 0 16px; padding: 13px 16px; border-radius: 8px;
+    background: #ffe9ea; color: #b53840; font-size: 12px;
+}
+
+/* Formulario de crear / editar */
+.servicios-admin .formulario-admin label {
+    font-size: 12px; font-weight: 700; color: var(--admin-texto);
+}
+.servicios-admin .formulario-admin input[type="text"],
+.servicios-admin .formulario-admin input[type="number"],
+.servicios-admin .formulario-admin select {
+    width: 100%; min-height: 40px; padding: 0 12px;
+    border: 1px solid var(--admin-borde); border-radius: 8px;
+    background: #fff; color: var(--admin-texto); font: inherit; font-size: 13px;
+}
+.servicios-admin__check { display: flex; align-items: center; gap: 8px; }
+.servicios-admin__pie-formulario {
+    display: flex; justify-content: flex-end; align-items: center; gap: 10px;
+}

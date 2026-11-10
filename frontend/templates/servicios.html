@@ -3,20 +3,22 @@
 {% block titulo %}Servicios · Cine Paradiso{% endblock %}
 
 {% block contenido %}
-<div class="contenedor">
+<div class="servicios-cliente">
 
     {% if error %}
-        <p class="vacio">{{ error }}</p>
+        <p class="servicio-cliente__vacio">{{ error }}</p>
     {% endif %}
     
     {% if promociones %}
     <h2>Promociones</h2>
-    <div class="grilla">
+    <div class="servicios-cliente__grilla">
         {% for promocion in promociones %}
-        <article>
-            {% if promocion.imagen_url %}
-                <img src="{{ promocion.imagen_url }}" alt="{{ promocion.titulo }}">
-            {% endif %}
+        <article class="servicio-cliente__tarjeta">
+            <div class="servicio-cliente__imagen">
+                {% if promocion.imagen_url %}
+                    <img src="{{ promocion.imagen_url }}" alt="{{ promocion.titulo }}">
+                {% endif %}
+            </div>
             <h4>{{ promocion.titulo }}</h4>
         </article>
         {% endfor %}
@@ -25,16 +27,17 @@
 
     <h2>Comida y bebida</h2>
     {% if comidas %}
-    <div class="grilla">
+    <div class="servicio-cliente__grilla">
         {% for comida in comidas %}
-        <article>
+        <article class="servicio-cliente__tarjeta">
+            <div class="servicio-cliente__imagen"></div>
             <h4>{{ comida.nombre }}</h4>
             <p>$ {{ comida.precio }}</p>
         </article>
         {% endfor %}
     </div>
     {% else %}
-        <p class="vacio">Por ahora no hay servicios disponibles.</p>
+        <p class="servicio-cliente__vacio">Por ahora no hay servicios disponibles.</p>
     {% endif %}
 
 </div>
