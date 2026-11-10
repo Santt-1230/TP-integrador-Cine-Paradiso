@@ -64,21 +64,24 @@ def actualizar_usuario(id, nombre, email, rol):
 
 def obtener_cantidad_peliculas_activas():
     conexion = obtener_conexion()
-    cursor = None
+    cursor = conexion.cursor(dictionary=True)
 
     try:
-        cursor = conexion.cursor(dictionary=True)
-
         cursor.execute("""
-            SELECT COUNT(*) AS cantidad
+            SELECT
+                DATABASE() AS base_datos,
+                COUNT(*) AS total
             FROM peliculas
-            WHERE activa = TRUE
+            WHERE activo = TRUE
         """)
 
         resultado = cursor.fetchone()
 
+        print("BASE DE DATOS:", resultado["base_datos"])
+        print("TOTAL PELICULAS:", resultado["total"])
+
+        return resultado["total"]
+
     finally:
         cursor.close()
         conexion.close()
-
-    return resultado["cantidad"] if resultado else 0

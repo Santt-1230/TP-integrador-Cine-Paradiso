@@ -47,6 +47,8 @@ app.register_blueprint(funciones_bp)
 app.register_blueprint(compras_bp)
 
 
+
+
 @app.errorhandler(RuntimeError)
 def error_de_conexion(error):
     respuesta = construir_error_api(

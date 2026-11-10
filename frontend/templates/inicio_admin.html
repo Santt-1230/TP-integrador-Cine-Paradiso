@@ -18,7 +18,7 @@
 
         <article class="tarjeta-resumen">
             <h2>Películas activas</h2>
-            <p>{{ cantidad_peliculas|default(0, true) }}</p>
+            <p>{{ cantidad_peliculas_activas if cantidad_peliculas_activas is not none else '--'}}</p>
         </article>
 
         <article class="tarjeta-resumen">

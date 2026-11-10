@@ -59,8 +59,14 @@ def update_usuario(id):
 
     return jsonify({"message": "Usuario actualizado correctamente"}), 200
 
-admin_bp.route("/peliculas/activa", methods=["GET"])
+
+
+@admin_bp.route("/peliculas/activa", methods=["GET"])
 @admin_requerido
 def get_peliculas_activas():
+
     cantidad = obtener_cantidad_peliculas_activas()
-    return jsonify({"cantidad": cantidad}), 200
+
+    return jsonify({
+        "total": cantidad
+    }), 200
