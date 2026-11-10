@@ -1,4 +1,4 @@
-from flask import Blueprint, redirect, session, render_template, request, url_for, flash
+from flask import Blueprint, redirect, render_template, url_for, flash
 import api
 
 locales_bp = Blueprint('locales', __name__)
@@ -15,7 +15,7 @@ def redirigir_al_inicio():
 def leer_formulario(campos):
     datos = {}
     for campo in campos:
-        datos[campo] = request.form.get(campo, '')
+        datos[campo] = api.request.form.get(campo, '')
     return datos
 
 def convertir_a_enteros(datos, campos):
@@ -25,10 +25,10 @@ def convertir_a_enteros(datos, campos):
     return convertidos
 
 def verificar_admin():
-    if not session.get('id_usuario'):
+    if not api.session.get('id_usuario'):
         return redirigir_al_login()
     
-    if session.get('rol') != 'administrador':
+    if api.session.get('rol') != 'administrador':
         flash('No tenes permisos para acceder a esta seccion', 'error')
         return redirect(url_for('peliculas_front.inicio'))
 
@@ -36,45 +36,41 @@ def verificar_admin():
 
 @locales_bp.app_context_processor
 def inyectar_locales():
-    try:
-        locales = api.get_lista('/api/locales', 'locales')
-    except api.ApiError:
-        locales = []
+    locales = api.get_lista('/api/locales', 'locales')
     return {'locales':locales}
 
 @locales_bp.route('/locales', methods = ['GET'])
 def mostrar_locales():
-    try:
-        locales = api.get_lista('/api/locales', 'locales')
+    estado, datos_respuesta = api.get('/api/locales')
+    if estado == 200:
+        locales = datos_respuesta.get('locales', [])
         error = None
-    except api.ApiError as error_api:
+    else:
         locales = []
-        error = error_api.mensaje
+        error = api.mensaje_error(datos_respuesta)
     return render_template("locales.html", locales = locales, error = error)
 
 @locales_bp.route('/elegir-cine/<int:id_local>', methods = ['GET'])
 def elegir_cine(id_local):
-    locales = []
+    estado, datos_respuesta = api.get('/api/locales')
+
+    if estado != 200:
+        flash(api.mensaje_error(datos_respuesta), 'error')
+        return redirigir_al_inicio()
+    locales = datos_respuesta.get('locales', [])
     local = None
-    error = None
-    try:
-        locales = api.get_lista('/api/locales', 'locales')
 
-        for local_actual in locales:
-            if local_actual['id_local'] == id_local:
-                local = local_actual
+    for local_actual in locales:
+        if local_actual['id_local'] == id_local:
+            local = local_actual
 
-        if local is None:
-            error = "El cine elegido no existe"
-
-    except api.ApiError as error_api:
-        error = error_api.mensaje
-
-    if error is None:
-        session['cine_id'] = local['id_local']
-        session['cine_nombre'] = local['nombre']
+    if local is None:
+        flash('El cine elegido no existe', 'error')
+    else:
+        api.session['cine_id'] = local['id_local']
+        api.session['cine_nombre'] = local['nombre']
         
-    return redirect('/')
+    return redirigir_al_inicio()
      
 
 @locales_bp.route('/admin/locales', methods=['GET'])
@@ -85,27 +81,32 @@ def admin_locales():
     locales = []
     error = None
     salas_configuradas = 0
-    try:
-        locales = api.get_lista('/api/locales', 'locales')
-        salas = api.pedir('GET', '/api/salas')['salas']
-        for local in locales:
-            local['salas'] = []
-            for sala in salas:
-                if sala['id_local'] == local['id_local']:
-                    local['salas'].append(sala)
-            local['total_butacas'] = sum(
-                sala['capacidad'] for sala in local['salas']
-            )
-        salas_configuradas = len(salas)
-    except api.ApiError as error_api:
-        if error_api.estado == 401:
+    estado, datos_respuesta = api.get('/api/locales')
+    if estado == 401:
+        return redirigir_al_login()
+    if estado == 403:
+        return redirigir_al_inicio()
+    if estado != 200:
+        error = api.mensaje_error(datos_respuesta)
+    else:
+        locales = datos_respuesta.get('locales', [])
+        estado, datos_respuesta = api.get('/api/salas')
+        if estado == 401:
             return redirigir_al_login()
-            
-        if error_api.estado == 403:
+        if estado == 403:
             return redirigir_al_inicio()
-            
-        error = error_api.mensaje
+        if estado != 200:
+            locales = []
+        else:
+            salas = datos_respuesta.get('salas', [])
+            for local in locales:
+                local['salas'] = []
+                for sala in salas:
+                    if sala['id_local'] == local['id_local']:
+                        local['salas'].append(sala)
+                local['total_butacas'] = sum(
+                    sala['capacidad'] for sala in local['salas']
+                )
+            salas_configuradas = len(salas)
     
-        locales = []
-        error = error_api.mensaje
     return render_template("admin_locales.html", locales=locales,salas_configuradas=salas_configuradas, error=error)
