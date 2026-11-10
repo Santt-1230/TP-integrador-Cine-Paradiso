@@ -1,4 +1,4 @@
-from flask import Blueprint, redirect, session, render_template, request, url_for, flash
+from flask import Blueprint, redirect, render_template, url_for, flash
 import api
 
 locales_bp = Blueprint('locales', __name__)
@@ -15,7 +15,7 @@ def redirigir_al_inicio():
 def leer_formulario(campos):
     datos = {}
     for campo in campos:
-        datos[campo] = request.form.get(campo, '')
+        datos[campo] = api.request.form.get(campo, '')
     return datos
 
 def convertir_a_enteros(datos, campos):
@@ -25,10 +25,10 @@ def convertir_a_enteros(datos, campos):
     return convertidos
 
 def verificar_admin():
-    if not session.get('id_usuario'):
+    if not api.session.get('id_usuario'):
         return redirigir_al_login()
     
-    if session.get('rol') != 'administrador':
+    if api.session.get('rol') != 'administrador':
         flash('No tenes permisos para acceder a esta seccion', 'error')
         return redirect(url_for('peliculas_front.inicio'))
 
@@ -67,8 +67,8 @@ def elegir_cine(id_local):
     if local is None:
         flash('El cine elegido no existe', 'error')
     else:
-        session['cine_id'] = local['id_local']
-        session['cine_nombre'] = local['nombre']
+        api.session['cine_id'] = local['id_local']
+        api.session['cine_nombre'] = local['nombre']
         
     return redirigir_al_inicio()
      
