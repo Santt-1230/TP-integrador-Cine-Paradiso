@@ -11,7 +11,7 @@
             <h1>Servicios</h1>
             <p class="servicios-admin__descripcion">Administrá las opciones disponibles para los clientes.</p>
         </div>
-        <a class="servicios-admin__boton" href="{{url_for('servicios.admin_servicio_nuevo')}}">+ Agregar servicio</a>
+        <a class="boton-tabla boton-tabla--agregar" href="{{url_for('servicios.admin_servicio_nuevo')}}">+ Agregar servicio</a>
     </div>
 
     {% if error %}
@@ -21,7 +21,8 @@
 
     <div class="servicios-admin__tarjeta">
         <div class="tabla-contenedor">
-            <table class="tabla-admin"></table>
+            <table class="tabla-admin">
+
                 <thead>
                     <tr>
                         <th>Servicios</th>
@@ -30,45 +31,66 @@
                         <th>Estado</th>
                         <th>Acciones</th>
                     </tr>
-            </thead>
-            <tbody>
-                {% for servicio in servicios %}
-                <tr>
-                    <td>{{ servicio.nombre }}</td>
-                    <td>{{ servicio.tipo }}</td>
-                    <td>$ {{ servicio.precio }}</td>
-                    <td>
-                        {% if servicio.activo %}
-                            <span class="estado-admin">Activo</span>
-                        {% else %}
-                            <span class="estado-admin estado-admin--inactivo">Inactivo</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        <div class="servicios-admin__acciones">
-                            <a class="servicios-admin__accion" href="{{ url_for('servicios.admin_servicio_editar', id_producto=servicio.id_producto) }}">Editar</a>
+                </thead>
+
+                <tbody>
+                    {% for servicio in servicios %}
+                    <tr>
+                        <td>{{ servicio.nombre }}</td>
+                        <td>{{ servicio.tipo }}</td>
+                        <td>$ {{ servicio.precio }}</td>
+
+                        <td>
                             {% if servicio.activo %}
-                            <form method="post" action="{{ url_for('servicios.admin_servicio_dar_de_baja', id_producto=servicio.id_producto) }}">
-                                <button type="submit" class="servicios-admin__accion servicios-admin__accion--baja">Dar de baja</button>
-                            </form>
+                                <span class="estado-admin">Activo</span>
                             {% else %}
-                            <form method="post" action="{{ url_for('servicios.admin_servicio_activar', id_producto=servicio.id_producto) }}">
-                                <button type="submit" class="servicios-admin__accion">Activar</button>
-                            </form>
+                                <span class="estado-admin estado-admin--inactivo">Inactivo</span>
                             {% endif %}
-                        </div>
-                    </td>
-                </tr>
-                {% else %}
-                <tr>
-                    <td colspan="5">Todavía no hay servicios.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                        </td>
+
+                        <td>
+                            <div class="servicios-admin__acciones">
+
+                                <a class="boton-tabla boton-tabla--editar"
+                                   href="{{ url_for('servicios.admin_servicio_editar', id_producto=servicio.id_producto) }}">
+                                   Editar
+                                </a>
+
+                                {% if servicio.activo %}
+                                <form method="post"
+                                      action="{{ url_for('servicios.admin_servicio_dar_de_baja', id_producto=servicio.id_producto) }}">
+                                    <button type="submit" 
+                                            class="boton-tabla boton-tabla--baja">
+                                        Dar de baja
+                                    </button>
+                                </form>
+                                {% else %}
+                                <form method="post" 
+                                      action="{{ url_for('servicios.admin_servicio_activar', id_producto=servicio.id_producto) }}">
+                                    <button type="submit"
+                                            class="servicios-admin__accion">
+                                            Activar
+                                    </button>
+                                </form>
+                                {% endif %}
+
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5">Todavía no hay servicios.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+
+            </table>
+        </div>
+
+        <div class="servicios-admin__pie">
+            Mostrando {{ servicios|length }} servicios
+        </div>
     </div>
-    <div class="servicios-admin__pie">Mostrando {{ servicios|length }} servicios</div>
-</div>
 <p class="servicios-admin__aviso">Los servicios están disponibles para todas las salas y se agregan junto con las entradas. Dar de baja un servicio no modifica las compras anteriores.</p>
 </div>
 {% endblock %}

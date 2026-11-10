@@ -259,6 +259,52 @@ a {
     text-decoration: underline;
 }
 
+
+.boton-tabla {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 0.85rem;
+    border: 1px solid transparent;
+    border-radius: 0.4rem;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    white-space: nowrap;
+}
+
+.boton-tabla--agregar {
+    background-color: #ff6464;
+    color: white;
+}
+
+.boton-tabla--agregar:hover {
+    background-color: #ed5050;
+}
+
+.boton-tabla--editar {
+    background-color: #f4f4f6;
+    border-color: #e5e5e8;
+    color: #515560;
+}
+
+.boton-tabla--editar:hover {
+    background-color: #e9e9ed;
+}
+
+.boton-tabla--baja {
+    background-color: #fff1f1;
+    border-color: #ffdada;
+    color: #d34d4d;
+}
+
+.boton-tabla--baja:hover {
+    background-color: #ffe2e2;
+}
+
 .tabla-contenedor {
     width: 100%;
     overflow-x: auto;
@@ -825,7 +871,6 @@ a {
     background: #ffe9ea; color: #b53840; font-size: 12px;
 }
 
-/* Formulario de crear / editar */
 .servicios-admin .formulario-admin label {
     font-size: 12px; font-weight: 700; color: var(--admin-texto);
 }
@@ -839,4 +884,134 @@ a {
 .servicios-admin__check { display: flex; align-items: center; gap: 8px; }
 .servicios-admin__pie-formulario {
     display: flex; justify-content: flex-end; align-items: center; gap: 10px;
+}
+ 
+
+.servicios-admin .tabla-admin {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: auto;
+}
+
+.servicios-admin .tabla-admin th {
+    padding: 16px 22px;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.servicios-admin .tabla-admin td {
+    padding: 17px 22px;
+    border-top: 1px solid #f0f1f4;
+    vertical-align: middle;
+    line-height: 1.5;
+}
+
+.servicios-admin .tabla-admin th:last-child {
+    text-align: right;
+    padding-right: 25px;
+}
+
+.servicios-admin .tabla-admin tbody tr:hover {
+    background-color: #fdfdff;
+}
+
+.servicios-admin__acciones {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+}
+
+.servicios-admin__acciones form {
+    margin: 0;
+}
+
+.servicios-admin__tarjeta {
+    width: 100%;
+    background-color: white;
+    border: 1px solid #e5e5e9;
+    border-radius: 10px;
+    overflow-x: auto;
+}
+
+.servicios-admin__pie {
+    padding: 13px 20px;
+    border-top: 1px solid #f0f1f4;
+    background-color: #fafafd;
+}
+ 
+
+.tabla-servicios {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+}
+
+.tabla-servicios th,
+.tabla-servicios td {
+    padding: 16px 20px;
+    text-align: left;
+    vertical-align: middle;
+    border-bottom: 1px solid #f0f1f4;
+}
+
+
+.tabla-servicios th:nth-child(1) {
+    width: 27%;
+}
+
+.tabla-servicios th:nth-child(2) {
+    width: 17%;
+}
+
+.tabla-servicios th:nth-child(3) {
+    width: 15%;
+}
+
+.tabla-servicios th:nth-child(4) {
+    width: 13%;
+}
+
+.tabla-servicios th:nth-child(5) {
+    width: 28%;
+}
+
+.tabla-servicios th {
+    background-color: #fafafd;
+    color: #9296a1;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.35px;
+}
+
+.tabla-servicios td {
+    color: #515560;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.tabla-servicios td:first-child {
+    color: var(--admin-texto);
+    font-weight: 600;
+}
+
+.servicios-admin__acciones {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+.servicios-admin__acciones form {
+    margin: 0;
+}
+
+.servicios-admin__acciones .boton-tabla {
+    padding: 7px 10px;
+    font-size: 11px;
+}
+
+.tabla-servicios tbody tr:hover {
+    background-color: #fdfdff;
 }
