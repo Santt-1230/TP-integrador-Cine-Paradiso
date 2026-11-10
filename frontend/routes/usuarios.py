@@ -88,6 +88,34 @@ def reenviar_verificacion():
         return render_template("confirmar_email.html", email=email, error=e.mensaje)
     return render_template("confirmar_email.html", email=email,mensaje="Si el email está pendiente de confirmación, te enviamos un nuevo mail.")
 
+
+@usuarios_bp.route("/olvide-contrasena", methods=["GET", "POST"])
+def olvide_contrasena():
+    if request.method == "GET":
+        return render_template("olvide_contrasena.html")
+
+    email = request.form.get("email", "")
+    try:
+        api.pedir("POST", "/api/auth/olvide-contrasena", {"email": email})
+    except api.ApiError as e:
+        return render_template("olvide_contrasena.html", error=e.mensaje)
+    return render_template("olvide_contrasena.html", mensaje="Si el email tiene una cuenta, te enviamos un mail para cambiar la contraseña.")
+
+
+@usuarios_bp.route("/restablecer-contrasena", methods=["GET", "POST"])
+def restablecer_contrasena():
+    if request.method == "GET":
+        return render_template("restablecer_contrasena.html", token=request.args.get("token", ""))
+
+    campos = ("token", "contrasena_nueva", "repetir_contrasena")
+    datos = {campo: request.form.get(campo, "") for campo in campos}
+    try:
+        api.pedir("POST", "/api/auth/restablecer-contrasena", datos)
+    except api.ApiError as e:
+        return render_template("restablecer_contrasena.html", token=datos["token"], error=e.mensaje)
+    return render_template("restablecer_contrasena.html", ok=True)
+
+
 @usuarios_bp.route("/mi-cuenta", methods=["GET", "POST"])
 def mi_cuenta():
     if not session.get("id_usuario"):
