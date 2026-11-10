@@ -87,9 +87,6 @@ CREATE TABLE IF NOT EXISTS tokens_usuario (
 )CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 
-SET NAMES utf8mb4;
-
-
 CREATE TABLE IF NOT EXISTS funciones (
 	id_funcion INT AUTO_INCREMENT PRIMARY KEY,
 	id_pelicula INT NOT NULL,

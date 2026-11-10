@@ -60,3 +60,25 @@ def actualizar_usuario(id, nombre, email, rol):
     finally:
         cursor.close()
         conexion.close()
+
+
+def obtener_cantidad_peliculas_activas():
+    conexion = obtener_conexion()
+    cursor = None
+
+    try:
+        cursor = conexion.cursor(dictionary=True)
+
+        cursor.execute("""
+            SELECT COUNT(*) AS cantidad
+            FROM peliculas
+            WHERE activa = TRUE
+        """)
+
+        resultado = cursor.fetchone()
+
+    finally:
+        cursor.close()
+        conexion.close()
+
+    return resultado["cantidad"] if resultado else 0

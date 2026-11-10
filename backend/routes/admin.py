@@ -5,7 +5,9 @@ from repositories.admin import (
     actualizar_usuario,
     obtener_usuario_por_id,
     obtener_usuarios,
+    obtener_cantidad_peliculas_activas
 )
+
 from utils import admin_requerido
 from constants import ROLES_VALIDOS
 
@@ -56,3 +58,9 @@ def update_usuario(id):
         return jsonify({"error": "Ese correo ya está en uso"}), 409
 
     return jsonify({"message": "Usuario actualizado correctamente"}), 200
+
+admin_bp.route("/peliculas/activa", methods=["GET"])
+@admin_requerido
+def get_peliculas_activas():
+    cantidad = obtener_cantidad_peliculas_activas()
+    return jsonify({"cantidad": cantidad}), 200
