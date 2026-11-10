@@ -33,11 +33,6 @@ app.register_blueprint(perfil_bp)
 app.register_blueprint(funciones_front_bp)
 app.register_blueprint(salas_bp)
 app.register_blueprint(compras_bp)
-@app.route('/mis-compras')
-def mis_compras():
-    return render_template('perfil.html')
-
-
 
 
 if __name__ == "__main__":

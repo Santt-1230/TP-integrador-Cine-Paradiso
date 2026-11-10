@@ -1,7 +1,8 @@
 """Llamadas del Frontend al Backend (requests). Un solo lugar para la URL, el timeout y los errores."""
 import os
 import requests
-from flask import session
+from flask import session, url_for, redirect
+from functools import wraps
 
 BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:5000")
 
@@ -122,3 +123,32 @@ def mensaje_error(datos):
     if errores:
         return errores[0].get("description") or errores[0].get("message")
     return datos.get("message", "Ocurrió un error")
+
+
+
+def admin_front_requerido(funcion):
+
+    @wraps(funcion)
+    def verificar_acceso(*args, **kwargs):
+
+        if not session.get("id_usuario"):
+            return redirect(url_for("usuarios.login"))
+
+        if session.get("rol") != "administrador":
+            return redirect(url_for("peliculas_front.inicio"))
+
+        return funcion(*args, **kwargs)
+
+    return verificar_acceso
+
+
+def limpiar_sesion_front():
+
+    for clave in (
+        "id_usuario",
+        "nombre",
+        "apellido",
+        "rol",
+        "cookie_backend"
+    ):
+        session.pop(clave, None)
