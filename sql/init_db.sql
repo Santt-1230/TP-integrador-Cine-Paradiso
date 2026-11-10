@@ -170,6 +170,44 @@ CREATE TABLE IF NOT EXISTS compra_productos (
 	FOREIGN KEY (id_producto) REFERENCES productos(id_producto)
 );
 
+CREATE TABLE IF NOT EXISTS qr (
+    id_qr INT AUTO_INCREMENT PRIMARY KEY,
+    id_compra INT NOT NULL,
+    id_entrada INT NULL UNIQUE,
+    id_compra_producto INT NULL UNIQUE,
+    tipo ENUM('entrada', 'producto') NOT NULL,
+    token VARCHAR(64) NOT NULL UNIQUE,
+    fecha_generacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    fecha_uso DATETIME NULL,
+    estado ENUM('valido', 'utilizado', 'expirado', 'cancelado')
+        NOT NULL DEFAULT 'valido',
+    id_validador INT NULL,
+
+    FOREIGN KEY (id_compra)
+        REFERENCES compras(id_compra),
+
+    FOREIGN KEY (id_entrada)
+        REFERENCES entradas(id_entrada),
+
+    FOREIGN KEY (id_compra_producto)
+        REFERENCES compra_productos(id_compra_producto),
+
+    FOREIGN KEY (id_validador)
+        REFERENCES usuarios(id_usuario),
+
+    CONSTRAINT chk_qr_tipo_referencia
+        CHECK (
+            (tipo = 'entrada'
+                AND id_entrada IS NOT NULL
+                AND id_compra_producto IS NULL)
+            OR
+            (tipo = 'producto'
+                AND id_entrada IS NULL
+                AND id_compra_producto IS NOT NULL)
+        )
+);
+
+
 
 INSERT INTO usuarios (nombre, apellido, email, fecha_nacimiento, contrasena_hash, rol, email_verificado) VALUES (
 	'Admin', 'Cine Paradiso', 'admin@cineparadiso.com', '1990-01-01', 

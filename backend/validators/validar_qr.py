@@ -1,6 +1,5 @@
 
 
-
 def validar_token(token: str) -> bool:
 
     if not isinstance(token, str):
@@ -14,3 +13,18 @@ def validar_token(token: str) -> bool:
             return False
 
     return True
+
+
+def validar_categoria(categoria: str) -> bool:
+
+    if not isinstance(categoria, str):
+        return False
+
+    categorias_validas = {
+        "bebida",
+        "comida",
+        "estacionamiento",
+        "vip"
+    }
+
+    return categoria in categorias_validas
