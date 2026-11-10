@@ -1,11 +1,6 @@
 {% extends "base.html" %}
 
-{% block titulo %}
-    Administración - Cine Paradiso
-{% endblock %}
-
 {% block estilos_extra %}
-    {{ super() }}
 <link rel="stylesheet"
       href="{{ url_for('static', filename='css/admin.css') }}">
 {% endblock %}
@@ -69,7 +64,7 @@
                 Usuarios
             </a>
 
-            <a href="/admin/validar_qr">
+            <a href="/admin/qr">
                 <i class="bi bi-qr-code-scan"></i>
                 Escaneo de QR
             </a>

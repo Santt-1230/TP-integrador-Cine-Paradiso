@@ -1,232 +1,42 @@
-from repositories.validar_qr import (
-    obtener_qr_entrada,
-    obtener_qr_producto,
-    validar_qr_entrada,
-    validar_qr_producto
-)
+from repositories.validar_qr import validar_qr, obtener_qr
 
 
-CATEGORIAS_PRODUCTOS = {
-    "bebida",
-    "comida",
-    "estacionamiento",
-    "vip"
-}
+def procesar_validacion_qr(token: str, id_validador: int) -> dict:
 
+    resultado = validar_qr(token, id_validador) #devuelve 1 si se modificó un registro, 0 si no se modificó ningún registro 
 
+    if resultado["filas"] == 1:
 
-def error_qr(codigo: str, mensaje: str, detalles: dict = None) -> dict:
+        qr = obtener_qr(token)
 
-    respuesta = {
-        "valido": False,
-        "codigo": codigo,
-        "mensaje": mensaje
-    }
+        return {
+            "valido": True,
+            "mensaje": "QR aceptado",
+            "datos": qr
+        }
 
-    if detalles is not None:
-        respuesta["detalles"] = detalles
-
-    return respuesta
-
-def obtener_qr(token: str, tipo: str) -> dict | None:
-
-    if tipo == "entrada":
-        return obtener_qr_entrada(token)
-
-    if tipo == "producto":
-        return obtener_qr_producto(token)
-
-    return None
-
-
-def comprobar_estado_qr(qr: dict) -> dict | None:
-
-    estado = qr["estado_qr"]
-
-    if estado == "utilizado":
-        return error_qr(
-            "QR_UTILIZADO",
-            "Este QR ya fue utilizado.",
-            qr
-        )
-
-    if estado == "cancelado":
-        return error_qr(
-            "QR_CANCELADO",
-            "Este QR fue cancelado.",
-            qr
-        )
-
-    if estado == "expirado":
-        return error_qr(
-            "QR_EXPIRADO",
-            "Este QR está expirado.",
-            qr
-        )
-
-    if estado != "valido":
-        return error_qr(
-            "QR_NO_VALIDO",
-            "El QR no se encuentra disponible.",
-            qr
-        )
-
-    return None
-
-def comprobar_entrada(qr: dict) -> dict | None:
-
-    if qr["estado_compra"] != "confirmada":
-        return error_qr(
-            "COMPRA_NO_CONFIRMADA",
-            "La compra no está confirmada.",
-            qr
-        )
-
-    if qr["estado_entrada"] != "confirmada":
-        return error_qr(
-            "ENTRADA_NO_CONFIRMADA",
-            "La entrada no está confirmada.",
-            qr
-        )
-
-    if qr["estado_funcion"] != "programada":
-        return error_qr(
-            "FUNCION_NO_DISPONIBLE",
-            "La función no está disponible.",
-            qr
-        )
-
-    return None
-
-
-def comprobar_producto(qr: dict, categoria: str) -> dict | None:
-
-    if categoria not in CATEGORIAS_PRODUCTOS:
-        return error_qr(
-            "CATEGORIA_INVALIDA",
-            "La categoría seleccionada no es válida."
-        )
-
-    if qr["estado_compra"] != "confirmada":
-        return error_qr(
-            "COMPRA_NO_CONFIRMADA",
-            "La compra no está confirmada.",
-            qr
-        )
-
-    if qr["categoria"] != categoria:
-        return error_qr(
-            "CATEGORIA_INCORRECTA",
-            "El QR no corresponde a la categoría seleccionada.",
-            qr
-        )
-
-    return None
-
-
-def procesar_validacion(
-    token: str,
-    id_validador: int,
-    tipo: str,
-    categoria: str = None
-) -> dict:
-
-
-    qr = obtener_qr(token, tipo)
+    qr = obtener_qr(token)
 
     if qr is None:
-        return error_qr(
-            "QR_NO_EXISTE",
-            "El QR no existe o no corresponde al tipo seleccionado."
-        )
+        return {
+            "valido": False,
+            "mensaje": "El QR no existe"
+        }
 
+    if qr["estado"] == "utilizado":
+        return {
+            "valido": False,
+            "mensaje": "El QR ya fue utilizado",
+            "fecha_uso": str(qr["fecha_uso"])
+        }
 
-    error = comprobar_estado_qr(qr)
+    if qr["estado"] == "cancelado":
+        return {
+            "valido": False,
+            "mensaje": "El QR fue cancelado"
+        }
 
-    if error is not None:
-        return error
-
-
-    if tipo == "entrada":
-
-        error = comprobar_entrada(qr)
-
-        if error is not None:
-            return error
-
-        resultado = validar_qr_entrada(
-            token,
-            id_validador
-        )
-
-    else:
-
-        error = comprobar_producto(qr, categoria)
-
-        if error is not None:
-            return error
-
-        resultado = validar_qr_producto(
-            token,
-            id_validador,
-            categoria
-        )
-
-
-    if resultado["filas"] <= 0:
-
-        return error_qr(
-            "QR_NO_VALIDADO",
-            "No se pudo validar el QR. Es posible que haya sido utilizado por otro administrador."
-        )
-
-
-    qr_actualizado = obtener_qr(token, tipo)
-
-    if qr_actualizado is None:
-        return error_qr(
-            "ERROR_VALIDACION",
-            "No se pudieron recuperar los datos del QR."
-        )
-
-
-    respuesta = {
-        "valido": True,
-        "mensaje": "QR validado correctamente."
+    return {
+        "valido": False,
+        "mensaje": "No se pudo validar el QR"
     }
-
-    if tipo == "entrada":
-
-        respuesta["mensaje"] = "Entrada validada correctamente. Puede ingresar."
-        respuesta["entrada"] = qr_actualizado
-
-    else:
-
-        respuesta["mensaje"] = "Producto validado correctamente. Puede realizar el retiro."
-        respuesta["detalles"] = qr_actualizado
-
-    return respuesta
-
-def procesar_validacion_entrada(
-    token: str,
-    id_validador: int
-) -> dict:
-
-    return procesar_validacion(
-        token,
-        id_validador,
-        "entrada"
-    )
-
-def procesar_validacion_producto(
-    token: str,
-    id_validador: int,
-    categoria: str
-) -> dict:
-
-    return procesar_validacion(
-        token,
-        id_validador,
-        "producto",
-        categoria
-    )

@@ -1,128 +1,50 @@
-from flask import Blueprint, jsonify,request, session, current_app
-from validators.validar_qr import validar_token, validar_categoria
-from services.validar_qr import procesar_validacion_entrada, procesar_validacion_producto
+from flask import Blueprint,request, jsonify, session
+from services.validar_qr import procesar_validacion_qr
+from validators.validar_qr import validar_token
 from utils import admin_requerido
 
-validar_qr_bp = Blueprint('qr_api', __name__, url_prefix='/api/qr')
+validar_qr = Blueprint('validar_qr', __name__, url_prefix='/api/qr')
 
+@validar_qr.route('/validar', methods=['PATCH'])
+@admin_requerido
+def validacion_qr():
 
+    datos = request.get_json(silent=True)
 
-def validar_qr_por_tipo(tipo: str):
+    if not datos:
+        return jsonify({
+            "mensaje": "Debe proporcionar los datos"
+        }), 400
 
-    token = request.form.get("token", "").strip()
-    categoria = request.form.get("categoria", "").strip()
+    token = datos.get("token")
 
     if not validar_token(token):
+        return jsonify({
+            "mensaje": "El token tiene un formato inválido"
+        }), 400
 
-        resultado = {
-            "valido": False,
-            "mensaje": "El token tiene un formato inválido."
-        }
+    id_validador = session.get("id_usuario")
 
-        codigo_http = 400
-    
-    elif tipo == "entrada":
+    if id_validador is None:
+        return jsonify({
+            "mensaje": "Debe iniciar sesión"
+        }), 401
 
-        try:
+    try:
+        resultado = procesar_validacion_qr(
+            token,
+            id_validador
+        )
 
-            resultado = procesar_validacion_entrada(
-                token,
-                session["id_usuario"]
-            )
+        if resultado["valido"]:
+            return jsonify(resultado), 200
 
-        except Exception:
+        if resultado["mensaje"] == "El QR no existe":
+            return jsonify(resultado), 404
 
-            current_app.logger.exception(
-                "Error al validar el QR de entrada."
-            )
+        return jsonify(resultado), 409
 
-            resultado = {
-                "valido": False,
-                "mensaje": "Error al comunicarse con la base de datos."
-            }
-
-            codigo_http = 503
-
-        else:
-
-            if resultado["valido"]:
-                codigo_http = 200
-
-            elif resultado.get("codigo") == "QR_NO_EXISTE":
-                codigo_http = 404
-
-            else:
-                codigo_http = 409
-
-    # Validar producto.
-    elif tipo == "producto":
-
-        if not validar_categoria(categoria):
-
-            resultado = {
-                "valido": False,
-                "mensaje": "La categoría seleccionada no es válida."
-            }
-
-            codigo_http = 400
-
-        else:
-
-            try:
-
-                resultado = procesar_validacion_producto(
-                    token,
-                    session["id_usuario"],
-                    categoria
-                )
-
-            except Exception:
-
-                current_app.logger.exception(
-                    "Error al validar el QR de producto."
-                )
-
-                resultado = {
-                    "valido": False,
-                    "mensaje": "Error al comunicarse con la base de datos."
-                }
-
-                codigo_http = 503
-
-            else:
-
-                if resultado["valido"]:
-                    codigo_http = 200
-
-                elif resultado.get("codigo") == "QR_NO_EXISTE":
-                    codigo_http = 404
-
-                else:
-                    codigo_http = 409
-
-    else:
-
-        resultado = {
-            "valido": False,
-            "mensaje": "Tipo de QR inválido."
-        }
-
-        codigo_http = 400
-
-    return jsonify(resultado), codigo_http
-
-
-
-
-@validar_qr_bp.route('/entradas/validar', methods=['POST'])
-@admin_requerido
-def validar_entrada():
-
-    return validar_qr_por_tipo("entrada")
-
-
-@validar_qr_bp.route('/productos/validar', methods=['POST'])
-@admin_requerido
-def validar_producto():
-
-    return validar_qr_por_tipo("producto")
+    except RuntimeError:
+        return jsonify({
+            "mensaje": "Error al comunicarse con la base de datos"
+        }), 503
