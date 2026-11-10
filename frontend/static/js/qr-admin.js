@@ -284,7 +284,6 @@
                 ["id_compra_producto", "Detalle de compra"],
                 ["numero_factura", "Factura"],
                 ["fecha_uso", "Fecha de uso"],
-                ["estado_entrada", "Estado de entrada"],
                 ["estado_compra", "Estado de compra"]
 
             ];

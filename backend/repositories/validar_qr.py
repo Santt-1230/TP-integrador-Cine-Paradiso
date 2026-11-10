@@ -1,5 +1,6 @@
 from db import ejecutar_consulta, ejecutar_mutacion
 
+
 def obtener_qr_entrada(token: str) -> dict | None:
 
     sql = """
@@ -59,11 +60,14 @@ def obtener_qr_entrada(token: str) -> dict | None:
         INNER JOIN butacas
             ON entradas.id_butaca = butacas.id_butaca
 
-        WHERE qr.token = %s
-        AND qr.tipo = 'entrada';
+        WHERE qr.tipo = 'entrada'
+        AND (
+            qr.token = %s
+            OR qr.codigo_manual = %s
+        );
     """
 
-    resultado = ejecutar_consulta(sql, (token,))
+    resultado = ejecutar_consulta(sql, (token, token))
 
     if not resultado:
         return None
@@ -112,11 +116,15 @@ def obtener_qr_producto(token: str) -> dict | None:
         INNER JOIN compras
             ON qr.id_compra = compras.id_compra
 
-        WHERE qr.token = %s
-        AND qr.tipo = 'producto';
+        WHERE qr.tipo = 'producto'
+
+        AND (
+            qr.token = %s
+            OR qr.codigo_manual = %s
+        );
     """
 
-    resultado = ejecutar_consulta(sql, (token,))
+    resultado = ejecutar_consulta(sql, (token, token))
 
     if not resultado:
         return None
@@ -148,17 +156,23 @@ def validar_qr_entrada(token: str, id_validador: int) -> dict:
             entradas.estado = 'utilizada',
             entradas.fecha_uso = NOW()
 
-        WHERE qr.token = %s
+        WHERE qr.tipo = 'entrada'
 
-        AND qr.tipo = 'entrada'
+        AND (
+            qr.token = %s
+            OR qr.codigo_manual = %s
+        )
+
         AND qr.estado = 'valido'
-
         AND entradas.estado = 'confirmada'
         AND compras.estado = 'confirmada'
         AND funciones.estado = 'programada';
     """
 
-    return ejecutar_mutacion(sql, (id_validador, token))
+    return ejecutar_mutacion(
+        sql,
+        (id_validador, token, token)
+    )
 
 
 def validar_qr_producto(
@@ -188,16 +202,19 @@ def validar_qr_producto(
             qr.fecha_uso = NOW(),
             qr.id_validador = %s
 
-        WHERE qr.token = %s
+        WHERE qr.tipo = 'producto'
 
-        AND qr.tipo = 'producto'
+        AND (
+            qr.token = %s
+            OR qr.codigo_manual = %s
+        )
+
         AND qr.estado = 'valido'
-
         AND productos.tipo = %s
         AND compras.estado = 'confirmada';
     """
 
     return ejecutar_mutacion(
         sql,
-        (id_validador, token, categoria)
+        (id_validador, token, token, categoria)
     )

@@ -9,8 +9,17 @@ validar_qr_bp = Blueprint('qr_api', __name__, url_prefix='/api/qr')
 
 def validar_qr_por_tipo(tipo: str):
 
-    token = request.form.get("token", "").strip()
-    categoria = request.form.get("categoria", "").strip()
+    datos = request.get_json(silent=True)
+
+    if isinstance(datos, dict):
+
+        token = str(datos.get("token") or "").strip()
+        categoria = str(datos.get("categoria") or "").strip()
+
+    else:
+
+        token = request.form.get("token", "").strip()
+        categoria = request.form.get("categoria", "").strip()
 
     if not validar_token(token):
 

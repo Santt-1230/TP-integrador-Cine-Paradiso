@@ -174,6 +174,7 @@ CREATE TABLE IF NOT EXISTS qr (
     id_compra_producto INT NULL UNIQUE,
     tipo ENUM('entrada', 'producto') NOT NULL,
     token VARCHAR(64) NOT NULL UNIQUE,
+	token_manual VARCHAR(12) NOT NULL UNIQUE,
     fecha_generacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     fecha_uso DATETIME NULL,
     estado ENUM('valido', 'utilizado', 'expirado', 'cancelado')
