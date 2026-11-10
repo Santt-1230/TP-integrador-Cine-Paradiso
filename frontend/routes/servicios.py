@@ -25,16 +25,11 @@ def datos_del_formulario():
 @servicios_bp.route("/servicios")
 def servicios():
     try:
-        todos = api.pedir("GET", "/api/servicios")
+        productos = api.pedir("GET", "/api/servicios")
         promociones = api.pedir("GET", "/api/promociones")
     except api.ApiError as e:
-        return render_template("servicios.html", comidas=[], promociones=[], error=e.mensaje)
-    comidas = []
-    for servicio in todos:
-        if servicio["tipo"] in ("comida", "bebida"):
-            comidas.append(servicio)
-
-    return render_template("servicios.html", comidas=comidas, promociones=promociones)
+        return render_template("servicios.html", productos=[], promociones=[], error=e.mensaje)
+    return render_template("servicios.html", productos=productos, promociones=promociones)
 
 
 @servicios_bp.route("/admin/servicios")

@@ -1,45 +1,68 @@
-{% extends "base.html" %}
+{% extends "base_peliculas.html" %}
 
 {% block titulo %}Servicios · Cine Paradiso{% endblock %}
 
 {% block contenido %}
-<div class="servicios-cliente">
+
+<div class="contenedor">
 
     {% if error %}
-        <p class="servicio-cliente__vacio">{{ error }}</p>
+        <p class="vacio">{{ error }}</p>
     {% endif %}
     
     {% if promociones %}
-    <h2>Promociones</h2>
-    <div class="servicios-cliente__grilla">
-        {% for promocion in promociones %}
-        <article class="servicio-cliente__tarjeta">
-            <div class="servicio-cliente__imagen">
-                {% if promocion.imagen_url %}
-                    <img src="{{ promocion.imagen_url }}" alt="{{ promocion.titulo }}">
-                {% endif %}
-            </div>
-            <h4>{{ promocion.titulo }}</h4>
+    <section id="promociones">
+        <div class="seccion-titulo">
+            <h2>Promociones</h2>
+        </div>
+
+    <div class="grilla grilla-chica">
+        {% for promo in promociones %}
+        <article class="promo">
+            {% if promo.imagen_url %}
+                <img src="{{ promo.imagen_url }}"
+                     alt="{{ promo.titulo }}"
+                     loading="lazy">
+            {% endif %}
+
+            <h3>{{ promo.titulo }}</h3>
+
+            {% if promo.descripcion %}
+                <p>{{ promo.descripcion }}</p>
+            {% endif %}
         </article>
         {% endfor %}
     </div>
+    </section>
     {% endif %}
 
-    <h2>Comida y bebida</h2>
-    {% if comidas %}
-    <div class="servicio-cliente__grilla">
-        {% for comida in comidas %}
-        <article class="servicio-cliente__tarjeta">
-            <div class="servicio-cliente__imagen"></div>
-            <h4>{{ comida.nombre }}</h4>
-            <p>$ {{ comida.precio }}</p>
-        </article>
-        {% endfor %}
-    </div>
-    {% else %}
-        <p class="servicio-cliente__vacio">Por ahora no hay servicios disponibles.</p>
-    {% endif %}
+    <section id="productos">
+        <div class="seccion-titulo">
+            <h2>Productos</h2>
+        </div>
+
+        {% if productos %}
+        <div class="grilla grilla-chica">
+            {% for producto in productos %}
+            <article class="producto">
+                <h3>{{ producto.nombre }}</h3>
+
+                {% if producto.descripcion %}
+                    <p>{{ producto.descripcion }}</p>
+                {% endif %}
+
+                {% if producto.precio is not none %}
+                    <p class="precio">$ {{ producto.precio }}</p>
+                {% endif %}
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+            <p class="vacio">Por ahora no hay productos disponibles.</p>
+        {% endif %}
+    </section>
 
 </div>
+
 {% endblock %}
 
