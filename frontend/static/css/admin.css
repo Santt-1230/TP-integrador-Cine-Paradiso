@@ -1,3 +1,4 @@
+
 :root {
     --admin-rojo: #ff6268;
     --admin-rojo-oscuro: #ed4f57;
@@ -745,7 +746,6 @@ a {
     color: #a73535;
     font-size: 13px;
     font-weight: 600;
-}
 .tabla-salas td.estado-activa{
     color: green;
     font-weight: bold;
@@ -961,12 +961,6 @@ a {
     border-radius: inherit;
 }
 
-
-/* =====================================================
-   VALIDACIÓN QR
-   Estilos exclusivos de #qr-admin.
-   No modificar ni afectar otras páginas del panel.
-===================================================== */
 
 #qr-admin {
     width: 100%;

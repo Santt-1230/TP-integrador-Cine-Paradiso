@@ -4,26 +4,31 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/qr-admin.css') }}">
 {% endblock %}
 
+
 {% block contenido_admin %}
 
 <section
     class="qr-admin"
     id="qr-admin"
-    data-validar-url="{{ url_for('validar_qr.validar_qr') }}"
+    data-validar-url="/admin/api/qr/validar"
 >
+
+    <!-- ENCABEZADO -->
 
     <header class="qr-admin__encabezado">
 
         <div>
+
             <p class="qr-admin__migas">
-                ADMINISTRACIÓN / CONTROL DE QR
+                ADMINISTRACIÓN / VALIDACIÓN DE CÓDIGOS
             </p>
 
-            <h1>Validación de QR</h1>
+            <h1>Validar código</h1>
 
             <p class="qr-admin__descripcion">
-                Escaneá entradas y productos de Cine Paradiso.
+                Escaneá el código QR o ingresalo manualmente para comprobar su validez.
             </p>
+
         </div>
 
         <span class="qr-admin__etiqueta">
@@ -33,315 +38,258 @@
     </header>
 
 
-    <section id="qr-pantalla-tipos" class="qr-seleccion">
+    <!-- CAMBIAR SELECCIÓN -->
 
-        <div class="qr-seleccion__encabezado">
-            <h2>¿Qué querés validar?</h2>
-
-            <p>
-                Seleccioná el tipo de código QR que vas a escanear.
-            </p>
-        </div>
-
-        <div class="qr-seleccion__opciones">
-
-            <button
-                type="button"
-                class="qr-opcion"
-                data-tipo="entrada"
-            >
-                <span class="qr-opcion__icono">🎟️</span>
-
-                <span class="qr-opcion__titulo">
-                    Entradas
-                </span>
-
-                <span class="qr-opcion__descripcion">
-                    Validar el acceso a las salas de cine.
-                </span>
-            </button>
-
-
-            <button
-                type="button"
-                class="qr-opcion"
-                data-tipo="producto"
-            >
-                <span class="qr-opcion__icono">🛍️</span>
-
-                <span class="qr-opcion__titulo">
-                    Productos
-                </span>
-
-                <span class="qr-opcion__descripcion">
-                    Validar el retiro de productos y servicios.
-                </span>
-            </button>
-
-        </div>
-
-    </section>
-
-
-    <section
-        id="qr-pantalla-categorias"
-        class="qr-seleccion"
-        hidden
+    <button
+        type="button"
+        class="qr-boton qr-boton--secundario"
+        id="qr-volver-seleccion"
     >
-
-        <div class="qr-seleccion__encabezado">
-            <h2>Seleccionar categoría</h2>
-
-            <p>
-                ¿Qué tipo de producto o servicio vas a validar?
-            </p>
-        </div>
-
-        <div class="qr-seleccion__categorias">
-
-            <button
-                type="button"
-                class="qr-categoria"
-                data-categoria="bebida"
-            >
-                🥤
-                <span>Bebidas</span>
-            </button>
+        Cambiar selección
+    </button>
 
 
-            <button
-                type="button"
-                class="qr-categoria"
-                data-categoria="comida"
-            >
-                🍿
-                <span>Comidas</span>
-            </button>
+    <!-- COLUMNAS PRINCIPALES -->
+
+    <div class="qr-admin__columnas">
 
 
-            <button
-                type="button"
-                class="qr-categoria"
-                data-categoria="estacionamiento"
-            >
-                🚗
-                <span>Estacionamiento</span>
-            </button>
+        <!-- ESCÁNER DE CÁMARA -->
 
-
-            <button
-                type="button"
-                class="qr-categoria"
-                data-categoria="vip"
-            >
-                ⭐
-                <span>VIP</span>
-            </button>
-
-        </div>
-
-        <button
-            type="button"
-            class="qr-boton qr-boton--secundario"
-            id="qr-volver-tipos"
+        <section
+            class="qr-panel qr-panel--lector"
+            aria-labelledby="qr-titulo-lector"
         >
-            Volver
-        </button>
 
-    </section>
+            <div class="qr-panel__encabezado">
 
+                <div>
 
-    <section
-        id="qr-pantalla-lector"
-        hidden
-    >
-
-        <div class="qr-lector__encabezado">
-
-            <div>
-                <p class="qr-admin__migas">
-                    VALIDACIÓN / <span id="qr-contexto-tipo"></span>
-                </p>
-
-                <h2 id="qr-contexto-titulo">
-                    Escanear QR
-                </h2>
-
-                <p id="qr-contexto-descripcion">
-                    Ubicá el código QR dentro del recuadro.
-                </p>
-            </div>
-
-            <button
-                type="button"
-                class="qr-boton qr-boton--secundario"
-                id="qr-volver-seleccion"
-            >
-                Cambiar selección
-            </button>
-
-        </div>
-
-
-        <div class="qr-admin__columnas">
-
-            <section class="qr-panel">
-
-                <div class="qr-panel__encabezado">
-                    <h3>Escanear con cámara</h3>
+                    <h2 id="qr-titulo-lector">
+                        Escanear con cámara
+                    </h2>
 
                     <p>
-                        Apuntá la cámara hacia el código QR.
+                        Ubicá el código QR dentro del recuadro.
                     </p>
-                </div>
-
-                <div class="qr-lector-marco">
-                    <div
-                        id="qr-reader"
-                        class="qr-lector"
-                        aria-label="Área de lectura del código QR"
-                    ></div>
-                </div>
-
-                <div class="qr-admin__acciones-camara">
-
-                    <button
-                        type="button"
-                        class="qr-boton qr-boton--principal"
-                        id="qr-iniciar"
-                    >
-                        Activar cámara
-                    </button>
-
-                    <button
-                        type="button"
-                        class="qr-boton qr-boton--secundario"
-                        id="qr-detener"
-                        disabled
-                    >
-                        Detener cámara
-                    </button>
 
                 </div>
 
-                <p
-                    class="qr-admin__estado"
-                    id="qr-estado"
-                    role="status"
-                    aria-live="polite"
+            </div>
+
+
+            <!-- LECTOR QR -->
+
+            <div class="qr-lector-marco">
+
+                <div
+                    id="qr-reader"
+                    class="qr-lector"
+                    aria-label="Área de lectura del código QR"
+                ></div>
+
+            </div>
+
+
+            <!-- ACCIONES DE CÁMARA -->
+
+            <div class="qr-admin__acciones-camara">
+
+                <button
+                    type="button"
+                    class="qr-boton qr-boton--principal"
+                    id="qr-iniciar"
                 >
-                    La cámara está apagada.
-                </p>
+                    Activar cámara
+                </button>
 
-            </section>
+                <button
+                    type="button"
+                    class="qr-boton qr-boton--secundario"
+                    id="qr-detener"
+                    disabled
+                >
+                    Detener cámara
+                </button>
+
+            </div>
 
 
-            <section class="qr-panel">
+            <!-- ESTADO DE CÁMARA -->
 
-                <div class="qr-panel__encabezado">
-                    <h3>Ingresar código manualmente</h3>
+            <p
+                class="qr-admin__estado"
+                id="qr-estado"
+                role="status"
+                aria-live="polite"
+            >
+                La cámara está apagada.
+            </p>
+
+
+            <p class="qr-admin__ayuda">
+
+                El navegador puede solicitar permiso para utilizar la cámara.
+                Para acceder a ella, normalmente necesitás abrir el sitio mediante
+                HTTPS o desde localhost.
+
+            </p>
+
+        </section>
+
+
+
+        <!-- INGRESO MANUAL -->
+
+        <section
+            class="qr-panel qr-panel--manual"
+            aria-labelledby="qr-titulo-manual"
+        >
+
+            <div class="qr-panel__encabezado">
+
+                <div>
+
+                    <h2 id="qr-titulo-manual">
+                        Ingresar código manualmente
+                    </h2>
 
                     <p>
                         También podés ingresar el código si no podés utilizar la cámara.
                     </p>
+
                 </div>
 
-                <form
-                    id="qr-form-manual"
-                    class="qr-form-manual"
-                    method="POST"
-                    target="qr-respuesta"
+            </div>
+
+
+            <!-- FORMULARIO -->
+
+            <form
+                id="qr-form-manual"
+                class="qr-form-manual"
+                method="POST"
+                target="qr-respuesta"
+            >
+
+                <input
+                    type="hidden"
+                    name="tipo"
+                    id="qr-tipo"
                 >
 
-                    <input
-                        type="hidden"
-                        name="tipo"
-                        id="qr-tipo"
-                    >
+                <input
+                    type="hidden"
+                    name="categoria"
+                    id="qr-categoria"
+                >
 
-                    <input
-                        type="hidden"
-                        name="categoria"
-                        id="qr-categoria"
-                    >
 
-                    <label for="qr-codigo">
-                        Código QR
-                    </label>
+                <label for="qr-codigo">
+                    Código QR
+                </label>
 
-                    <textarea
-                        id="qr-codigo"
-                        name="token"
-                        rows="4"
-                        placeholder="Pegá el token del QR"
-                        autocomplete="off"
-                        required
-                    ></textarea>
 
-                    <button
-                        type="submit"
-                        class="qr-boton qr-boton--principal"
-                        id="qr-validar-manual"
-                    >
-                        Validar código
-                    </button>
+                <textarea
+                    id="qr-codigo"
+                    name="token"
+                    rows="4"
+                    placeholder="Pegá o escribí el código QR"
+                    autocomplete="off"
+                    required
+                ></textarea>
 
-                </form>
 
-                <iframe
-                    id="qr-respuesta"
-                    name="qr-respuesta"
-                    src="about:blank"
-                    hidden
-                ></iframe>
+                <button
+                    type="submit"
+                    class="qr-boton qr-boton--principal"
+                    id="qr-validar-manual"
+                >
+                    Validar código
+                </button>
 
-            </section>
+            </form>
+
+
+            <!-- RESPUESTA DEL FORMULARIO -->
+
+            <iframe
+                id="qr-respuesta"
+                name="qr-respuesta"
+                src="about:blank"
+                hidden
+            ></iframe>
+
+
+            <!-- AVISO -->
+
+            <div class="qr-admin__aviso">
+
+                <strong>Importante</strong>
+
+                <p>
+                    La lectura del QR no confirma por sí sola el ingreso.
+                    El código se envía al servidor, donde se comprueba su estado
+                    y se registra la validación.
+                </p>
+
+            </div>
+
+        </section>
+
+    </div>
+
+
+
+    <!-- RESULTADO DE VALIDACIÓN -->
+
+    <section
+        class="qr-resultado"
+        id="qr-resultado"
+        aria-live="polite"
+        hidden
+    >
+
+        <div class="qr-resultado__encabezado">
+
+            <h2 id="qr-resultado-titulo">
+                Resultado de la validación
+            </h2>
+
+            <span
+                class="qr-resultado__estado"
+                id="qr-resultado-estado"
+            ></span>
 
         </div>
 
 
-        <section
-            class="qr-resultado"
-            id="qr-resultado"
-            aria-live="polite"
+        <p
+            id="qr-resultado-mensaje"
+            class="qr-resultado__mensaje"
+        ></p>
+
+
+        <dl
+            class="qr-resultado__detalles"
+            id="qr-resultado-detalles"
             hidden
-        >
-
-            <div class="qr-resultado__encabezado">
-
-                <h3 id="qr-resultado-titulo">
-                    Resultado de la validación
-                </h3>
-
-                <span
-                    class="qr-resultado__estado"
-                    id="qr-resultado-estado"
-                ></span>
-
-            </div>
-
-            <p
-                id="qr-resultado-mensaje"
-                class="qr-resultado__mensaje"
-            ></p>
-
-            <dl
-                class="qr-resultado__detalles"
-                id="qr-resultado-detalles"
-                hidden
-            ></dl>
-
-        </section>
+        ></dl>
 
     </section>
 
 </section>
 
 
+<!-- LIBRERÍA PARA LEER QR -->
+
 <script
     src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"
     defer
 ></script>
+
+
+<!-- JAVASCRIPT PROPIO -->
 
 <script
     src="{{ url_for('static', filename='js/qr-admin.js') }}"

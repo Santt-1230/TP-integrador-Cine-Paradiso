@@ -1,6 +1,10 @@
 from db import ejecutar_consulta, ejecutar_mutacion
 
 
+# ====================================
+# OBTENER QR DE ENTRADA
+# ====================================
+
 def obtener_qr_entrada(token: str) -> dict | None:
 
     sql = """
@@ -61,6 +65,7 @@ def obtener_qr_entrada(token: str) -> dict | None:
             ON entradas.id_butaca = butacas.id_butaca
 
         WHERE qr.tipo = 'entrada'
+
         AND (
             qr.token = %s
             OR qr.codigo_manual = %s
@@ -74,6 +79,10 @@ def obtener_qr_entrada(token: str) -> dict | None:
 
     return resultado[0]
 
+
+# ====================================
+# OBTENER QR DE PRODUCTO
+# ====================================
 
 def obtener_qr_producto(token: str) -> dict | None:
 
@@ -132,6 +141,10 @@ def obtener_qr_producto(token: str) -> dict | None:
     return resultado[0]
 
 
+# ====================================
+# VALIDAR QR DE ENTRADA
+# ====================================
+
 def validar_qr_entrada(token: str, id_validador: int) -> dict:
 
     sql = """
@@ -174,6 +187,10 @@ def validar_qr_entrada(token: str, id_validador: int) -> dict:
         (id_validador, token, token)
     )
 
+
+# ====================================
+# VALIDAR QR DE PRODUCTO
+# ====================================
 
 def validar_qr_producto(
     token: str,

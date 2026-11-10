@@ -13,6 +13,7 @@ EMAIL_NO_VERIFICADO = ("EMAIL_NO_VERIFICADO", "Email sin confirmar", "Tenes que 
 TOKEN_INVALIDO = ("TOKEN_INVALIDO", "Link invalido", "El link de confirmacion no es valido o ya vencio")
 MAIL_NO_ENVIADO = ("MAIL_NO_ENVIADO", "Mail no enviado", "Tu cuenta fue creada, pero no pudimos enviar el mail de confirmacion. Pedi que te lo reenviemos")
 MINUTOS_VALIDEZ_TOKEN = 15
+TOKEN_RECUPERACION_INVALIDO = ("TOKEN_INVALIDO", "Link invalido", "El link para cambiar la contraseña no es valido o ya vencio")
 
 def usuario_publico(usuario):
     user_id = usuario.get("id") or usuario.get("id_usuario")
@@ -187,4 +188,36 @@ def dar_de_baja(id_usuario):
     if not usuario:
         return False, SESION_INVALIDA
     usuarios_repository.desactivar_usuario(id_usuario)
+    return True, None
+
+def enviar_recuperacion(id_usuario, nombre, email):
+    token = secrets.token_urlsafe(32)
+    tokens_repository.invalidar_tokens(id_usuario, "recuperar_contrasena")  # el link anterior deja de servir
+    tokens_repository.crear_token(id_usuario, "recuperar_contrasena", hashear_token(token), MINUTOS_VALIDEZ_TOKEN)
+
+    link = f"{os.getenv('FRONTEND_URL', 'http://localhost:5001')}/restablecer-contrasena?token={token}"
+    texto = (f"Hola {nombre}!\n\n"
+             f"Para cambiar tu contraseña de Cine Paradiso entra a este link "
+             f"(vale {MINUTOS_VALIDEZ_TOKEN} minutos):\n{link}\n\n"
+             f"Si no lo pediste vos, ignora este mensaje.")
+    return mailer.enviar_mail(email, "Cambiar contraseña - Cine Paradiso", texto)
+
+
+def solicitar_recuperacion(email):
+    usuario = usuarios_repository.buscar_por_email(email.lower())
+    if usuario and usuario.get("activo"):  # si el email no existe no se avisa, asi nadie puede averiguar quien tiene cuenta
+        enviar_recuperacion(usuario["id_usuario"], usuario["nombre"], usuario["email"])
+
+
+def restablecer_contrasena(token, contrasena_nueva):
+    registro = tokens_repository.buscar_token_valido(hashear_token(token), "recuperar_contrasena")
+    if not registro:
+        return False, TOKEN_RECUPERACION_INVALIDO
+
+    usuario = buscar_usuario_activo(registro["id_usuario"])
+    if not usuario:
+        return False, TOKEN_RECUPERACION_INVALIDO
+
+    usuarios_repository.actualizar_contrasena(registro["id_usuario"], generate_password_hash(contrasena_nueva))
+    tokens_repository.marcar_usado(registro["id_token"])
     return True, None
