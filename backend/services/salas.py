@@ -88,7 +88,7 @@ def desactivar_sala(id_sala):
             description=f"No existe una sala con el ID '{id_sala}'"
         ))
     ahora = datetime.now()
-    funciones = services_funciones.listar_funciones()
+    funciones = services_funciones.listar_funciones(id_sala)
     funciones_pendientes = [
         funcion for funcion in funciones
         if funcion['id_sala'] == int(id_sala) and funcion['estado'] == 'programada'
