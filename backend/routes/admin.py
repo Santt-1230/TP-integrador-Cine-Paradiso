@@ -5,7 +5,8 @@ from repositories.admin import (
     actualizar_usuario,
     obtener_usuario_por_id,
     obtener_usuarios,
-    obtener_cantidad_peliculas_activas
+    obtener_cantidad_peliculas_activas,
+    obtener_cantidad_funciones_programadas
 )
 
 from utils import admin_requerido
@@ -60,13 +61,19 @@ def update_usuario(id):
     return jsonify({"message": "Usuario actualizado correctamente"}), 200
 
 
-
 @admin_bp.route("/peliculas/activa", methods=["GET"])
 @admin_requerido
 def get_peliculas_activas():
 
     cantidad = obtener_cantidad_peliculas_activas()
 
-    return jsonify({
-        "total": cantidad
-    }), 200
+    return jsonify({"total": cantidad}), 200
+
+
+@admin_bp.route("/funciones/programadas", methods=["GET"])
+@admin_requerido
+def get_funciones_programadas():
+
+    cantidad = obtener_cantidad_funciones_programadas()
+
+    return jsonify({"total": cantidad}), 200

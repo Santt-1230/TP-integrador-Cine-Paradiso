@@ -69,7 +69,6 @@ def obtener_cantidad_peliculas_activas():
     try:
         cursor.execute("""
             SELECT
-                DATABASE() AS base_datos,
                 COUNT(*) AS total
             FROM peliculas
             WHERE activo = TRUE
@@ -77,11 +76,29 @@ def obtener_cantidad_peliculas_activas():
 
         resultado = cursor.fetchone()
 
-        print("BASE DE DATOS:", resultado["base_datos"])
-        print("TOTAL PELICULAS:", resultado["total"])
-
         return resultado["total"]
 
     finally:
         cursor.close()
         conexion.close()
+
+
+def obtener_cantidad_funciones_programadas():
+    conexion = obtener_conexion()
+    cursor = conexion.cursor(dictionary=True)
+
+    try:
+            cursor.execute("""
+                SELECT
+                    COUNT(*) AS total
+                FROM funciones
+                WHERE estado = 'programada'
+            """)
+    
+            resultado = cursor.fetchone()
+    
+            return resultado["total"]
+    
+    finally:
+            cursor.close()
+            conexion.close()
