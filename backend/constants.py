@@ -1,7 +1,6 @@
 from dotenv import load_dotenv
-
+import string
 load_dotenv()
-
 ENTERO_POSITIVO_MINIMO = 1
 BUTACAS_POR_FILA = 20
 
@@ -23,3 +22,6 @@ ERROR_CODE_SALA_NOT_FOUND = 'sala.not_found'
 ERROR_CODE_LOCAL_NOT_FOUND = 'local.not_found'
 ERROR_CODE_LOCAL_INACTIVE = 'local.inactive'
 ERROR_CODE_SALA_CONFLICT = 'sala.conflict'
+
+ALFABETO_CODIGO = string.ascii_uppercase + string.digits
+MAX_INTENTOS_QR = 5
