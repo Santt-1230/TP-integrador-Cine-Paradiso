@@ -12,9 +12,7 @@ DIAS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Doming
 URL_COMPRA = "/funciones/{id_funcion}/butacas"
 
 
-@peliculas_front_bp.app_errorhandler(api.ApiError)
-def error_del_backend(error):
-    return render_template("error.html", estado=error.estado, mensaje=error.mensaje), error.estado
+
 
 
 @peliculas_front_bp.app_template_filter("fecha_ar")

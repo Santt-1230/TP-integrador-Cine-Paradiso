@@ -1,4 +1,4 @@
-from flask import Blueprint, redirect, render_template, url_for, flash
+from flask import Blueprint, redirect, render_template, url_for, flash, request
 import api
 
 salas_bp = Blueprint('salas', __name__)
@@ -24,7 +24,7 @@ def verificar_estado(estado):
 def leer_formulario(campos):
     datos = {}
     for campo in campos:
-        datos[campo] = api.request.form.get(campo, '')
+        datos[campo] = request.form.get(campo, '')
     return datos
 
 def convertir_a_enteros(datos, campos):
@@ -49,8 +49,8 @@ def crear_sala():
     if respuesta:
         return respuesta
 
-    if api.request.method == 'GET':
-        datos = {'id_local' : api.request.args.get('id_local', '')}
+    if request.method == 'GET':
+        datos = {'id_local' : request.args.get('id_local', '')}
         return render_template('admin_editar_sala.html', datos=datos, id_sala=None, error=None)
 
     datos = leer_formulario(CAMPOS_NUEVA_SALA)
@@ -83,7 +83,7 @@ def editar_sala(id_sala):
     
     datos = {}
     error = None
-    if api.request.method == 'GET':
+    if request.method == 'GET':
         estado, datos_respuesta = api.pedir('GET', f'/api/salas/{id_sala}')
 
         estado_respuesta = verificar_estado(estado)

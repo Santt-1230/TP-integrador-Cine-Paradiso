@@ -1,4 +1,4 @@
-from flask import Blueprint, redirect, render_template, url_for, flash
+from flask import Blueprint, redirect, render_template, url_for, flash, request
 import api
 
 locales_bp = Blueprint('locales', __name__)
@@ -32,6 +32,13 @@ def verificar_admin():
         flash('No tenes permisos para acceder a esta seccion', 'error')
         return redirect(url_for('peliculas_front.inicio'))
 
+    return None
+
+def verificar_estado(estado):
+    if estado == 401:
+        return redirigir_al_login()
+    if estado == 403:
+        return redirigir_al_inicio()
     return None
 
 @locales_bp.app_context_processor
@@ -78,35 +85,54 @@ def admin_locales():
     respuesta = verificar_admin()
     if respuesta:
         return respuesta
+    
+    filtro_estado = request.args.get('estado', 'todas')
+    if filtro_estado not in ('todas', 'activa', 'inactiva'):
+        filtro_estado = 'todas'
+    filtro_local = request.args.get('local', type=int)
+    
     locales = []
+    todos_los_locales = []
     error = None
     salas_configuradas = 0
+
     estado, datos_respuesta = api.get('/api/locales')
-    if estado == 401:
-        return redirigir_al_login()
-    if estado == 403:
-        return redirigir_al_inicio()
+    estado_respuesta = verificar_estado(estado)
+    if estado_respuesta:
+        return estado_respuesta
+    
     if estado != 200:
         error = api.mensaje_error(datos_respuesta)
     else:
         locales = datos_respuesta.get('locales', [])
+        todos_los_locales = locales
+
         estado, datos_respuesta = api.get('/api/salas')
-        if estado == 401:
-            return redirigir_al_login()
-        if estado == 403:
-            return redirigir_al_inicio()
+        estado_respuesta = verificar_estado(estado)
+        if estado_respuesta:
+            return estado_respuesta
         if estado != 200:
             locales = []
         else:
             salas = datos_respuesta.get('salas', [])
+            for sala in salas:
+                if filtro_local is None or sala['id_local'] == filtro_local:
+                    salas_configuradas += 1
+
+            if filtro_estado != 'todas':
+                salas = [s for s in salas if s['estado'] == filtro_estado]
+
             for local in locales:
-                local['salas'] = []
-                for sala in salas:
-                    if sala['id_local'] == local['id_local']:
-                        local['salas'].append(sala)
+                local['salas'] = [
+                    sala for sala in salas
+                    if sala['id_local'] == local['id_local']
+                ]
                 local['total_butacas'] = sum(
                     sala['capacidad'] for sala in local['salas']
                 )
-            salas_configuradas = len(salas)
+
+            if filtro_local is not None:
+                locales = [l for l in locales if l['id_local'] == filtro_local]
+            
     
-    return render_template("admin_locales.html", locales=locales,salas_configuradas=salas_configuradas, error=error)
+    return render_template("admin_locales.html", locales=locales, todos_los_locales=todos_los_locales,salas_configuradas=salas_configuradas, error=error, filtro_estado = filtro_estado, filtro_local=filtro_local)
