@@ -10,9 +10,8 @@ from routes.validar_qr import validar_qr_bp
 from routes.locales import locales_bp
 from routes.perfil import perfil_bp
 from routes.funciones import funciones_front_bp
-
 from routes.salas import salas_bp
-
+from routes.compras import compras_bp
 load_dotenv()
 
 
