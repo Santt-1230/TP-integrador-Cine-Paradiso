@@ -78,78 +78,69 @@
             </div>
         </section>
         <section id="mis-compras" class="seccion-contenido">
-    <h2>MIS COMPRAS</h2>
+            <h2>MIS COMPRAS</h2>
 
-    <div class="contenedor-lista-compras">
-        {% for compra in historial.compras %}
-            <div class="tarjeta-compra-layout">
-                
-                <!-- Fecha de la Compra -->
-                <div class="header-fecha">
-                    <h3>{{ compra.fecha_creacion }}</h3>
-                </div>
-
-                <div class="cuerpo-compra-grid">
-                    
-                    <!-- 1. Película -->
-                    <div class="columna-item">
-                        <div class="contenedor-poster pastel-purpura">
-                            {% if compra.poster_url %}
-                                <img src="{{ compra.poster_url }}" alt="{{ compra.titulo_pelicula }}" class="poster-img">
-                            {% endif %}
+            <div class="contenedor-lista-compras">
+                {% for compra in historial.compras %}
+                    <div class="tarjeta-compra-layout">
+                        
+                        <!-- Fecha de la Compra -->
+                        <div class="header-fecha">
+                            <h3>{{ compra.fecha_creacion }}</h3>
                         </div>
-                        <span class="etiqueta-categoria">{{ compra.genero | default('CINE') | upper }}</span>
-                        <h4 class="titulo-item">{{ compra.titulo_pelicula | upper }}</h4>
-                    </div>
 
-                    <!-- 2. Comida / Combos -->
-                    <div class="columna-item">
-                        {% if compra.servicios %}
-                            {% for servicio in compra.servicios %}
-                                <div class="contenedor-poster pastel-azul">
-                                    {% if servicio.imagen_url %}
-                                        <img src="{{ servicio.imagen_url }}" alt="{{ servicio.nombre }}" class="poster-img">
+                        <div class="cuerpo-compra-grid">
+                            
+                            <!-- 1. Película -->
+                            <div class="columna-item">
+                                <div class="contenedor-poster pastel-purpura">
+                                    {% if compra.poster_url %}
+                                        <img src="{{ compra.poster_url }}" alt="{{ compra.titulo_pelicula }}" class="poster-img">
                                     {% endif %}
                                 </div>
-                                <span class="etiqueta-categoria">COMBO</span>
-                                <h4 class="titulo-item">{{ servicio.nombre | upper }}</h4>
-                                <span class="badge-retirar">RETIRAR</span>
-                            {% endfor %}
-                        {% else %}
-                            <!-- Sin snacks o combos comprados -->
-                            <div class="contenedor-poster pastel-azul"></div>
-                            <span class="etiqueta-categoria">COMBO</span>
-                            <h4 class="titulo-item">SIN COMBO</h4>
-                        {% endif %}
-                    </div>
+                                <span class="etiqueta-categoria">{{ compra.genero | default('CINE') | upper }}</span>
+                                <h4 class="titulo-item">{{ compra.titulo_pelicula | upper }}</h4>
+                            </div>
 
-                    <!-- 3. Entrada y QR -->
-                    <div class="columna-qr">
-                        <h4 class="titulo-qr">TUS ENTRADAS</h4>
-                        <div class="contenedor-qr-box">
-                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=COMPRA-{{ compra.id_compra }}" 
-                                 alt="QR Compra #{{ compra.id_compra }}" 
-                                 class="imagen-qr">
+                            <div class="columna-item">
+                                {% if compra.servicios %}
+                                    {% for servicio in compra.servicios %}
+                                        <div class="contenedor-poster pastel-azul">
+                                            {% if servicio.imagen_url %}
+                                                <img src="{{ servicio.imagen_url }}" alt="{{ servicio.nombre }}" class="poster-img">
+                                            {% endif %}
+                                        </div>
+                                        <span class="etiqueta-categoria">COMBO</span>
+                                        <h4 class="titulo-item">{{ servicio.nombre | upper }}</h4>
+                                        <span class="badge-retirar">RETIRAR</span>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="contenedor-poster pastel-azul"></div>
+                                    <span class="etiqueta-categoria">COMBO</span>
+                                    <h4 class="titulo-item">SIN COMBO</h4>
+                                {% endif %}
+                            </div>
+
+                            <div class="columna-qr">
+                                <h4 class="titulo-qr">TUS ENTRADAS</h4>
+                                <div class="contenedor-qr-box">
+                                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=COMPRA-{{ compra.id_compra }}" 
+                                        alt="QR Compra #{{ compra.id_compra }}" 
+                                        class="imagen-qr">
+                                </div>
+                                <p class="instruccion-qr">
+                                    PRESENTÁ TU QR EN LA ENTRADA<br>A LAS SALAS DE TU CINE
+                                </p>
+                            </div>
+
                         </div>
-                        <p class="instruccion-qr">
-                            PRESENTÁ TU QR EN LA ENTRADA<br>A LAS SALAS DE TU CINE
-                        </p>
                     </div>
-
-                </div>
+                {% else %}
+                    <p class="sin-compras">No se encontraron compras registradas en tu historial.</p>
+                {% endfor %}
             </div>
-        {% else %}
-            <p class="sin-compras">No se encontraron compras registradas en tu historial.</p>
-        {% endfor %}
-    </div>
 
-    <!-- Botón Volver -->
-    <div class="footer-acciones">
-        <button type="button" onclick="window.history.back()" class="btn-volver">
-            <span class="icono-volver">↺</span> VOLVER
-        </button>
-    </div>
-</section>
+        </section>
         <section id="resenas" class="seccion-contenido">
             <h2>Reseñas</h2>
            {% for compra in compras %}
