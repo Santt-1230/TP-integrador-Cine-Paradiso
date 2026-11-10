@@ -1,7 +1,35 @@
-from flask import Blueprint, redirect, session, render_template, request, url_for
+from flask import Blueprint, redirect, session, render_template, request, url_for, flash
 import api
 
 locales_bp = Blueprint('locales', __name__)
+
+def sesion_invalida(error_api):
+    return error_api.estado in (401, 403)
+
+def redirigir_al_login():
+    return redirect(url_for('usuarios.login'))
+
+def leer_formulario(campos):
+    datos = {}
+    for campo in campos:
+        datos[campo] = request.form.get(campo, '')
+    return datos
+
+def convertir_a_enteros(datos, campos):
+    convertidos = dict(datos)
+    for campo in campos:
+        convertidos[campo] = int(datos[campo])
+    return convertidos
+
+def verificar_admin():
+    if not session.get('id_usuario'):
+        return redirigir_al_login()
+    
+    if session.get('rol') != 'administrador':
+        flash('No tenes permisos para acceder a esta seccion', 'error')
+        return redirect(url_for('peliculas_front.inicio'))
+
+    return None
 
 @locales_bp.app_context_processor
 def inyectar_locales():
@@ -48,6 +76,9 @@ def elegir_cine(id_local):
 
 @locales_bp.route('/admin/locales', methods=['GET'])
 def admin_locales():
+    respuesta = verificar_admin()
+    if respuesta:
+        return respuesta
     locales = []
     error = None
 
@@ -59,6 +90,9 @@ def admin_locales():
             for sala in salas:
                 if sala['id_local'] == local['id_local']:
                     local['salas'].append(sala)
+            local['total_butacas'] = sum(
+                sala['capacidad'] for sala in local['salas']
+            )
         
     except api.ApiError as error_api:
         if error_api.estado in (401, 403):
@@ -66,44 +100,3 @@ def admin_locales():
         locales = []
         error = error_api.mensaje
     return render_template("admin_locales.html", locales=locales, error=error)
-
-@locales_bp.route('/prueba-nueva-sala', methods = ['GET'])
-def probar_nueva_sala():
-    id_local = request.args.get('id_local', type=int)
-    local = next(
-            (
-                item for item in LOCALES_PRUEBA
-                if item['id_local'] == id_local
-            ),
-            None
-    )
-    if local is None:
-        return "Local no encontrado", 404
-    
-    return render_template("admin_nueva_sala.html", local=local,locales=LOCALES_PRUEBA)
-
-@locales_bp.route('/prueba-editar-sala', methods=['GET'])
-def probar_editar_sala():
-        id_sala=request.args.get('id_sala', type=int)
-        id_local = request.args.get('id_local', type=int)
-        local = next(
-            (
-                item for item in LOCALES_PRUEBA
-                if item['id_local'] == id_local
-            ),
-            None
-        )
-        if local is None:
-            return "Local no encontrado", 404
-        
-        sala = next(
-            (
-                item for item in local['salas']
-                if item['id_sala'] == id_sala
-            ),
-            None
-        )
-        if sala is None:
-            return "Local no encontrado", 404
-        
-        return render_template("admin_editar_sala.html", sala=sala,local=local, locales=LOCALES_PRUEBA)

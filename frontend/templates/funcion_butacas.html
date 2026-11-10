@@ -1,0 +1,42 @@
+{% extends "base_funciones.html" %}
+
+{% block titulo %}Butacas - Cine Paradiso{% endblock %}
+
+{% block contenido %}
+<section class="funciones-pagina">
+    <a href="{{ url_for('funciones_front.pagina_funciones') }}">← Volver a funciones</a>
+    <h1>Elegí tus butacas</h1>
+    <p>Seleccioná entre una y seis butacas disponibles. Las ocupadas no se pueden elegir.</p>
+    <p class="mensaje-error" id="aviso-seleccion-butacas" role="status" aria-live="polite" hidden></p>
+    {% with mensajes = get_flashed_messages() %}
+        {% for mensaje in mensajes %}<p class="mensaje-error" role="status">{{ mensaje }}</p>{% endfor %}
+    {% endwith %}
+    {% if error %}<p class="mensaje-error">{{ error }}</p>{% endif %}
+    {% if butacas %}
+        <div class="leyenda-butacas">
+            <span><i class="butaca-muestra disponible"></i> Disponible</span>
+            <span><i class="butaca-muestra ocupada"></i> Ocupada</span>
+        </div>
+        <div class="pantalla">PANTALLA</div>
+        <form method="get" action="{{ url_for('compras_bp.checkout') }}" class="seleccion-butacas">
+        <input type="hidden" name="id_funcion" value="{{ id_funcion }}">
+        <div class="mapa-butacas">
+            {% for fila, asientos in butacas|groupby('fila') %}
+                <div class="fila-butacas">
+                    {% for butaca in asientos %}
+                        <label class="butaca {{ butaca.estado }}" title="Fila {{ butaca.fila }}, asiento {{ butaca.numero }}">
+                            <input type="checkbox" name="butacas" value="{{ butaca.id_butaca }}" {% if butaca.estado != 'disponible' %}disabled{% endif %}>
+                            <span>{{ butaca.fila }}{{ butaca.numero }}</span>
+                        </label>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        </div>
+        <button class="boton" type="submit">Continuar</button>
+        </form>
+        <script src="{{ url_for('static', filename='js/checkout.js') }}" defer></script>
+    {% elif not error %}
+        <p>Esta sala todavía no tiene butacas cargadas.</p>
+    {% endif %}
+</section>
+{% endblock %}

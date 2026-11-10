@@ -355,6 +355,155 @@ footer {
     background-color: #e94b4b;
     border-color: #e94b4b;
 }
+
+.sala {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 24px 16px;
+    background: #111;
+    border-radius: 8px;
+    color: #ddd;
+}
+
+.pantalla {
+    width: 80%;
+    margin: 0 auto 28px;
+    padding: 10px 0;
+    text-align: center;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: #fff;
+    background: linear-gradient(#555, #222);
+    border-radius: 50% 50% 0 0 / 40% 40% 0 0;
+}
+
+.butacas-grilla {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    overflow-x: auto;
+}
+
+.fila {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.letra-fila {
+    width: 20px;
+    text-align: center;
+    font-weight: 600;
+    color: #999;
+}
+
+.butaca {
+    position: relative;
+    cursor: pointer;
+}
+
+.butaca input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.butaca span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 28px;
+    background: #fff;
+    color: #222;
+    border-radius: 5px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    transition: transform 0.1s;
+}
+
+.butaca:hover span { transform: scale(1.1); }
+.butaca input:checked + span { background: #e33; color: #fff; }
+.butaca input:focus-visible + span { outline: 2px solid #ff9f4a; outline-offset: 2px; }
+.butaca input:disabled + span { background: #666; color: #999; cursor: not-allowed; }
+
+.leyenda {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 24px;
+    font-size: 0.85rem;
+}
+
+.muestra {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    margin-right: 6px;
+    border-radius: 3px;
+    vertical-align: middle;
+}
+.muestra--libre { background: #fff; }
+.muestra--ocupada { background: #666; }
+.muestra--elegida { background: #e33; }
+
+.barra-continuar {
+    display: flex;
+    max-width: 640px;
+    margin: 20px auto 0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.barra-continuar p {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    margin: 0;
+    padding: 20px;
+    background: #5a5a5a;
+    color: #fff;
+}
+#boton-continuar {
+    padding: 20px 40px;
+    border: none;
+    background: #ff9f4a;
+    color: #2b2b2b;
+    font: inherit;
+    font-size: 1.5rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+#boton-continuar:hover {
+    filter: brightness(0.95); 
+}
+#boton-continuar:disabled {
+    background: #bbb; cursor: not-allowed;
+}
+.error {
+    background-color: #f8d7da;
+    color: #842029;
+    border: 1px solid #f5c2c7;
+    padding: 12px 16px;
+    margin: 15px auto;
+    border-radius: 6px;
+    max-width: 600px;
+    text-align: center;
+    font-size: 14px;
+}
+.success {
+    background-color: #d1e7dd;
+    color: #0f5132;
+    border: 1px solid #badbcc;
+    padding: 12px 16px;
+    margin: 15px auto;
+    border-radius: 6px;
+    max-width: 600px;
+    text-align: center;
+    font-size: 14px;
+}
 @media (max-width: 700px) {
     .header-principal {
         flex-wrap: wrap;
@@ -521,7 +670,7 @@ footer {
 
 /* BOTON AGREGAR */
 
-.pagina-admin .boton-agregar{
+.pagina-admin{
     background-color: #ff6464;
     color: #222;
     border: none;

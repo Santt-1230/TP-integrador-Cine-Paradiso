@@ -1,0 +1,268 @@
+.funciones-pagina {
+    width: min(1100px, 92%);
+    margin: 2rem auto;
+    flex: 1;
+}
+
+.funciones-pagina h1 {
+    margin-bottom: 1.25rem;
+}
+
+.titulo-con-accion {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+
+
+.filtros-funciones,
+.formulario-funcion form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: 1rem;
+    padding: 1.25rem;
+    background: #fff;
+    border-radius: 12px;
+}
+
+.filtros-funciones label,
+.formulario-funcion label {
+    display: grid;
+    gap: .35rem;
+}
+
+.filtros-funciones input,
+.formulario-funcion input {
+    padding: .6rem;
+    border: 1px solid #aaa;
+    border-radius: 6px;
+}
+
+
+.funciones-pagina .boton,
+.funciones-pagina button,
+.funciones-pagina .boton-secundario {
+    display: inline-block;
+    border: 0;
+    border-radius: 6px;
+    padding: .65rem 1rem;
+    background: #b30000;
+    color: #fff;
+    cursor: pointer;
+    font: inherit;
+}
+
+.funciones-pagina .boton-secundario {
+    background: #555;
+}
+
+.funciones-pagina .boton-peligro {
+    padding: .4rem .65rem;
+    background: #7b1113;
+}
+
+
+.mensaje-error {
+    padding: .9rem;
+    background: #ffe2e2;
+    border-left: 4px solid #b30000;
+}
+
+
+.lista-funciones {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.tarjeta-funcion {
+    padding: 1.25rem;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px #0001;
+}
+
+.tarjeta-funcion h2 {
+    margin-top: 0;
+}
+
+
+.tabla-contenedor {
+    overflow-x: auto;
+    background: #fff;
+    border-radius: 10px;
+}
+
+.tabla-contenedor table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tabla-contenedor th,
+.tabla-contenedor td {
+    padding: .8rem;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+}
+
+.acciones-tabla {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+}
+
+.acciones-tabla form {
+    margin: 0;
+}
+
+
+.leyenda-butacas {
+    display: flex;
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+.leyenda-butacas span {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+}
+
+.butaca-muestra {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+}
+
+.pantalla {
+    width: min(500px, 90%);
+    margin: 1rem auto 2rem;
+    padding: .6rem;
+    text-align: center;
+    background: #ddd;
+    border-radius: 0 0 50% 50%;
+}
+
+.mapa-butacas {
+    display: flex;
+    flex-direction: column;
+    gap: .6rem;
+    max-width: 600px;
+    margin: auto;
+}
+
+.fila-butacas {
+    display: flex;
+    justify-content: center;
+    gap: .6rem;
+}
+
+.butaca {
+    position: relative;
+    padding: .8rem .4rem;
+    text-align: center;
+    border-radius: 8px 8px 4px 4px;
+    color: #fff;
+}
+
+.butaca input {
+    position: absolute;
+    opacity: 0;
+    inset: 0;
+    cursor: pointer;
+}
+
+.butaca.disponible,
+.butaca-muestra.disponible {
+    background: #218838;
+}
+
+.butaca.disponible {
+    cursor: pointer;
+}
+
+.butaca.disponible:has(input:checked) {
+    background: #b30000;
+    outline: 3px solid #f0b429;
+}
+
+.butaca.ocupada,
+.butaca-muestra.ocupada {
+    background: #777;
+}
+
+.butaca.ocupada {
+    cursor: not-allowed;
+    opacity: .7;
+}
+
+.seleccion-butacas > .boton {
+    display: block;
+    margin: 1.5rem auto;
+}
+
+
+.resumen-checkout,
+.checkout-form {
+    margin: 1.25rem 0;
+    padding: 1.25rem;
+    background: #fff;
+    border-radius: 12px;
+}
+
+.resumen-checkout h2,
+.checkout-form h2 {
+    margin-top: 0;
+}
+
+.lista-servicios-checkout {
+    display: grid;
+    gap: .75rem;
+}
+
+.servicio-checkout {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: .8rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+.servicio-checkout > span:first-of-type {
+    display: grid;
+    gap: .25rem;
+}
+
+.servicio-checkout small {
+    color: #555;
+}
+
+.servicio-checkout input[type="number"] {
+    width: 4.5rem;
+    padding: .35rem;
+}
+
+
+@media (max-width: 700px) {
+    .titulo-con-accion {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .filtros-funciones {
+        align-items: stretch;
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 650px) {
+    .servicio-checkout {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
