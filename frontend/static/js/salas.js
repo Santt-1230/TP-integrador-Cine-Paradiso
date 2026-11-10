@@ -72,9 +72,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (!formularioValido) {
             evento.preventDefault();
+            return;
         }
+
+        const boton = formulario.querySelector('button[type="submit"]');
+        boton.disabled = true;
+        boton.textContent = 'Guardando...';
     });
 });
-
-
 

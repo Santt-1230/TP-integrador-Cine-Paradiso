@@ -56,9 +56,9 @@
 
     <main>
         {% with mensajes = get_flashed_messages(with_categories=true) %}
-        {% for categoria, mensaje in mensajes %}
-        <div class="{{ categoria }}">{{ mensaje }}</div>
-        {% endfor %}
+            {% for categoria, mensaje in mensajes %}
+                <div class="{{ categoria }}">{{ mensaje }}</div>
+            {% endfor %}
         {% endwith %}
         {% block contenido %}{% endblock %}
     </main>

@@ -84,7 +84,7 @@ def admin_locales():
         return respuesta
     locales = []
     error = None
-
+    salas_configuradas = 0
     try:
         locales = api.get_lista('/api/locales', 'locales')
         salas = api.pedir('GET', '/api/salas')['salas']
@@ -96,7 +96,7 @@ def admin_locales():
             local['total_butacas'] = sum(
                 sala['capacidad'] for sala in local['salas']
             )
-        
+        salas_configuradas = len(salas)
     except api.ApiError as error_api:
         if error_api.estado == 401:
             return redirigir_al_login()
@@ -108,4 +108,4 @@ def admin_locales():
     
         locales = []
         error = error_api.mensaje
-    return render_template("admin_locales.html", locales=locales, error=error)
+    return render_template("admin_locales.html", locales=locales,salas_configuradas=salas_configuradas, error=error)

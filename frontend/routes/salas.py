@@ -52,7 +52,7 @@ def crear_sala():
     try:
         datos_back = convertir_a_enteros(datos, CAMPOS_NUEVA_SALA)
         api.pedir('POST', f'/api/salas', datos_back)
-        flash('La nueva sala se creo correctamente')
+        flash('La nueva sala se creo correctamente', 'success')
         return redirect(url_for('locales.admin_locales'))
 
     except ValueError:
@@ -97,7 +97,7 @@ def editar_sala(id_sala):
     try:
         datos_back = convertir_a_enteros(datos, CAMPOS_ENTEROS_SALA)
         api.pedir('PATCH', f'/api/salas/{id_sala}', datos_back)
-        flash('la sala se actualizó correctamente')
+        flash('la sala se actualizó correctamente', 'success')
         return redirect(url_for('locales.admin_locales'))
     
     except ValueError:
@@ -122,7 +122,7 @@ def desactivar_sala(id_sala):
     
     try:
         api.pedir('DELETE', f'/api/salas/{id_sala}')
-        flash('La sala se dio de baja correctamente')
+        flash('La sala se dio de baja correctamente', 'success')
 
     except api.ApiError as error_api:
         if error_api.estado == 401:
