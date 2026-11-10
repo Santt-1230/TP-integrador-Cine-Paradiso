@@ -134,6 +134,8 @@ def desactivar_sala(id_sala):
 
         if codigo == const.ERROR_CODE_SALA_NOT_FOUND:
             return jsonify(respuesta), 404
+        if codigo == const.ERROR_CODE_SALA_CONFLICT:
+            return jsonify(respuesta), 409
         
         return jsonify(respuesta), 400
         
