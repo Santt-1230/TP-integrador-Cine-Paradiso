@@ -1,0 +1,37 @@
+/* Pantallas de administración de películas */
+.filtros-admin {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 14px;
+}
+
+.filtros-admin input,
+.filtros-admin select {
+    padding: 0.5rem 0.7rem;
+    border: 1px solid #d9dee6;
+    border-radius: 0.4rem;
+    font-family: inherit;
+    font-size: 13px;
+}
+
+.filtros-admin input[type="search"] {
+    min-width: 260px;
+}
+
+.pelicula-admin {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.pelicula-admin__poster {
+    width: 38px;
+    height: 56px;
+    object-fit: cover;
+    border-radius: 4px;
+    background: #eef0f3;
+    flex: none;
+}
+
