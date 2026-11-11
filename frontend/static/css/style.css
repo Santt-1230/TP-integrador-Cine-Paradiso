@@ -399,10 +399,6 @@ footer {
     }
 }
 
-/* -- ADMIN -- */
-
-/* BARRA SUPERIOR */
-
 .pagina-admin {
     display: block;
     background-color: #f4f4f5;
@@ -441,15 +437,11 @@ footer {
 }
 
 
-/* ESTRUCTURA */
-
 .pagina-admin .contenedor {
     display: flex;
     min-height: calc(100vh - 106px);
 }
 
-
-/* MENU LATERAL */
 
 .pagina-admin .menu-lateral {
     width: 195px;
@@ -485,8 +477,6 @@ footer {
 }
 
 
-/* CONTENIDO */
-
 .pagina-admin main {
     flex: 1;
     padding: 30px;
@@ -519,8 +509,6 @@ footer {
 }
 
 
-/* BOTON AGREGAR */
-
 .pagina-admin .boton-agregar{
     background-color: #ff6464;
     color: #222;
@@ -531,7 +519,6 @@ footer {
     cursor: pointer;
 }
 
-/* BUSCADOR Y FILTRO */
 
 .pagina-admin .filtros {
     display: flex;
@@ -560,8 +547,6 @@ footer {
     color: #888;
 }
 
-
-/* TABLA */
 
 .pagina-admin .tabla-contenedor {
     background-color: white;
@@ -597,8 +582,6 @@ footer {
 }
 
 
-/* ICONOS */
-
 .pagina-admin .icono {
     display: inline-flex;
     width: 36px;
@@ -620,8 +603,6 @@ footer {
 }
 
 
-/* ESTADOS */
-
 .pagina-admin .activo {
     background-color: #def4e6;
     color: #287447;
@@ -637,8 +618,6 @@ footer {
 }
 
 
-/* BOTONES DE ACCIONES */
-
 .pagina-admin td button {
     background-color: white;
     border: 1px solid #ddd;
@@ -653,8 +632,6 @@ footer {
 }
 
 
-/* PIE DE TABLA */
-
 .pagina-admin .tabla-pie {
     display: flex;
     justify-content: space-between;
@@ -664,8 +641,6 @@ footer {
     color: #888;
 }
 
-
-/* AVISO */
 
 .pagina-admin .aviso {
     background-color: #fff6d9;
@@ -677,8 +652,6 @@ footer {
 }
 
 
-/* FOOTER ADMIN */
-
 .pagina-admin .pie-admin {
     background-color: white;
     padding: 20px;
@@ -688,8 +661,6 @@ footer {
     text-align: left;
 }
 
-
-/* RESPONSIVE ADMIN */
 
 @media (max-width: 700px) {
 
