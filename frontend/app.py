@@ -9,6 +9,7 @@ from routes.usuarios import usuarios_bp
 from routes.validar_qr import validar_qr_bp
 from routes.locales import locales_bp
 from routes.perfil import perfil_bp
+from routes.servicios import servicios_bp
 from routes.funciones import funciones_front_bp
 from routes.salas import salas_bp
 from routes.compras import compras_bp
@@ -32,8 +33,8 @@ app.register_blueprint(locales_bp)
 app.register_blueprint(perfil_bp)
 app.register_blueprint(funciones_front_bp)
 app.register_blueprint(salas_bp)
-
-
+app.register_blueprint(compras_bp)
+app.register_blueprint(servicios_bp)
 
 
 if __name__ == "__main__":

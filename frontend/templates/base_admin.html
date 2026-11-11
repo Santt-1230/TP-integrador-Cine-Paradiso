@@ -1,6 +1,11 @@
 {% extends "base.html" %}
 
+{% block titulo %}
+    Administración - Cine Paradiso
+{% endblock %}
+
 {% block estilos_extra %}
+    {{ super() }}
 <link rel="stylesheet"
       href="{{ url_for('static', filename='css/admin.css') }}">
 {% endblock %}
@@ -64,7 +69,7 @@
                 Usuarios
             </a>
 
-            <a href="/admin/qr">
+            <a href="/admin/validar_qr">
                 <i class="bi bi-qr-code-scan"></i>
                 Escaneo de QR
             </a>
@@ -77,21 +82,12 @@
     <div class="admin-contenido">
 
         {% block contenido_admin %}
-        <script src="{{ url_for('static', filename='js/admin.js') }}" defer></script>
-        <script src="{{ url_for('static', filename='js/estadisticas.js') }}" defer></script>
         {% endblock %}
 
     </div>
 
 </div>
 
-
-{# JAVASCRIPT DEL PANEL #}
 <script src="{{ url_for('static', filename='js/admin.js') }}" defer></script>
-<script src="{{ url_for('static', filename='js/estadisticas.js') }}" defer></script>
-
-{% endblock %}
-
-
-{% block pie %}
+    {% block scripts_admin %}{% endblock %}
 {% endblock %}

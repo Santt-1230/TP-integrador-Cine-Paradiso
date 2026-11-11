@@ -88,12 +88,22 @@ document.addEventListener('DOMContentLoaded', () => {
             const confirmar = document.getElementById('confirmar_clave').value;
             const mensaje = document.getElementById('mensaje-clave');
 
-            if (nueva !== confirmar) {
-                e.preventDefault();
-                mensaje.className = 'mensaje-alerta error';
-                mensaje.style.display = 'block';
-                mensaje.textContent = 'Las contraseñas nuevas no coinciden.';
-            }
-        });
+  links.forEach(link => {
+      link.addEventListener('click', function() {
+          document.querySelector('.sidebar-menu a.active')?.classList.remove('active');
+            
+          this.classList.add('active');
+      });
+  });
+
+
+document.addEventListener('click', function (evento) {
+    const desplegable = document.querySelector('.desplegable');
+    if (desplegable && !desplegable.contains(evento.target)) {
+        desplegable.removeAttribute('open');
     }
+});
+
+document.querySelectorAll('main .success').forEach(function(aviso){
+  setTimeout(function() { aviso.remove(); }, 5000);
 });

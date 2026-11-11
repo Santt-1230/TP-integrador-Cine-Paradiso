@@ -5,7 +5,7 @@ Si algo falla, `datos` trae {"errors": [{"message": "..."}]} y se lee con mensaj
 """
 import os
 import requests
-from flask import session,redirect, url_for
+from flask import session, redirect, url_for
 from functools import wraps
 
 

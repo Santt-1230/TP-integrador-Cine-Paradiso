@@ -57,3 +57,7 @@ function configurarConfirmaciones() {
         });
     });
 }
+
+function CantidadPeliculasActivas (){
+    
+}

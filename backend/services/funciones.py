@@ -18,12 +18,15 @@ def serializar_funcion(funcion):
 def listar_funciones(filtros, incluir_canceladas=False):
     pelicula_id = filtros.get("pelicula_id")
     local_id = filtros.get("local_id")
+    id_sala = filtros.get("id_sala")
     fecha = filtros.get("fecha")
 
     if pelicula_id not in (None, ""):
         pelicula_id = funciones_validator.validar_id(pelicula_id, "pelicula_id")
     if local_id not in (None, ""):
         local_id = funciones_validator.validar_id(local_id, "local_id")
+    if id_sala not in (None, ""):
+        id_sala = funciones_validator.validar_id(id_sala, "id_sala")
     if fecha:
         try:
             date.fromisoformat(fecha)
@@ -31,9 +34,16 @@ def listar_funciones(filtros, incluir_canceladas=False):
             raise ValueError("fecha debe tener formato YYYY-MM-DD")
 
     funciones = funciones_repository.listar_funciones(
-        pelicula_id, local_id, fecha, incluir_canceladas
+        pelicula_id, local_id, fecha, incluir_canceladas, id_sala
     )
     return [serializar_funcion(funcion) for funcion in funciones]
+
+
+def listar_funciones_por_sala(id_sala, incluir_canceladas=False):
+    """Lista las funciones de una sala sin pedir otros filtros."""
+    return listar_funciones(
+        {"id_sala": id_sala}, incluir_canceladas=incluir_canceladas
+    )
 
 
 def obtener_funcion(id_funcion):
