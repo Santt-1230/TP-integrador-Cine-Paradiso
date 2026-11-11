@@ -5,7 +5,9 @@ Si algo falla, `datos` trae {"errors": [{"message": "..."}]} y se lee con mensaj
 """
 import os
 import requests
-from flask import session
+from flask import session,redirect, url_for
+from functools import wraps
+
 
 BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:5000")
 
@@ -100,3 +102,46 @@ def pedir_api(metodo, ruta, **opciones):
         return 503, {"errors": [{"message": "No se pudo conectar con el Backend"}]}
     except ValueError:
         return 500, {"errors": [{"message": "El Backend devolvió una respuesta inválida"}]}
+
+def admin_front_requerido(funcion):
+    @wraps(funcion)
+    def verificar_acceso(*args, **kwargs):
+
+        if not session.get("id_usuario"):
+            return redirect(url_for("usuarios.login"))
+
+        if session.get("rol") != "administrador":
+            return redirect(url_for("peliculas_front.inicio"))
+
+        return funcion(*args, **kwargs)
+
+    return verificar_acceso
+
+
+def limpiar_sesion_front():
+
+    for clave in (
+        "id_usuario",
+        "nombre",
+        "apellido",
+        "rol",
+        "cookie_backend"
+    ):
+        session.pop(clave, None)
+
+def redirigir_al_login():
+    return redirect(url_for('usuarios.login'))
+
+def redirigir_al_inicio():
+    return redirect(url_for('peliculas_front.inicio'))
+
+
+def verificar_estado(estado):
+    if estado == 401:
+        limpiar_sesion_front()
+        return redirigir_al_login()
+
+    if estado == 403:
+        return redirigir_al_inicio()
+
+    return None

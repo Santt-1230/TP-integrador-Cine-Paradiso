@@ -39,6 +39,13 @@ def listar_funciones(filtros, incluir_canceladas=False):
     return [serializar_funcion(funcion) for funcion in funciones]
 
 
+def listar_funciones_por_sala(id_sala, incluir_canceladas=False):
+    """Lista las funciones de una sala sin pedir otros filtros."""
+    return listar_funciones(
+        {"id_sala": id_sala}, incluir_canceladas=incluir_canceladas
+    )
+
+
 def obtener_funcion(id_funcion):
     id_funcion = funciones_validator.validar_id(id_funcion, "id_funcion")
     return serializar_funcion(funciones_repository.obtener_funcion(id_funcion))

@@ -4,7 +4,6 @@ from validators import salas as salas_validator
 from services  import funciones as services_funciones
 import utils as ut
 import constants as const
-from datetime import datetime
 def listar_salas(id_local=None):
     if id_local is not None:
         id_local = salas_validator.validar_id_local(id_local)
@@ -87,18 +86,13 @@ def desactivar_sala(id_sala):
             message='Sala no encontrada',
             description=f"No existe una sala con el ID '{id_sala}'"
         ))
-    ahora = datetime.now()
-    funciones = services_funciones.listar_funciones(id_sala)
-    funciones_pendientes = [
-        funcion for funcion in funciones
-        if funcion['id_sala'] == int(id_sala) and funcion['estado'] == 'programada'
-        and function['fecha_hora_fin'] >= ahora
-    ]
-    if funciones_pendientes:
+    
+    funciones = services_funciones.listar_funciones_por_sala(id_sala)
+    if funciones:
         raise ValueError(ut.construir_error_api(
             code=const.ERROR_CODE_SALA_CONFLICT,
             message='Sala reservada',
-            description=f"La sala '{id_sala}' tiene funciones programadas"
+            description=f"La sala '{id_sala}' tiene {len(funciones)} funciones programadas"
         ))
     return salas_repository.desactivar_sala(id_sala)
 
