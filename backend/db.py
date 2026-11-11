@@ -21,14 +21,14 @@ def obtener_conexion():
     try:
         conexion=mysql.connector.connect(
             host=os.getenv("DB_HOST"),
-            port=int(os.getenv("DB_PORT")),
+            port=puerto,
             database=os.getenv("DB_NAME"),
             user=os.getenv("DB_USER"),
             password=os.getenv("DB_PASSWORD"),
             charset="utf8mb4",
             connection_timeout=5,
         )
-    except mysql.connector.Error as error:
+    except (ValueError, mysql.connector.Error) as error:
         logger.exception("No se pudo conectar con MySQL")
         raise RuntimeError("No se pudo conectar con la base de datos") from error
     return conexion

@@ -1,0 +1,38 @@
+{% extends "base_funciones.html" %}
+
+{% block titulo %}Funciones - Cine Paradiso{% endblock %}
+
+{% block contenido %}
+<section class="funciones-pagina">
+    <h1>Funciones disponibles</h1>
+    <form class="filtros-funciones" method="get" action="{{ url_for('funciones_front.pagina_funciones') }}">
+        <label>Película (ID)
+            <input type="number" min="1" name="pelicula_id" value="{{ filtros.get('pelicula_id', '') }}">
+        </label>
+        <label>Cine (ID)
+            <input type="number" min="1" name="local_id" value="{{ filtros.get('local_id', '') }}">
+        </label>
+        <label>Fecha
+            <input type="date" name="fecha" value="{{ filtros.get('fecha', '') }}">
+        </label>
+        <button type="submit">Buscar</button>
+        <a class="boton-secundario" href="{{ url_for('funciones_front.pagina_funciones') }}">Limpiar</a>
+    </form>
+
+    {% if error %}<p class="mensaje-error">{{ error }}</p>{% endif %}
+    {% if funciones %}
+        <div class="lista-funciones">
+            {% for funcion in funciones %}
+            <article class="tarjeta-funcion">
+                <h2>{{ funcion.pelicula }}</h2>
+                <p>{{ funcion.local }} · Sala {{ funcion.numero_sala }}</p>
+                <p>{{ funcion.fecha_hora_inicio }} · ${{ funcion.precio_entrada }}</p>
+                <a class="boton" href="{{ url_for('funciones_front.pagina_butacas', id_funcion=funcion.id_funcion) }}">Ver butacas</a>
+            </article>
+            {% endfor %}
+        </div>
+    {% elif not error %}
+        <p>No hay funciones para esos filtros.</p>
+    {% endif %}
+</section>
+{% endblock %}

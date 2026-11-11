@@ -12,6 +12,9 @@ from routes.perfil import perfil_bp
 from routes.servicios import servicios_bp
 
 
+from routes.funciones import funciones_front_bp
+from routes.salas import salas_bp
+from routes.compras import compras_bp
 load_dotenv()
 
 
@@ -30,11 +33,9 @@ app.register_blueprint(usuarios_bp)
 app.register_blueprint(validar_qr_bp)
 app.register_blueprint(locales_bp)
 app.register_blueprint(perfil_bp)
-app.register_blueprint(servicios_bp)
-@app.route('/mis-compras')
-def mis_compras():
-    return render_template('mis_compras.html')
-
+app.register_blueprint(funciones_front_bp)
+app.register_blueprint(salas_bp)
+app.register_blueprint(compras_bp)
 
 
 if __name__ == "__main__":

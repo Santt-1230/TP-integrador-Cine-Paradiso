@@ -1,4 +1,3 @@
-import logging
 from flask import Blueprint, jsonify, request
 import mysql.connector
 import utils as ut
@@ -44,7 +43,7 @@ def obtener_sala_id(id_sala):
 
 @salas_bp.route('/salas', methods = ['POST'])
 @ut.admin_requerido
-def crear_sala(datos):
+def crear_sala():
     datos = request.get_json(silent=True)
     if not isinstance(datos, dict):
         respuesta = ut.construir_error_api(
@@ -67,9 +66,9 @@ def crear_sala(datos):
             return jsonify(respuesta), 409
         
         return jsonify(respuesta), 400
-    
+
     except (RuntimeError, mysql.connector.Error):
-        jsonify(ut.construir_error_db()), 500
+        return jsonify(ut.construir_error_db()), 500
 
 @salas_bp.route('/salas/<id_sala>/butacas', methods= ['GET'])
 def obtener_butacas_sala(id_sala):
@@ -92,7 +91,7 @@ def obtener_butacas_sala(id_sala):
         return jsonify(ut.construir_error_db()), 500
 
 
-@salas_bp.route('/salas<id_sala>', methods = ['PATCH'])
+@salas_bp.route('/salas/<id_sala>', methods = ['PATCH'])
 @ut.admin_requerido
 def actualizar_sala(id_sala):
     datos = request.get_json(silent=True)
@@ -136,6 +135,8 @@ def desactivar_sala(id_sala):
 
         if codigo == const.ERROR_CODE_SALA_NOT_FOUND:
             return jsonify(respuesta), 404
+        if codigo == const.ERROR_CODE_SALA_CONFLICT:
+            return jsonify(respuesta), 409
         
         return jsonify(respuesta), 400
         
