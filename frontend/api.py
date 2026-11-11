@@ -73,6 +73,46 @@ def pedir(metodo, ruta, datos=None, params=None):
     except ValueError:
         return _error(502, "El servidor devolvió una respuesta inválida.")
 
+    try:
+        datos = respuesta.json()
+    except ValueError:
+        return f"El servidor devolvió una respuesta inválida (HTTP {respuesta.status_code})."
+
+    if not isinstance(datos, dict):
+        return f"El servidor respondió con un error HTTP {respuesta.status_code}."
+
+    # Formato con lista de errores
+    errores = datos.get("errors")
+
+    if isinstance(errores, list) and errores:
+        error = errores[0]
+
+        if isinstance(error, dict):
+            return (
+                error.get("description")
+                or error.get("message")
+                or error.get("title")
+                or "Error en el servidor."
+            )
+
+    # Otros formatos posibles
+    for clave in ("mensaje", "message", "description"):
+        if datos.get(clave):
+            return datos[clave]
+
+    error = datos.get("error")
+
+    if isinstance(error, str):
+        return error
+
+    if isinstance(error, dict):
+        return (
+            error.get("description")
+            or error.get("message")
+            or "Error en el servidor."
+        )
+
+    return f"El servidor respondió con un error HTTP {respuesta.status_code}."
 
 def get(ruta, params=None):
     """GET al backend. Devuelve (estado, cuerpo)."""

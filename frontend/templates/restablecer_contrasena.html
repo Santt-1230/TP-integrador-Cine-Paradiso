@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block titulo %}Nueva contraseña - Cine Paradiso{% endblock %}
+
+{% block estilos_extra %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/usuarios.css') }}">
+{% endblock %}
+
+{% block contenido %}
+<section class="pagina-formulario">
+    <h1>Nueva contraseña</h1>
+
+    <div class="tarjeta-formulario tarjeta-angosta">
+        {% if ok %}
+            <p class="mensaje-ok">¡Listo! Tu contraseña fue cambiada.</p>
+            <a class="boton-oscuro" href="{{ url_for('usuarios.login') }}">Iniciar sesión</a>
+        {% else %}
+            {% if error %}
+                <p class="mensaje-error">{{ error }}</p>
+            {% endif %}
+
+            <form method="post" action="{{ url_for('usuarios.restablecer_contrasena') }}">
+                <input type="hidden" name="token" value="{{ token }}">
+
+                <label>Contraseña nueva
+                    <input type="password" name="contrasena_nueva" minlength="8" required>
+                </label>
+
+                <label>Repetir contraseña
+                    <input type="password" name="repetir_contrasena" minlength="8" required>
+                </label>
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; text-transform: none;">
+                    <span>Mostrar contraseña</span>
+                    <input type="checkbox" style="width: auto; margin: 0;" onchange="this.closest('form').querySelectorAll('input[name*=contrasena]').forEach(i => i.type = this.checked ? 'text' : 'password')">
+                </label>
+                <button type="submit" class="boton-oscuro">Cambiar contraseña</button>
+            </form>
+            <p class="enlace-chico"><a href="{{ url_for('usuarios.olvide_contrasena') }}">Pedir un link nuevo</a></p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

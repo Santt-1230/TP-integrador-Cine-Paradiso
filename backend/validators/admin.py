@@ -1,6 +1,3 @@
-from functools import wraps
-from flask import session, jsonify
-
 
 def validar_rol(rol):
     roles_permitidos = ["cliente", "admin"]

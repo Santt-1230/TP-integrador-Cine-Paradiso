@@ -9,9 +9,15 @@
 
 {% block encabezado %}
 <header class="admin-header">
-    <a href="/admin" class="logo">CINE PARADISO</a>
+
+    <a href="/admin" class="logo">
+        CINE PARADISO
+    </a>
+
     <span>ADMIN</span>
+
     <span>PANEL DE ADMINISTRACIÓN</span>
+
 </header>
 {% endblock %}
 
@@ -20,29 +26,85 @@
 
 <div class="admin-layout">
 
+    {# BARRA LATERAL #}
     <aside class="admin-sidebar">
+
         <nav>
+<<<<<<< HEAD
             <a href="/admin/">Inicio</a>
             <a href="/admin/peliculas">Películas</a>
             <a href="/admin/funciones">Funciones</a>
             <a href="{{ url_for('locales.admin_locales') }}" 
             class="{% if request.endpoint == 'locales.admin_locales' %}activo{% endif %}">
             Locales
+=======
+            <a href="/admin">
+                <i class="bi bi-house-door"></i>
+                Inicio
             </a>
-            <a href="/admin/servicios">Servicios</a>
-            <a href="/admin/estadisticas">Estadísticas</a>
-            <a href="/admin/usuarios">Usuarios</a>
-            <a href="/admin/qr">Escaneo de QR</a>
+
+            <a href="/admin/peliculas">
+                <i class="bi bi-film"></i>
+                Películas
+            </a>
+
+            <a href="/admin/funciones">
+                <i class="bi bi-calendar-event"></i>
+                Funciones
+            </a>
+
+            <a href="/admin/locales">
+                <i class="bi bi-building"></i>
+                Locales y salas
+            </a>
+
+            <a href="/admin/servicios">
+                <i class="bi bi-cup-straw"></i>
+                Servicios
+            </a>
+
+            <a href="/admin/estadisticas">
+                <i class="bi bi-bar-chart"></i>
+                Estadísticas
+            </a>
+
+            <a href="/admin/usuarios">
+                <i class="bi bi-people"></i>
+                Usuarios
+            </a>
+
+            <a href="/admin/qr">
+                <i class="bi bi-qr-code-scan"></i>
+                Escaneo de QR
+>>>>>>> origin/develop
+            </a>
         </nav>
+
     </aside>
 
+
+    {# ÁREA DE CONTENIDO #}
     <div class="admin-contenido">
+
         {% block contenido_admin %}
         {% endblock %}
+
     </div>
 
 </div>
 
+<<<<<<< HEAD
 <script src="{{ url_for('static', filename='js/admin.js') }}" defer></script>
     {% block scripts_admin %}{% endblock %}
+=======
+
+{# JAVASCRIPT DEL PANEL #}
+<script src="{{ url_for('static', filename='js/admin.js') }}" defer></script>
+<script src="{{ url_for('static', filename='js/estadisticas.js') }}" defer></script>
+
+{% endblock %}
+
+
+{% block pie %}
+>>>>>>> origin/develop
 {% endblock %}
