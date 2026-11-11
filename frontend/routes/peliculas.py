@@ -195,8 +195,8 @@ def buscar():
     """Buscador del encabezado: redirige a la cartelera con el texto buscado."""
     texto = request.args.get("q", "").strip()
     if not texto:
-        return redirect(url_para("peliculas_front.lista"))
-    return redirect(url_para("peliculas_front.lista", q=texto))
+        return redirect(url_for("peliculas_front.lista"))
+    return redirect(url_for("peliculas_front.lista", q=texto))
 
 
 @peliculas_front_bp.get("/peliculas")
