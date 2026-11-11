@@ -288,3 +288,14 @@ INSERT  IGNORE INTO `pelicula_genero` (`id_pelicula`, `id_genero`) VALUES (5,13)
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
+INSERT INTO productos (nombre, tipo, descripcion, precio) VALUES
+  ('Pochoclo mediano', 'comida', NULL, 3000),
+  ('Gaseosa 750 ml', 'bebida', NULL, 2000),
+  ('Acceso por vehículo', 'estacionamiento', NULL, 3000),
+  ('Ingreso prioritario a la sala', 'vip', NULL, 5000);
+
+INSERT INTO promociones (nombre, descripcion, vigente_desde, vigente_hasta)
+VALUES
+('2x1 los martes', 'Entradas 2x1', '2026-01-01', '2027-12-31'),
+('Combo pareja', 'Pochoclo + 2 gaseosas', '2026-01-01', '2027-12-31'),
+('Descuento en entradas', 'Promoción especial', '2026-01-01', '2027-12-31');

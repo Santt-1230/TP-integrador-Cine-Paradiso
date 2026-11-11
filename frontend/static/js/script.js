@@ -25,3 +25,15 @@ const links = document.querySelectorAll('.sidebar-menu a');
           this.classList.add('active');
       });
   });
+
+
+document.addEventListener('click', function (evento) {
+    const desplegable = document.querySelector('.desplegable');
+    if (desplegable && !desplegable.contains(evento.target)) {
+        desplegable.removeAttribute('open');
+    }
+});
+
+document.querySelectorAll('main .success').forEach(function(aviso){
+  setTimeout(function() { aviso.remove(); }, 5000);
+});

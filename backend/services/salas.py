@@ -1,6 +1,7 @@
 from repositories import salas as salas_repository
 from repositories import locales as locales_repository
 from validators import salas as salas_validator
+from services  import funciones as services_funciones
 import utils as ut
 import constants as const
 def listar_salas(id_local=None):
@@ -85,7 +86,14 @@ def desactivar_sala(id_sala):
             message='Sala no encontrada',
             description=f"No existe una sala con el ID '{id_sala}'"
         ))
-
+    
+    funciones = services_funciones.listar_funciones_por_sala(id_sala)
+    if funciones:
+        raise ValueError(ut.construir_error_api(
+            code=const.ERROR_CODE_SALA_CONFLICT,
+            message='Sala reservada',
+            description=f"La sala '{id_sala}' tiene {len(funciones)} funciones programadas"
+        ))
     return salas_repository.desactivar_sala(id_sala)
 
 def listar_salas_activas(id_local):

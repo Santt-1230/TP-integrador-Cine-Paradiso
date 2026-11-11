@@ -1,0 +1,72 @@
+{% extends "base_admin.html" %}
+
+{% block titulo %}{{ 'Editar servicio' if servicio.id_producto else 'Nuevo servicio' }} · Cine paradiso{% endblock %}
+
+{% block contenido_admin %}
+<div class="servicios-admin">
+
+    <div class="servicios-admin__encabezado">
+        <div>
+            <p class="servicios-admin__migas">Administración / Servicios</p>
+            <h1>{{ 'Editar servicio' if servicio.id_producto else 'Nuevo servicio' }}</h1>
+        </div>
+    </div>
+
+    {% if error %}
+        <p class="servicios-admin__error">{{ error }}</p>
+    {% endif %}
+
+    <form method="post" class="formulario-admin">
+
+        <div class="campo-formulario">
+            <label for="nombre">Nombre</label>
+            <input id="nombre" type="text" name="nombre"
+                   value="{{ servicio.nombre }}" required>   
+        </div>
+
+        <div class="campo-formulario">
+            <label for="tipo">Tipo</label>
+            <select id="tipo" name="tipo">
+                {% for tipo in tipos %}
+                    <option value="{{ tipo }}"
+                       {% if servicio.tipo == tipo %}selected{% endif %}>
+                       {{ tipo }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="campo-formulario">
+            <label for="descripcion">Descripción</label>
+            <input id="descripcion" type="text" name="descripcion"
+                   value="{{ servicio.descripcion or '' }}">
+        </div>
+
+        <div class="campo-formulario">
+            <label for="precio">Precio</label>
+            <input id="precio" type="number" name="precio"
+                   value="{{ servicio.precio or '' }}"
+                   min="0" step="0.01" required>
+        </div>
+
+        <label class="servicios-admin__check">
+            <input type="checkbox" name="activo"
+                   {% if servicio.get('activo', True) %}checked{% endif %}>
+            Activo
+        </label>
+
+        <div class="servicios-admin__pie-formulario">
+            <a class="servicios-admin__accion"
+               href="{{ url_for('servicios.admin_servicios') }}">
+               Cancelar
+            </a>
+            <button type="submit" class="servicios-admin__boton">
+                Guardar
+            </button>
+        </div>
+        
+    </form>
+
+</div>
+
+{% endblock %} 
