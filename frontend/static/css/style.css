@@ -384,6 +384,31 @@ footer {
     text-align:center;
 }
 
+/* Layout en 2 columnas paralelas */
+.grid-dos-columnas {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Dos columnas de igual ancho */
+    gap: 5rem;                       /* Espacio horizontal entre columnas */
+    align-items: start;   
+}
+.columna-perfil{
+    width: 20rem;
+}
+.desplegable-contenido {
+    display: none;
+}
+
+.desplegable-contenido.abierto {
+    display: block;
+}
+/* En pantallas pequeñas (celulares) pasan a mostrarse una abajo de la otra */
+@media (max-width: 768px) {
+    .grid-dos-columnas {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+}
+
 /* Sección de Baja de Cuenta / Arrepentimiento */
 .seccion-arrepentimiento {
   
@@ -484,7 +509,6 @@ footer {
     padding: 20px;
     margin-top: 15px;
     max-width: 500px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
 .perfil-info p {
@@ -529,7 +553,6 @@ footer {
 }
 
 .bloque-perfil-desplegable {
-  margin-top: 20px;
   max-width: 450px;
 }
 

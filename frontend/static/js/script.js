@@ -68,34 +68,55 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-document.addEventListener('DOMContentLoaded', () => {
-    const boton = document.getElementById('btn-toggle-clave');
-    const contenedor = document.getElementById('contenedor-cambiar-clave');
-    const flecha = document.getElementById('flecha-clave');
+document.addEventListener('DOMContentLoaded', function () {
+    // 1. Toggle Mostrar / Ocultar Formulario de Editar Datos
+    const btnEditar = document.getElementById('btn-toggle-editar');
+    const btnCancelar = document.getElementById('btn-cancelar-editar');
+    const vistaDatos = document.getElementById('vista-datos-perfil');
+    const formEditar = document.getElementById('form-editar-perfil');
 
-    if (boton && contenedor) {
-        boton.addEventListener('click', () => {
-            const abierto = contenedor.style.display !== 'none';
-            contenedor.style.display = abierto ? 'none' : 'block';
-            if (flecha) flecha.textContent = abierto ? '▼' : '▲';
+    if (btnEditar && btnCancelar) {
+        btnEditar.addEventListener('click', function () {
+            vistaDatos.style.display = 'none';
+            formEditar.style.display = 'block';
+        });
+
+        btnCancelar.addEventListener('click', function () {
+            formEditar.style.display = 'none';
+            vistaDatos.style.display = 'block';
         });
     }
 
-    const form = document.getElementById('form-cambiar-clave');
-    if (form) {
-        form.addEventListener('submit', (e) => {
-            const nueva = document.getElementById('nueva_clave').value;
-            const confirmar = document.getElementById('confirmar_clave').value;
-            const mensaje = document.getElementById('mensaje-clave');
+    // 2. Toggle Contraer / Descontraer Cambiar Contraseña
+    const btnClave = document.getElementById('btn-toggle-clave');
+    const contenedorClave = document.getElementById('contenedor-cambiar-clave');
+    const flechaClave = document.getElementById('flecha-clave');
 
-  links.forEach(link => {
-      link.addEventListener('click', function() {
-          document.querySelector('.sidebar-menu a.active')?.classList.remove('active');
-            
-          this.classList.add('active');
-      });
-  });
+    if (btnClave) {
+        btnClave.addEventListener('click', function () {
+            contenedorClave.classList.toggle('abierto');
+            if (contenedorClave.classList.contains('abierto')) {
+                flechaClave.textContent = '▲';
+            } else {
+                flechaClave.textContent = '▼';
+            }
+        });
+    }
+});
 
+// 3. Función para Ver / Ocultar Contraseña con el Ojito
+function toggleVisibilidadPassword(idInput, icono) {
+    const input = document.getElementById(idInput);
+    if (input.type === 'password') {
+        input.type = 'text';
+        icono.classList.remove('bi-eye');
+        icono.classList.add('bi-eye-slash');
+    } else {
+        input.type = 'password';
+        icono.classList.remove('bi-eye-slash');
+        icono.classList.add('bi-eye');
+    }
+}
 
 document.addEventListener('click', function (evento) {
     const desplegable = document.querySelector('.desplegable');

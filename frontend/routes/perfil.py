@@ -1,5 +1,9 @@
+import io
+import requests
 from flask import Blueprint, flash, redirect, render_template, request, session, url_for
 from api import pedir, mensaje_error, verificar_estado, limpiar_sesion_front
+from flask import send_file, session, flash, redirect, url_for
+from api import BACKEND_URL, cookies_backend, verificar_estado
 
 perfil_bp = Blueprint('perfil', __name__)
 
@@ -97,12 +101,46 @@ def cambiar_clave():
 
     return redirect(url_for("perfil.perfil_seccion", seccion="mi-cuenta"))
 
+@perfil_bp.route('/mi-perfil/actualizar-datos', methods=['POST'])
+def actualizar_datos():
+    if "cookie_backend" not in session:
+        return redirect(url_for("usuarios.login"))
+
+    nombre = request.form.get("nombre", "").strip()
+    apellido = request.form.get("apellido", "").strip()
+    email = request.form.get("email", "").strip()
+    fecha_nacimiento = request.form.get("fecha_nacimiento", "").strip()
+
+    datos_actualizados = {
+        "nombre": nombre,
+        "apellido": apellido,
+        "email": email,
+        "fecha_nacimiento": fecha_nacimiento
+    }
+
+    estado, datos = pedir("PATCH", "/api/usuarios/me", datos_actualizados)
+
+    redir = verificar_estado(estado)
+    if redir:
+        return redir
+
+    if estado == 200:
+        session["nombre"] = nombre
+        flash("Datos personales actualizados correctamente.", "exito")
+    else:
+        flash(mensaje_error(datos), "error")
+
+    return redirect(url_for("perfil.perfil_seccion", seccion="mi-cuenta"))
 
 @perfil_bp.route('/mi-perfil/baja', methods=['POST'])
 def baja_cuenta():
     if "cookie_backend" not in session:
         return redirect(url_for("usuarios.login"))
 
+    comentario = request.form.get("comentario", "").strip()
+
+    # Si la API en el backend acepta el comentario, se lo podés pasar como payload:
+    # estado, datos = pedir("PATCH", "/api/usuarios/me/arrepentimiento", {"comentario": comentario})
     estado, datos = pedir("PATCH", "/api/usuarios/me/arrepentimiento")
 
     redir = verificar_estado(estado)
@@ -113,9 +151,9 @@ def baja_cuenta():
         limpiar_sesion_front()
         flash("Tu cuenta fue dada de baja.", "exito")
         return redirect("/")
-    else:
-        flash(mensaje_error(datos), "error")
-        return redirect(url_for("perfil.perfil_seccion", seccion="mi-cuenta"))
+
+    flash(mensaje_error(datos), "error")
+    return redirect(url_for("perfil.perfil_seccion", seccion="mi-cuenta"))
 
 
 @perfil_bp.route('/mi-perfil/mis-compras', methods=['POST'])
@@ -138,3 +176,37 @@ def cancelar_compra():
             flash(mensaje_error(datos), 'error')
 
     return redirect(url_for('perfil.perfil_seccion', seccion='mis-compras'))
+
+
+@perfil_bp.route('/mi-perfil/mis-compras/<int:compra_id>/descargar-pdf')
+def descargar_pdf_compra(compra_id):
+    if "cookie_backend" not in session:
+        return redirect(url_for("usuarios.login"))
+
+    try:
+        # Petición directa al backend enviando la cookie de sesión
+        respuesta = requests.get(
+            f"{BACKEND_URL}/api/compras/{compra_id}/pdf",
+            cookies=cookies_backend(),
+            timeout=15
+        )
+    except requests.RequestException:
+        flash("No se pudo conectar con el servidor.", "error")
+        return redirect(url_for("perfil.perfil_seccion", seccion="mis-compras"))
+
+    # Manejar expiración de sesión (401/403)
+    redir = verificar_estado(respuesta.status_code)
+    if redir:
+        return redir
+
+    if respuesta.status_code != 200:
+        flash("No se pudo descargar el comprobante.", "error")
+        return redirect(url_for("perfil.perfil_seccion", seccion="mis-compras"))
+
+    # Forzar la descarga en el navegador
+    return send_file(
+        io.BytesIO(respuesta.content),
+        mimetype='application/pdf',
+        as_attachment=True,
+        download_name=f'factura_compra_{compra_id}.pdf'
+    )

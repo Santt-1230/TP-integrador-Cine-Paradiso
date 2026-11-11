@@ -9,7 +9,7 @@
         <nav class="sidebar-menu">
             <a href="{{ url_for('perfil.perfil_seccion', seccion='mi-cuenta') }}" class="{{ 'active' if seccion == 'mi-cuenta' }} bi bi-person-circle"> MI CUENTA</a>
             <a href="{{ url_for('perfil.perfil_seccion', seccion='peliculas-vistas') }}" class="{{ 'active' if seccion == 'peliculas-vistas' }} bi bi-film"> PELICULAS VISTAS</a>
-            <a href="{{ url_for('perfil.perfil_seccion', seccion='mis-compras') }}" class="{{ 'active' if seccion == 'mis-compras' }} bi bi-ticket-perforated">MIS COMPRAS</a>
+            <a href="{{ url_for('perfil.perfil_seccion', seccion='mis-compras') }}" class="{{ 'active' if seccion == 'mis-compras' }} bi bi-ticket-perforated"> MIS COMPRAS</a>
             <a href="{{ url_for('perfil.perfil_seccion', seccion='resenas') }}" class="{{ 'active' if seccion == 'resenas' }} bi bi-chat-right-text-fill"> RESEÑAS</a>
             <a href="{{ url_for('perfil.perfil_seccion', seccion='cupones-y-puntos') }}" class="{{ 'active' if seccion == 'cupones-y-puntos' }} bi bi-award"> CUPONES Y PUNTOS</a>
             <a href="{{ url_for('perfil.perfil_seccion', seccion='merch') }}" class="{{ 'active' if seccion == 'merch' }} bi bi-bag-fill"> MERCH</a>
@@ -22,51 +22,93 @@
     <div class="contenido-secciones">
         <section id="mi-cuenta" class="seccion-contenido {{ 'activa' if seccion == 'mi-cuenta' }}">
             <h2>Mi Cuenta</h2>
-            <div class="perfil-card">
-                <div class="perfil-info">
-                    <p><strong>Nombre:</strong> {{ perfil.nombre }} {{ perfil.apellido }}</p>
-                    <p><strong>Email:</strong> {{ perfil.email }}</p>
-                    <p><strong>Fecha de nacimiento:</strong> {{ perfil.fecha_nacimiento }}</p>
+            
+            <div class="perfil-card grid-dos-columnas">
+                
+                <!-- COLUMNA IZQUIERDA: DATOS PERSONALES Y EDICIÓN -->
+                <div class="columna-perfil">
+                    <!-- Vista de Datos -->
+                    <div id="vista-datos-perfil" class="perfil-info">
+                        <p><strong>Nombre:</strong> {{ perfil.nombre }} {{ perfil.apellido }}</p>
+                        <p><strong>Email:</strong> {{ perfil.email }}</p>
+                        <p><strong>Fecha de nacimiento:</strong> {{ perfil.fecha_nacimiento }}</p>
+                        <button type="button" id="btn-toggle-editar" class="btn-editar">Editar Datos</button>
+                    </div>
+
+                    <!-- Formulario de Edición -->
+                    <form id="form-editar-perfil" method="post" action="{{ url_for('perfil.actualizar_datos') }}" class="form-editar-perfil" style="display: none;">
+                        <div class="form-group">
+                            <label for="nombre">Nombre:</label>
+                            <input type="text" id="nombre" name="nombre" value="{{ perfil.nombre }}" required class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="apellido">Apellido:</label>
+                            <input type="text" id="apellido" name="apellido" value="{{ perfil.apellido }}" required class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email:</label>
+                            <input type="email" id="email" name="email" value="{{ perfil.email }}" required class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="fecha_nacimiento">Fecha de nacimiento:</label>
+                            <input type="date" id="fecha_nacimiento" name="fecha_nacimiento" value="{{ perfil.fecha_nacimiento }}" required class="form-control">
+                        </div>
+                        <div class="acciones-edicion">
+                            <button type="submit" class="btn-guardar-clave">Guardar Cambios</button>
+                            <button type="button" id="btn-cancelar-editar" class="btn-cancelar">Cancelar</button>
+                        </div>
+                    </form>
                 </div>
-                <button class="btn-editar">Editar Datos</button>
-                {% set mensajes = get_flashed_messages(with_categories=true) %}
-                <div class="bloque-perfil-desplegable">
-                    <button type="button" id="btn-toggle-clave" class="btn-desplegar">
-                        <span><i class="bi bi-key"></i> Cambiar Contraseña</span>
-                        <span id="flecha-clave" class="flecha">{{ '▲' if mensajes else '▼' }}</span>
-                    </button>
 
-                    <!-- Contenedor oculto por defecto -->
+                <div class="columna-perfil">
                     {% set mensajes = get_flashed_messages(with_categories=true) %}
+                    <div class="bloque-perfil-desplegable">
+                        <button type="button" id="btn-toggle-clave" class="btn-desplegar">
+                            <span><i class="bi bi-key"></i> Cambiar Contraseña</span>
+                            <span id="flecha-clave" class="flecha">▼</span>
+                        </button>
 
-                    <div id="contenedor-cambiar-clave" class="desplegable-contenido {{ 'abierto' if mensajes }}">
-                        <form id="form-cambiar-clave" method="post" action="{{ url_for('perfil.cambiar_clave') }}">
-                            <div class="form-group">
-                                <label for="clave_actual">Contraseña actual:</label>
-                                <input type="password" id="clave_actual" name="clave_actual" required class="form-control">
-                            </div>
+                        <!-- Sin la clase "abierto" para que comience oculto -->
+                        <div id="contenedor-cambiar-clave" class="desplegable-contenido">
+                            <form id="form-cambiar-clave" method="post" action="{{ url_for('perfil.cambiar_clave') }}">
+                                <div class="form-group campo-password">
+                                    <label for="clave_actual">Contraseña actual:</label>
+                                    <div class="input-con-ojo">
+                                        <input type="password" id="clave_actual" name="clave_actual" required class="form-control">
+                                        <i class="bi bi-eye icono-ojo" onclick="toggleVisibilidadPassword('clave_actual', this)"></i>
+                                    </div>
+                                </div>
 
-                            <div class="form-group">
-                                <label for="nueva_clave">Nueva contraseña:</label>
-                                <input type="password" id="nueva_clave" name="nueva_clave" required minlength="6" class="form-control">
-                            </div>
+                                <div class="form-group campo-password">
+                                    <label for="nueva_clave">Nueva contraseña:</label>
+                                    <div class="input-con-ojo">
+                                        <input type="password" id="nueva_clave" name="nueva_clave" required minlength="6" class="form-control">
+                                        <i class="bi bi-eye icono-ojo" onclick="toggleVisibilidadPassword('nueva_clave', this)"></i>
+                                    </div>
+                                </div>
 
-                            <div class="form-group">
-                                <label for="confirmar_clave">Confirmar nueva contraseña:</label>
-                                <input type="password" id="confirmar_clave" name="confirmar_clave" required class="form-control">
-                            </div>
+                                <div class="form-group campo-password">
+                                    <label for="confirmar_clave">Confirmar nueva contraseña:</label>
+                                    <div class="input-con-ojo">
+                                        <input type="password" id="confirmar_clave" name="confirmar_clave" required class="form-control">
+                                        <i class="bi bi-eye icono-ojo" onclick="toggleVisibilidadPassword('confirmar_clave', this)"></i>
+                                    </div>
+                                </div>
 
-                            <button type="submit" class="btn-guardar-clave">Actualizar Contraseña</button>
-                        </form>
-                        {% if mensajes %}
-                            <div id="mensaje-clave" class="mensaje-alerta {{ mensajes[0][0] }}">
-                                {% for categoria, texto in mensajes %}{{ texto }}{% endfor %}
-                            </div>
-                        {% else %}
-                            <div id="mensaje-clave" class="mensaje-alerta" style="display: none;"></div>
-                        {% endif %}
+                                <button type="submit" class="btn-guardar-clave">Actualizar Contraseña</button>
+                            </form>
+
+                            {% if mensajes %}
+                                <div id="mensaje-clave" class="mensaje-alerta {{ mensajes[0][0] }}">
+                                    {% for categoria, texto in mensajes %}{{ texto }}{% endfor %}
+                                </div>
+                            {% else %}
+                                <div id="mensaje-clave" class="mensaje-alerta" style="display: none;"></div>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
+
             </div>
         </section>
         <section id="peliculas-vistas" class="seccion-contenido {{ 'activa' if seccion == 'peliculas-vistas' }}">
@@ -84,69 +126,81 @@
             </div>
         </section>
         <section id="mis-compras" class="seccion-contenido {{ 'activa' if seccion == 'mis-compras' }}">
-            <h2>MIS COMPRAS</h2>
+    <h2>MIS COMPRAS</h2>
 
-            <div class="contenedor-lista-compras">
-                {% for compra in historial.compras %}
-                    <div class="tarjeta-compra-layout">
-                        
-                        <!-- Fecha de la Compra -->
-                        <div class="header-fecha">
-                            <h3>{{ compra.fecha_creacion }}</h3>
+    <div class="contenedor-lista-compras">
+        {% for compra in historial.compras %}
+            <div class="tarjeta-compra-layout">
+                
+                <div class="header-fecha">
+                    <h3>{{ compra.fecha_creacion }}</h3>
+                </div>
+
+                <div class="cuerpo-compra-grid">
+                    
+                    <!-- 1. Película -->
+                    <div class="columna-item">
+                        <div class="contenedor-poster pastel-purpura">
+                            {% if compra.poster_url %}
+                                <img src="{{ compra.poster_url }}" alt="{{ compra.titulo_pelicula }}" class="poster-img">
+                            {% endif %}
                         </div>
+                        <span class="etiqueta-categoria">{{ compra.genero | default('CINE') | upper }}</span>
+                        <h4 class="titulo-item">{{ compra.titulo_pelicula | upper }}</h4>
+                    </div>
 
-                        <div class="cuerpo-compra-grid">
-                            
-                            <!-- 1. Película -->
-                            <div class="columna-item">
-                                <div class="contenedor-poster pastel-purpura">
-                                    {% if compra.poster_url %}
-                                        <img src="{{ compra.poster_url }}" alt="{{ compra.titulo_pelicula }}" class="poster-img">
+                    <!-- 2. Combo / Servicios -->
+                    <div class="columna-item">
+                        {% if compra.servicios %}
+                            {% for servicio in compra.servicios %}
+                                <div class="contenedor-poster pastel-azul">
+                                    {% if servicio.imagen_url %}
+                                        <img src="{{ servicio.imagen_url }}" alt="{{ servicio.nombre }}" class="poster-img">
                                     {% endif %}
                                 </div>
-                                <span class="etiqueta-categoria">{{ compra.genero | default('CINE') | upper }}</span>
-                                <h4 class="titulo-item">{{ compra.titulo_pelicula | upper }}</h4>
-                            </div>
-
-                            <div class="columna-item">
-                                {% if compra.servicios %}
-                                    {% for servicio in compra.servicios %}
-                                        <div class="contenedor-poster pastel-azul">
-                                            {% if servicio.imagen_url %}
-                                                <img src="{{ servicio.imagen_url }}" alt="{{ servicio.nombre }}" class="poster-img">
-                                            {% endif %}
-                                        </div>
-                                        <span class="etiqueta-categoria">COMBO</span>
-                                        <h4 class="titulo-item">{{ servicio.nombre | upper }}</h4>
-                                        <span class="badge-retirar">RETIRAR</span>
-                                    {% endfor %}
-                                {% else %}
-                                    <div class="contenedor-poster pastel-azul"></div>
-                                    <span class="etiqueta-categoria">COMBO</span>
-                                    <h4 class="titulo-item">SIN COMBO</h4>
-                                {% endif %}
-                            </div>
-
-                            <div class="columna-qr">
-                                <h4 class="titulo-qr">TUS ENTRADAS</h4>
-                                <div class="contenedor-qr-box">
-                                    <p>Descarga tu factura.</p>
-                                </div>
-                                <p class="instruccion-qr">
-                                    PRESENTÁ TU QR EN LA ENTRADA<br>A LAS SALAS DE TU CINE
-                                </p>
-                            </div>
-                        </div>
+                                <span class="etiqueta-categoria">COMBO</span>
+                                <h4 class="titulo-item">{{ servicio.nombre | upper }}</h4>
+                                <span class="badge-retirar">RETIRAR</span>
+                            {% endfor %}
+                        {% else %}
+                            <div class="contenedor-poster pastel-azul"></div>
+                            <span class="etiqueta-categoria">COMBO</span>
+                            <h4 class="titulo-item">SIN COMBO</h4>
+                        {% endif %}
                     </div>
-                    <form id="form-baja-cuenta" method="post" action="{{ url_for('perfil.cancelar_compra') }}">
-                    <button type="submit">Cancelar compra</button>
-                    </form>
-                {% else %}
-                    <p class="sin-compras">No se encontraron compras registradas en tu historial.</p>
-                {% endfor %}
-            </div>
 
-        </section>
+                    <!-- 3. Entradas y Descarga PDF -->
+                    <div class="columna-qr">
+                        <h4 class="titulo-qr">TUS ENTRADAS</h4>
+                        <div class="contenedor-qr-box">
+                            <a href="{{ url_for('perfil.descargar_pdf_compra', compra_id=compra.id_compra) }}" class="btn-descargar-pdf">
+                                <i class="bi bi-file-earmark-pdf"></i> Descargar factura</a> 
+                        </div>
+                        <p class="instruccion-qr">
+                            PRESENTÁ TU QR EN LA ENTRADA<br>A LAS SALAS DE TU CINE
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 4. Acción de Cancelación -->
+                <div class="acciones-compra">
+                    {% if compra.estado != 'cancelada' %}
+                        <form method="post" action="{{ url_for('perfil.cancelar_compra') }}" onsubmit="return confirm('¿Confirmás que querés cancelar esta compra?');">
+                            <!-- Input oculto para que la ruta POST reciba el ID de la compra -->
+                            <input type="hidden" name="id_compra" value="{{ compra.id_compra }}">
+                            <button type="submit" class="btn-cancelar">Cancelar compra</button>
+                        </form>
+                    {% else %}
+                        <span class="estado-cancelado">Compra Cancelada</span>
+                    {% endif %}
+                </div>
+
+            </div>
+        {% else %}
+            <p class="sin-compras">No se encontraron compras registradas en tu historial.</p>
+        {% endfor %}
+    </div>
+</section>
         <section id="resenas" class="seccion-contenido {{ 'activa' if seccion == 'resenas' }}">
             <h2>Reseñas</h2>
            {% for compra in compras %}
@@ -205,7 +259,7 @@
                 <h3>Arrepentimiento / Baja del servicio</h3>
                 <p>Si querés cancelar dar de baja tu cuenta en Cine Paradiso, podés hacerlo desde acá.</p>
 
-                <form id="form-baja-cuenta">
+                <form method="post" action="{{ url_for('perfil.baja_cuenta') }}" onsubmit="return confirm('¿Estás seguro de que querés dar de baja tu cuenta?');">
                     <div class="form-group">
                         <label for="comentario-baja">¿Por qué decidís darte de baja?:</label>
                         <textarea 
@@ -216,10 +270,7 @@
                             placeholder="Dejanos tu opinión para ayudarnos a mejorar..."
                         ></textarea>
                     </div>
-
-                    <form id="form-baja-cuenta" method="post" action="{{ url_for('perfil.baja_cuenta') }}">
-                        <button type="submit">Darme de baja</button>
-                    </form>
+                    <button type="submit" class="btn-cancelar">Darme de baja</button>
                 </form>
             </div>
         </section>
