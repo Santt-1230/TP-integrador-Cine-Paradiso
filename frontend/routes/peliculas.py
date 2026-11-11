@@ -1,6 +1,6 @@
 from datetime import date, datetime
 
-from flask import Blueprint, redirect, render_template, request, url_para
+from flask import Blueprint, redirect, render_template, request, url_for
 
 import api
 
