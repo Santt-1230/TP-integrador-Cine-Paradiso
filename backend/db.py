@@ -64,3 +64,19 @@ def ejecutar_mutacion(sql:str, parametros :tuple = ())-> dict:
             cursor.close()
         conexion.close()
         conexion.close()
+
+@contextmanager
+def transaccion():
+    conexion = obtener_conexion()
+    cursor = None
+    try:
+        cursor = conexion.cursor(dictionary=True)
+        yield cursor
+        conexion.commit()
+    except Exception:
+        conexion.rollback()
+        raise
+    finally:
+        if cursor is not None:
+            cursor.close()
+        conexion.close()
