@@ -8,19 +8,6 @@ CAMPOS_EDITAR_SALA = ['numero_sala', 'estado']
 CAMPOS_ENTEROS_SALA = ['numero_sala']
 
 
-def redirigir_al_login():
-    return redirect(url_for('usuarios.login'))
-
-def redirigir_al_inicio():
-    return redirect(url_for('peliculas_front.inicio'))
-
-def verificar_estado(estado):
-    if estado == 401:
-        return redirigir_al_login()
-    if estado == 403:
-        return redirigir_al_inicio()
-    return None
-
 def leer_formulario(campos):
     datos = {}
     for campo in campos:
@@ -33,24 +20,11 @@ def convertir_a_enteros(datos, campos):
         convertidos[campo] = int(datos[campo])
     return convertidos
 
-def verificar_admin():
-    if not api.session.get('id_usuario'):
-        return redirigir_al_login()
-    
-    if api.session.get('rol') != 'administrador':
-        flash('No tenes permisos para acceder a esta seccion.', 'error')
-        return redirigir_al_inicio()
-
-    return None
-
 @salas_bp.route('/admin/salas/nueva', methods = ['GET', 'POST'])
+@api.admin_front_requerido
 def crear_sala():
-    respuesta = verificar_admin()
-    if respuesta:
-        return respuesta
-
-    if api.request.method == 'GET':
-        datos = {'id_local' : api.request.args.get('id_local', '')}
+    if request.method == 'GET':
+        datos = {'id_local' : request.args.get('id_local', '')}
         return render_template('admin_editar_sala.html', datos=datos, id_sala=None, error=None)
 
     datos = leer_formulario(CAMPOS_NUEVA_SALA)
@@ -62,7 +36,7 @@ def crear_sala():
 
     estado, datos_respuesta = api.pedir('POST', f'/api/salas', datos_back)
 
-    estado_respuesta = verificar_estado(estado)
+    estado_respuesta = api.verificar_estado(estado)
     if estado_respuesta:
         return estado_respuesta
 
@@ -76,17 +50,14 @@ def crear_sala():
 
 
 @salas_bp.route('/admin/salas/<int:id_sala>/editar', methods = ['GET', 'POST'])
+@api.admin_front_requerido
 def editar_sala(id_sala):
-    respuesta = verificar_admin()
-    if respuesta:
-        return respuesta
-    
     datos = {}
     error = None
     if request.method == 'GET':
         estado, datos_respuesta = api.pedir('GET', f'/api/salas/{id_sala}')
 
-        estado_respuesta = verificar_estado(estado)
+        estado_respuesta = api.verificar_estado(estado)
         if estado_respuesta:
             return estado_respuesta
         
@@ -107,7 +78,7 @@ def editar_sala(id_sala):
 
     estado, datos_respuesta = api.pedir('PATCH', f'/api/salas/{id_sala}', datos_back)
 
-    estado_respuesta = verificar_estado(estado)
+    estado_respuesta = api.verificar_estado(estado)
     if estado_respuesta:
         return estado_respuesta
                 
@@ -119,14 +90,12 @@ def editar_sala(id_sala):
     return redirect(url_for('locales.admin_locales'))
 
 @salas_bp.route('/admin/salas/<int:id_sala>/dar_baja', methods = ['POST'])
+@api.admin_front_requerido
 def desactivar_sala(id_sala):
-    respuesta = verificar_admin()
-    if respuesta:
-        return respuesta
     
     estado, datos_respuesta = api.pedir('DELETE', f'/api/salas/{id_sala}')
 
-    estado_respuesta = verificar_estado(estado)
+    estado_respuesta = api.verificar_estado(estado)
     if estado_respuesta:
         return estado_respuesta
 

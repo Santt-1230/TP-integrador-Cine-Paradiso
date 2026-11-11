@@ -1,4 +1,4 @@
-from flask import Blueprint, redirect, render_template, url_for, flash, request
+from flask import Blueprint, render_template, flash, request
 import api
 
 locales_bp = Blueprint('locales', __name__)
@@ -6,16 +6,11 @@ locales_bp = Blueprint('locales', __name__)
 def sesion_invalida(error_api):
     return error_api.estado in (401, 403)
 
-def redirigir_al_login():
-    return redirect(url_for('usuarios.login'))
-
-def redirigir_al_inicio():
-    return redirect(url_for('peliculas_front.inicio'))
 
 def leer_formulario(campos):
     datos = {}
     for campo in campos:
-        datos[campo] = api.request.form.get(campo, '')
+        datos[campo] = request.form.get(campo, '')
     return datos
 
 def convertir_a_enteros(datos, campos):
@@ -24,22 +19,6 @@ def convertir_a_enteros(datos, campos):
         convertidos[campo] = int(datos[campo])
     return convertidos
 
-def verificar_admin():
-    if not api.session.get('id_usuario'):
-        return redirigir_al_login()
-    
-    if api.session.get('rol') != 'administrador':
-        flash('No tenes permisos para acceder a esta seccion', 'error')
-        return redirect(url_for('peliculas_front.inicio'))
-
-    return None
-
-def verificar_estado(estado):
-    if estado == 401:
-        return redirigir_al_login()
-    if estado == 403:
-        return redirigir_al_inicio()
-    return None
 
 @locales_bp.app_context_processor
 def inyectar_locales():
@@ -63,7 +42,7 @@ def elegir_cine(id_local):
 
     if estado != 200:
         flash(api.mensaje_error(datos_respuesta), 'error')
-        return redirigir_al_inicio()
+        return api.redirigir_al_inicio()
     locales = datos_respuesta.get('locales', [])
     local = None
 
@@ -77,15 +56,13 @@ def elegir_cine(id_local):
         api.session['cine_id'] = local['id_local']
         api.session['cine_nombre'] = local['nombre']
         
-    return redirigir_al_inicio()
+    return api.redirigir_al_inicio()
      
 
 @locales_bp.route('/admin/locales', methods=['GET'])
+@api.admin_front_requerido
 def admin_locales():
-    respuesta = verificar_admin()
-    if respuesta:
-        return respuesta
-    
+
     filtro_estado = request.args.get('estado', 'todas')
     if filtro_estado not in ('todas', 'activa', 'inactiva'):
         filtro_estado = 'todas'
@@ -97,7 +74,7 @@ def admin_locales():
     salas_configuradas = 0
 
     estado, datos_respuesta = api.get('/api/locales')
-    estado_respuesta = verificar_estado(estado)
+    estado_respuesta = api.verificar_estado(estado)
     if estado_respuesta:
         return estado_respuesta
     
@@ -108,7 +85,7 @@ def admin_locales():
         todos_los_locales = locales
 
         estado, datos_respuesta = api.get('/api/salas')
-        estado_respuesta = verificar_estado(estado)
+        estado_respuesta = api.verificar_estado(estado)
         if estado_respuesta:
             return estado_respuesta
         if estado != 200:

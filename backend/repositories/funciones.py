@@ -6,7 +6,7 @@ import constants as const
 from db import ejecutar_consulta, ejecutar_mutacion, obtener_conexion
 
 
-def listar_funciones(pelicula_id=None, local_id=None, fecha=None, incluir_canceladas=False):
+def listar_funciones(pelicula_id=None, local_id=None, fecha=None, incluir_canceladas=False, id_sala = None):
     sql = (
         "SELECT f.id_funcion, f.id_pelicula, p.nombre AS pelicula, "
         "f.id_sala, s.numero_sala, s.id_local, l.nombre AS local, "
@@ -37,7 +37,9 @@ def listar_funciones(pelicula_id=None, local_id=None, fecha=None, incluir_cancel
     if fecha is not None:
         sql += " AND DATE(f.fecha_hora_inicio) = %s"
         parametros.append(fecha)
-
+    if id_sala is not None:
+        sql += " AND f.id_sala = %s"
+        parametros.append(id_sala)
     sql += " ORDER BY f.fecha_hora_inicio"
     return ejecutar_consulta(sql, tuple(parametros))
 
