@@ -1,6 +1,5 @@
 from db import ejecutar_consulta, ejecutar_mutacion, transaccion
-from mysql.connector import IntegrityError
-
+from datetime import datetime
 
 def obtener_compras(id):
     sql = "SELECT * FROM compras WHERE id_usuario = %s;"
@@ -19,6 +18,9 @@ def obtener_compra_id(id_compra, id_usuario):
     return  compra[0] if compra else None
 
 #validar que la butaca este activa, o libre, y agregar datos a la base de butacas
+def generar_numero_factura(id_compra):
+    anio = datetime.now().year
+    return f"FAC-{anio}-{id_compra:06d}"
 
 def registrar_compra(id_usuario, datos, productos):
     with transaccion() as cursor:
@@ -66,6 +68,18 @@ def registrar_compra(id_usuario, datos, productos):
             if cursor.rowcount != 1:
                 raise RuntimeError("No se pudo actualizar el total de la compra")
 
+            
+        numero_factura = generar_numero_factura(id_compra)
+
+        cursor.execute(
+            "UPDATE compras SET numero_factura = %s WHERE id_compra = %s",
+            (numero_factura, id_compra),
+        )
+
+        if cursor.rowcount != 1:
+            raise RuntimeError("No se pudo asignar el número de factura")
+
+        
         return id_compra
 
 def butacas_disponibles(id_funcion, id_butacas):
@@ -176,3 +190,10 @@ def actualizar_total_compra(id_compra, subtotal):
         "SELECT total FROM compras WHERE id_compra = %s", (id_compra,)
     )
     return filas[0]["total"] if filas else None
+
+def butacas_id(id_butaca):
+    butaca = ejecutar_consulta(
+        "SELECT * FROM butacas WHERE id_butaca = %s",
+        (id_butaca,)
+    )
+    return butaca[0] if butaca else None
