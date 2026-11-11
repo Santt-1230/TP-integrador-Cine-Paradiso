@@ -152,9 +152,6 @@ def pedir_api(metodo, ruta, **opciones):
     except requests.RequestException:
         return 503, {"errors": [{"message": "No se pudo conectar con el Backend"}]}
     except ValueError:
-<<<<<<< HEAD
-        return 500, {"errors": [{"message": "El Backend devolvió una respuesta inválida"}]}
-=======
         return 500, {"errors": [{"message": "El Backend devolvió una respuesta inválida"}]}
 
 def admin_front_requerido(funcion):
@@ -199,4 +196,3 @@ def verificar_estado(estado):
         return redirigir_al_inicio()
 
     return None
->>>>>>> origin/feature/front-js-estilizacion

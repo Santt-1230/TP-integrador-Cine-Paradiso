@@ -258,8 +258,8 @@ INSERT INTO productos (nombre, tipo, descripcion, precio) VALUES
   ('Acceso por vehículo', 'estacionamiento', NULL, 3000),
   ('Ingreso prioritario a la sala', 'vip', NULL, 5000);
 
-INSERT INTO promociones (titulo, descripcion) VALUES
-  ('2x1 los martes', 'Entradas 2x1'),
-  ('Combo pareja', 'Pochoclo + 2 gaseosas');
-  ('Descuento en entradas', NULL)
-
+INSERT INTO promociones (nombre, descripcion, vigente_desde, vigente_hasta)
+VALUES
+('2x1 los martes', 'Entradas 2x1', '2026-01-01', '2027-12-31'),
+('Combo pareja', 'Pochoclo + 2 gaseosas', '2026-01-01', '2027-12-31'),
+('Descuento en entradas', 'Promoción especial', '2026-01-01', '2027-12-31');

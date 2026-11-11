@@ -15,7 +15,7 @@ def validar(datos, es_creacion):
 
     if es_creacion or "precio" in datos:
         precio = datos.get("precio")
-        if isinstance(precio, bool) or not isinstance (precio, (int, float)) or precio < 0:
+        if isinstance(precio, bool) or not isinstance (precio, (int, float)) or precio <= 0:
             return "El precio debe ser un numero mayor o igual a 0"
 
     if "descripcion" in datos:

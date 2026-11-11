@@ -98,7 +98,7 @@ def admin_servicio_activar(id_producto):
     if respuesta:
         return respuesta
     estado, datos_respuesta = api.pedir("PATCH", f"/api/servicios/{id_producto}", {"activo": True})
-    respuesta = verificar_estado()
+    respuesta = verificar_estado(estado)
     if respuesta:
         return respuesta
     if estado != 200:
@@ -115,7 +115,7 @@ def admin_servicio_nuevo():
         return render_template("admin_servicio_form.html", servicio={}, tipos=TIPOS)
     datos = datos_del_formulario()
     estado, datos_respuesta = api.pedir("POST", "/api/servicios", datos)
-    respuesta = verificar_estado()
+    respuesta = verificar_estado(estado)
     if respuesta:
         return respuesta
     if estado != 201:

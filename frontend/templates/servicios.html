@@ -21,11 +21,11 @@
         <article class="promo">
             {% if promo.imagen_url %}
                 <img src="{{ promo.imagen_url }}"
-                     alt="{{ promo.titulo }}"
+                     alt="{{ promo.nombre }}"
                      loading="lazy">
             {% endif %}
 
-            <h3>{{ promo.titulo }}</h3>
+            <h3>{{ promo.nombre }}</h3>
 
             {% if promo.descripcion %}
                 <p>{{ promo.descripcion }}</p>

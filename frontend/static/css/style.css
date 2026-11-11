@@ -764,13 +764,9 @@ footer {
 }
 
 
-<<<<<<< HEAD
-.pagina-admin .boton-agregar{
-=======
 /* BOTON AGREGAR */
 
 .pagina-admin{
->>>>>>> origin/feature/front-js-estilizacion
     background-color: #ff6464;
     color: #222;
     border: none;
