@@ -11,7 +11,7 @@
         <span>Mostrar contraseña</span>
         <input type="checkbox" style="width: auto; margin: 0;" onchange="this.closest('form').querySelectorAll('input[name*=contrasena]').forEach(i => i.type = this.checked ? 'text' : 'password')">
     </label>
-    <a class="enlace-chico" href="#">Olvidé mi contraseña</a>
+    <a class="enlace-chico" href="{{ url_for('usuarios.olvide_contrasena') }}">Olvidé mi contraseña</a>
     <button type="submit" class="boton-oscuro">Iniciar sesión</button>
     <p class="enlace-chico">¿No tenés cuenta? <a href="{{ url_for('usuarios.registro') }}">Crear cuenta</a></p>
 </form>
