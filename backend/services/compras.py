@@ -1,10 +1,10 @@
-from utils import construir_error_api
 from repositories import compras as compras_repositories
 from repositories import usuarios as usuarios_repositories
 from validators import compras as compras_validators
 from repositories import qr as qr_repositories
 from repositories import peliculas as peliculas_repositories
-from repositories import funciones as funciones_repositories
+from repositories import salas as salas_repositories 
+from repositories import locales as locales_repositories
 import constants as const
 import secrets
 
@@ -16,17 +16,28 @@ def generar_codigo_manual():
 
 
 def construir_compra(compra, pelicula, entradas, productos):
-    return {
+    compra = {
         "id": compra["id_compra"],
         "fecha": compra["fecha_creacion"],
         "fecha_confirmacion": compra.get("fecha_confirmacion"),
         "estado": compra["estado"],
         "pelicula": {"id": pelicula["id_pelicula"],
-                     "Titulo": pelicula["nombre"]},
-        "entrada": entradas,
+                     "titulo": pelicula["nombre"],
+                     "imagen_url": pelicula["poster_url"]},
+        "entrada": [],
         "productos": productos,
         "total": compra["total"]
     }
+    for entrada in entradas:
+        butaca = compras_repositories.butacas_id(entrada["id_butaca"])
+        entrada_dict = {
+            "id_entrada": entrada["id_entrada"],
+            "fila": butaca["fila"],
+            "numero": butaca["numero"],
+            "estado": entrada["estado"]
+        }
+        compra["entrada"].append(entrada_dict)
+    return compra
 
 
 def listar_compras(id_usuario):
@@ -48,8 +59,12 @@ def compra_id(id_compra, id_usuario=None):
     compra = compras_repositories.obtener_compra_id(id_compra, id_usuario)
     if not compra:
         return None, "COMPRA_INEXISTENTE"
+    funcion = compras_repositories.obtener_funcion(compra["id_funcion"])
+    pelicula = peliculas_repositories.buscar_por_id(funcion["id_pelicula"])
+    entradas  = compras_repositories.obtener_entradas(compra["id_compra"])
+    productos = compras_repositories.obtener_productos_compra(compra["id_compra"])
 
-    return compra, None
+    return construir_compra(compra,pelicula,entradas,productos), None
 
 def registrar_compra(id_usuario, datos):
     # El validador ya devuelve el error armado (o None si todo esta bien)
@@ -81,7 +96,7 @@ def registrar_compra(id_usuario, datos):
         return None, "ERROR_COMPRA"
     if not id_compra:
         return None, "ERROR_COMPRA"
-    return "Compra registrada con exito", None
+    return id_compra , None
 
 
 
@@ -93,42 +108,92 @@ def cancelar_compra(id_compra, id_usuario):
         return "ERROR_CANCELACION"
     return None
 
-def construir_factura(compra, usuario, entradas):
-    funcion = funciones_repositories.obtener_funcion(compra["id_funcion"])
-    productos = compras_repositories.obtener_productos_compra(compra["id_compra"])
-    nombre_cliente = " ".join(
-        parte for parte in (usuario.get("nombre"), usuario.get("apellido")) if parte
-    )
+def construir_factura(compra, cliente, funcion, entradas, productos, sala, pelicula, local):
+    subtotal_entradas = sum(entrada["precio_unitario"] for entrada in entradas)
+
+    subtotal_productos = sum(producto["precio_unitario"] * producto["cantidad"] for producto in productos)
+
+    total = subtotal_entradas + subtotal_productos
+
     return {
-        "id_compra": compra["id_compra"],
-        "fecha": compra["fecha_creacion"],
-        "estado": compra["estado"],
-        "cliente": {
-            "id": usuario.get("id_usuario", usuario.get("id")),
-            "nombre": nombre_cliente,
-            "apellido": usuario.get("apellido"),
-            "email": usuario["email"],
+        "factura": {
+            "numero": compra["numero_factura"],
+            "id_compra": compra["id_compra"],
+            "fecha_emision": compra["fecha_confirmacion"],
+            "estado": compra["estado"],
+            "moneda": "ARS"
         },
+
+        "cliente": {
+            "id_usuario": cliente["id_usuario"],
+            "nombre": f"{cliente['nombre']} {cliente['apellido']}",
+            "nombre_pila": cliente["nombre"],
+            "apellido": cliente["apellido"],
+            "email": cliente["email"]
+        },
+
         "funcion": {
-            "id": funcion["id_funcion"],
-            "pelicula": funcion["pelicula"],
+            "id_funcion": funcion["id_funcion"],
+            "pelicula": pelicula["nombre"],
+            "id_pelicula": funcion["id_pelicula"],
             "fecha_hora_inicio": funcion["fecha_hora_inicio"],
-            "local": funcion["local"],
-            "sala": funcion["numero_sala"],
-        } if funcion else None,
-        "entradas": entradas,
-        "productos": productos,
-        "total_compra": compra["total"],
+            "local": local["nombre"],
+            "id_local": sala["id_local"],
+            "sala": sala["id_sala"]
+        },
+
+        "entradas": [
+            {
+                "id_entrada": entrada["id_entrada"],
+                "fila": entrada["fila"],
+                "numero": entrada["numero"],
+                "precio_unitario": entrada["precio_unitario"]
+            }
+            for entrada in entradas
+        ],
+
+        "productos": [
+            {
+                "id_producto": producto["id_producto"],
+                "nombre": producto["nombre"],
+                "cantidad": producto["cantidad"],
+                "precio_unitario": producto["precio_unitario"],
+                "subtotal": producto["precio_unitario"] * producto["cantidad"]
+            }
+            for producto in productos
+        ],
+
+        "totales": {
+            "subtotal_entradas": subtotal_entradas,
+            "subtotal_productos": subtotal_productos,
+            "total": total
+        }
     }
 def obtener_factura(id_compra, id_usuario=None):
     compra = compras_repositories.obtener_compra_id(id_compra, id_usuario)
     if not compra:
         return None, "COMPRA_INEXISTENTE"
  
-    usuario = usuarios_repositories.buscar_por_id(compra["id_usuario"])
+    cliente = usuarios_repositories.buscar_por_id(compra["id_usuario"])
     entradas = compras_repositories.obtener_entradas_factura(compra["id_compra"])
-
-    return construir_factura(compra, usuario, entradas), None
+    productos = compras_repositories.obtener_productos_compra(compra["id_compra"])
+    funcion = compras_repositories.obtener_funcion(compra["id_funcion"])
+    sala = salas_repositories.listar_sala_por_id(funcion["id_sala"])
+    pelicula = peliculas_repositories.buscar_por_id(funcion["id_pelicula"])
+    local = locales_repositories.obtener_local_id(sala["id_local"])
+    lista_entradas = []
+    for entrada_nv in entradas:
+        butaca = compras_repositories.butacas_id(entrada_nv["id_butaca"])
+        entradas_dict = {
+            "id_entrada": entrada_nv["id_entrada"],
+            "fila": butaca["fila"],
+            "numero": butaca["numero"],
+            "precio_unitario": entrada_nv["precio_unitario"]
+        }
+        lista_entradas.append(entradas_dict)
+    return construir_factura(
+        compra, cliente, funcion, lista_entradas, productos, sala, pelicula, local
+    ), None
 
 
 def crear_qr_unico(id_compra, id_entrada):
@@ -162,6 +227,7 @@ def obtener_qr(id_compra, id_usuario=None):
             "id_entrada": entrada["id_entrada"],
             "tipo": qr["tipo"],
             "codigo_manual": qr["codigo_manual"],
-            "estado": qr["estado"]
+            "estado": qr["estado"],
+            "token": qr["token"]
         })
     return resultado, None

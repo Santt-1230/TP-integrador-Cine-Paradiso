@@ -119,84 +119,56 @@
 }
 
 
-.leyenda-butacas {
-    display: flex;
-    gap: 1rem;
-    margin: 1rem 0;
+.seleccion-butacas .butacas-grilla {
+    width: max-content;
+    max-width: none;
+    margin-inline: auto;
+    overflow: visible;
 }
 
-.leyenda-butacas span {
-    display: flex;
+.seleccion-butacas .sala {
+    width: max-content;
+    max-width: none;
+}
+
+.seleccion-butacas .fila {
+    display: grid;
+    width: max-content;
+    margin-inline: auto;
+    grid-template-columns: 26px repeat(var(--cantidad-columnas), 34px);
     align-items: center;
-    gap: .4rem;
-}
-
-.butaca-muestra {
-    width: 16px;
-    height: 16px;
-    border-radius: 4px;
-}
-
-.pantalla {
-    width: min(500px, 90%);
-    margin: 1rem auto 2rem;
-    padding: .6rem;
-    text-align: center;
-    background: #ddd;
-    border-radius: 0 0 50% 50%;
-}
-
-.mapa-butacas {
-    display: flex;
-    flex-direction: column;
-    gap: .6rem;
-    max-width: 600px;
-    margin: auto;
-}
-
-.fila-butacas {
-    display: flex;
     justify-content: center;
-    gap: .6rem;
+    justify-items: center;
 }
 
-.butaca {
-    position: relative;
-    padding: .8rem .4rem;
-    text-align: center;
-    border-radius: 8px 8px 4px 4px;
-    color: #fff;
+.seleccion-butacas .letra-fila {
+    width: auto;
+    text-align: right;
 }
 
-.butaca input {
-    position: absolute;
-    opacity: 0;
-    inset: 0;
-    cursor: pointer;
+.seleccion-butacas .asiento-vacio {
+    display: block;
+    width: 34px;
+    height: 34px;
 }
 
-.butaca.disponible,
-.butaca-muestra.disponible {
-    background: #218838;
+.seleccion-butacas .butaca {
+    width: 34px;
+    height: 34px;
 }
 
-.butaca.disponible {
-    cursor: pointer;
+.seleccion-butacas .butaca span {
+    box-sizing: border-box;
+    width: 34px;
+    height: 34px;
+    font-size: .58rem;
 }
 
-.butaca.disponible:has(input:checked) {
-    background: #b30000;
-    outline: 3px solid #f0b429;
-}
-
-.butaca.ocupada,
-.butaca-muestra.ocupada {
-    background: #777;
-}
-
-.butaca.ocupada {
-    cursor: not-allowed;
-    opacity: .7;
+@media (max-width: 700px) {
+    .seleccion-butacas .sala {
+        margin-right: 0;
+        margin-left: 0;
+    }
 }
 
 .seleccion-butacas > .boton {

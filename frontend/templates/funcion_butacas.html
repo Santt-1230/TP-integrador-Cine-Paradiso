@@ -13,26 +13,37 @@
     {% endwith %}
     {% if error %}<p class="mensaje-error">{{ error }}</p>{% endif %}
     {% if butacas %}
-        <div class="leyenda-butacas">
-            <span><i class="butaca-muestra disponible"></i> Disponible</span>
-            <span><i class="butaca-muestra ocupada"></i> Ocupada</span>
-        </div>
-        <div class="pantalla">PANTALLA</div>
         <form method="get" action="{{ url_for('compras_bp.checkout') }}" class="seleccion-butacas">
-        <input type="hidden" name="id_funcion" value="{{ id_funcion }}">
-        <div class="mapa-butacas">
-            {% for fila, asientos in butacas|groupby('fila') %}
-                <div class="fila-butacas">
-                    {% for butaca in asientos %}
-                        <label class="butaca {{ butaca.estado }}" title="Fila {{ butaca.fila }}, asiento {{ butaca.numero }}">
+            <input type="hidden" name="id_funcion" value="{{ id_funcion }}">
+            <div class="sala">
+                <div class="pantalla">PANTALLA</div>
+                <div class="butacas-grilla">
+                    {% for fila, asientos in butacas|groupby('fila') %}
+                    {% set espacios_antes = (cantidad_columnas - (asientos|length)) // 2 %}
+                    {% set espacios_despues = cantidad_columnas - (asientos|length) - espacios_antes %}
+                    <div class="fila" style="--cantidad-columnas: {{ cantidad_columnas }}">
+                        <span class="letra-fila">{{ fila }}</span>
+                        {% for _ in range(espacios_antes) %}<span class="asiento-vacio" aria-hidden="true"></span>{% endfor %}
+                        {% for butaca in asientos|sort(attribute='numero', reverse=true) %}
+                        <label class="butaca" title="Fila {{ butaca.fila }}, asiento {{ butaca.numero }}">
                             <input type="checkbox" name="butacas" value="{{ butaca.id_butaca }}" {% if butaca.estado != 'disponible' %}disabled{% endif %}>
-                            <span>{{ butaca.fila }}{{ butaca.numero }}</span>
+                            <span>{{ fila }}{{ butaca.numero }}</span>
                         </label>
+                        {% endfor %}
+                        {% for _ in range(espacios_despues) %}<span class="asiento-vacio" aria-hidden="true"></span>{% endfor %}
+                    </div>
                     {% endfor %}
                 </div>
-            {% endfor %}
-        </div>
-        <button class="boton" type="submit">Continuar</button>
+                <div class="leyenda">
+                    <span><i class="muestra muestra--libre"></i>Disponible</span>
+                    <span><i class="muestra muestra--ocupada"></i>No disponible</span>
+                    <span><i class="muestra muestra--elegida"></i>Seleccionado</span>
+                </div>
+            </div>
+            <div class="barra-continuar">
+                <p>Butacas elegidas: <span id="contador">0</span></p>
+                <button type="submit" id="boton-continuar">Continuar</button>
+            </div>
         </form>
         <script src="{{ url_for('static', filename='js/checkout.js') }}" defer></script>
     {% elif not error %}

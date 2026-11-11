@@ -53,6 +53,7 @@ def checkout():
         compra_creada = estado_respuesta == 201
         if compra_creada:
             session.pop("checkout_expira_en", None)
+            flash("Compra registrada con exito", "mensaje-ok")
             return redirect(url_for("compras_bp.mis_compras"))
 
         cantidad_por_id_producto = {
@@ -179,4 +180,33 @@ def render_checkout(id_funcion, ids_butacas, error=None, productos_seleccionados
         error=error,
         checkout_expira_en=expiracion_checkout,
         locales=[],
+    )
+
+
+
+@compras_bp.get("/mi-cuenta/compras/<int:id_compra>/factura")
+def descargar_factura(id_compra):
+    if not session.get("id_usuario") or not session.get("cookie_backend"):
+        return redirect(url_for("usuarios.login"))
+
+    try:
+        respuesta = requests.get(f"{api.BACKEND_URL}/api/compras/{id_compra}/factura", cookies=api.cookies_backend(), timeout=10,)
+    except requests.RequestException:
+        abort(503, "No se pudo conectar con el servidor.")
+
+    if respuesta.status_code == 401:
+        for clave in ("cookie_backend", "id_usuario", "nombre", "apellido", "rol"):
+            session.pop(clave, None)
+        return redirect(url_for("usuarios.login"))
+    if not respuesta.ok:
+        try:
+            return jsonify(respuesta.json()), respuesta.status_code
+        except ValueError:
+            abort(502, "El servidor devolvió una respuesta inválida.")
+
+    return Response(
+        respuesta.content,
+        status=respuesta.status_code,
+        mimetype="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="factura-compra-{id_compra}.pdf"'},
     )
