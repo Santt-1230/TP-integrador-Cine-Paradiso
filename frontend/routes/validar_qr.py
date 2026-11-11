@@ -1,9 +1,10 @@
 from flask import Blueprint, render_template, request, jsonify
-from api import pedir_api, cookies_backend
+from api import pedir_api, cookies_backend, admin_front_requerido
 
 validar_qr_bp = Blueprint("validar_qr",__name__, url_prefix="/admin")
 
 @validar_qr_bp.route("/validar_qr", methods=["GET", "POST"])
+@admin_front_requerido
 def validar_qr():
 
     if request.method == "GET":

@@ -83,7 +83,7 @@ def editar_sala(id_sala):
     
     datos = {}
     error = None
-    if api.request.method == 'GET':
+    if request.method == 'GET':
         estado, datos_respuesta = api.pedir('GET', f'/api/salas/{id_sala}')
 
         estado_respuesta = verificar_estado(estado)
