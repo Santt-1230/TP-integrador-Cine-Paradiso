@@ -30,14 +30,6 @@
     <aside class="admin-sidebar">
 
         <nav>
-<<<<<<< HEAD
-            <a href="/admin/">Inicio</a>
-            <a href="/admin/peliculas">Películas</a>
-            <a href="/admin/funciones">Funciones</a>
-            <a href="{{ url_for('locales.admin_locales') }}" 
-            class="{% if request.endpoint == 'locales.admin_locales' %}activo{% endif %}">
-            Locales
-=======
             <a href="/admin">
                 <i class="bi bi-house-door"></i>
                 Inicio
@@ -76,7 +68,6 @@
             <a href="/admin/qr">
                 <i class="bi bi-qr-code-scan"></i>
                 Escaneo de QR
->>>>>>> origin/develop
             </a>
         </nav>
 
@@ -93,18 +84,6 @@
 
 </div>
 
-<<<<<<< HEAD
 <script src="{{ url_for('static', filename='js/admin.js') }}" defer></script>
     {% block scripts_admin %}{% endblock %}
-=======
-
-{# JAVASCRIPT DEL PANEL #}
-<script src="{{ url_for('static', filename='js/admin.js') }}" defer></script>
-<script src="{{ url_for('static', filename='js/estadisticas.js') }}" defer></script>
-
-{% endblock %}
-
-
-{% block pie %}
->>>>>>> origin/develop
 {% endblock %}
