@@ -27,11 +27,10 @@
 
         <form method="get" class="filtro-local">
             <input type="hidden" name="estado" value="{{ filtro_estado }}">
-            <select name="local" class="filtro-local__select" aria-label="Filtrar por local"
-                onchange="this.form.submit()">
+            <select name="local" class="filtro-local__select" aria-label="Filtrar por local">
             <option value="">Todos los locales</option>
-            {% for l in todos_los_locales %}
-                <option value="{{ l.id_local }}" {% if filtro_local == l.id_local %}selected{% endif %}>{{ l.nombre }}</option>
+            {% for local in todos_los_locales %}
+                <option value="{{ local.id_local }}" {% if filtro_local == local.id_local %}selected{% endif %}>{{ local.nombre }}</option>
             {% endfor %}
             </select>
         </form>

@@ -1,5 +1,5 @@
 """Consultas SQL de peliculas, generos y pelicula_genero. No tiene reglas de negocio."""
-from db import ejecutar_consulta, ejecutar_mutacion, transaccion
+from db import ejecutar_consulta, ejecutar_mutacion
 
 # "Vigente" = activa y dentro del periodo de cartelera. Las fechas son opcionales: NULL = sin limite.
 VIGENTE = """

@@ -81,3 +81,12 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+document.addEventListener('DOMContentLoaded', function(){
+    const filtrosLocal = document.querySelectorAll('.filtro-local__select');
+
+    filtrosLocal.forEach(filtro => {
+        filtro.addEventListener('change', function(){
+            this.form.submit();
+        });
+    });
+});

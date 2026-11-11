@@ -88,13 +88,6 @@
 
 </div>
 
-
-{# JAVASCRIPT DEL PANEL #}
 <script src="{{ url_for('static', filename='js/admin.js') }}" defer></script>
-<script src="{{ url_for('static', filename='js/estadisticas.js') }}" defer></script>
-
-{% endblock %}
-
-
-{% block pie %}
+    {% block scripts_admin %}{% endblock %}
 {% endblock %}
