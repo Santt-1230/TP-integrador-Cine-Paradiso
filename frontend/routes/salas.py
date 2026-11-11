@@ -1,4 +1,4 @@
-from flask import Blueprint, redirect, render_template, url_for, flash, request
+from flask import Blueprint, redirect, render_template, url_for, request
 import api
 
 salas_bp = Blueprint('salas', __name__)
@@ -11,7 +11,7 @@ CAMPOS_ENTEROS_SALA = ['numero_sala']
 def leer_formulario(campos):
     datos = {}
     for campo in campos:
-        datos[campo] = api.request.form.get(campo, '')
+        datos[campo] = request.form.get(campo, '')
     return datos
 
 def convertir_a_enteros(datos, campos):
@@ -44,7 +44,7 @@ def crear_sala():
             error = api.mensaje_error(datos_respuesta)
             return render_template('admin_editar_sala.html', datos=datos,id_sala=None, error=error)
 
-    flash('La nueva sala se creo correctamente', 'success')
+    api.flash('La nueva sala se creo correctamente', 'success')
     return redirect(url_for('locales.admin_locales'))
 
 
@@ -86,7 +86,7 @@ def editar_sala(id_sala):
         error = api.mensaje_error(datos_respuesta)
         return render_template('admin_editar_sala.html', datos=datos, id_sala=id_sala, error=error)
                 
-    flash('la sala se actualizó correctamente', 'success')
+    api.flash('la sala se actualizó correctamente', 'success')
     return redirect(url_for('locales.admin_locales'))
 
 @salas_bp.route('/admin/salas/<int:id_sala>/dar_baja', methods = ['POST'])
@@ -100,8 +100,8 @@ def desactivar_sala(id_sala):
         return estado_respuesta
 
     if estado != 200:
-        flash(api.mensaje_error(datos_respuesta), 'error')
+        api.flash(api.mensaje_error(datos_respuesta), 'error')
         return redirect(url_for('locales.admin_locales'))
     
-    flash('La sala se dio de baja correctamente', 'success')
+    api.flash('La sala se dio de baja correctamente', 'success')
     return redirect(url_for('locales.admin_locales'))

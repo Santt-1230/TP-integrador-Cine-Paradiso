@@ -5,7 +5,7 @@ Si algo falla, `datos` trae {"errors": [{"message": "..."}]} y se lee con mensaj
 """
 import os
 import requests
-from flask import session, redirect, url_for
+from flask import session, redirect, url_for, flash
 from functools import wraps
 
 
@@ -111,6 +111,7 @@ def admin_front_requerido(funcion):
             return redirect(url_for("usuarios.login"))
 
         if session.get("rol") != "administrador":
+            flash('No tienes permiso para acceder a esta página', 'error')
             return redirect(url_for("peliculas_front.inicio"))
 
         return funcion(*args, **kwargs)
