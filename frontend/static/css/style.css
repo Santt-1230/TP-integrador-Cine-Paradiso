@@ -319,7 +319,7 @@ footer {
     gap: 0.75rem;
 }
 
-/* BUSCÁ ESTO Y CAMBIALO: */
+
 .page-with-sidebar {
     display: flex;
     flex: 1; /* ← En lugar de min-height, esto le dice que use el espacio que sobra de forma perfecta */
@@ -654,10 +654,6 @@ footer {
     }
 }
 
-/* -- ADMIN -- */
-
-/* BARRA SUPERIOR */
-
 .pagina-admin {
     display: block;
     background-color: #f4f4f5;
@@ -696,15 +692,11 @@ footer {
 }
 
 
-/* ESTRUCTURA */
-
 .pagina-admin .contenedor {
     display: flex;
     min-height: calc(100vh - 106px);
 }
 
-
-/* MENU LATERAL */
 
 .pagina-admin .menu-lateral {
     width: 195px;
@@ -739,8 +731,6 @@ footer {
     font-weight: bold;
 }
 
-
-/* CONTENIDO */
 
 .pagina-admin main {
     flex: 1;
@@ -786,7 +776,6 @@ footer {
     cursor: pointer;
 }
 
-/* BUSCADOR Y FILTRO */
 
 .pagina-admin .filtros {
     display: flex;
@@ -815,8 +804,6 @@ footer {
     color: #888;
 }
 
-
-/* TABLA */
 
 .pagina-admin .tabla-contenedor {
     background-color: white;
@@ -852,8 +839,6 @@ footer {
 }
 
 
-/* ICONOS */
-
 .pagina-admin .icono {
     display: inline-flex;
     width: 36px;
@@ -875,8 +860,6 @@ footer {
 }
 
 
-/* ESTADOS */
-
 .pagina-admin .activo {
     background-color: #def4e6;
     color: #287447;
@@ -892,8 +875,6 @@ footer {
 }
 
 
-/* BOTONES DE ACCIONES */
-
 .pagina-admin td button {
     background-color: white;
     border: 1px solid #ddd;
@@ -908,8 +889,6 @@ footer {
 }
 
 
-/* PIE DE TABLA */
-
 .pagina-admin .tabla-pie {
     display: flex;
     justify-content: space-between;
@@ -919,8 +898,6 @@ footer {
     color: #888;
 }
 
-
-/* AVISO */
 
 .pagina-admin .aviso {
     background-color: #fff6d9;
@@ -932,8 +909,6 @@ footer {
 }
 
 
-/* FOOTER ADMIN */
-
 .pagina-admin .pie-admin {
     background-color: white;
     padding: 20px;
@@ -943,8 +918,6 @@ footer {
     text-align: left;
 }
 
-
-/* RESPONSIVE ADMIN */
 
 @media (max-width: 700px) {
 
@@ -1113,6 +1086,56 @@ header { position: relative; }
         width: auto;
     }
 }
+
+.servicios-cliente {
+    width: min(68.75rem, calc(100% - 2rem));
+    margin: 2rem auto;
+}
+
+.servicios-cliente h2 {
+    margin: 2rem 0 1rem;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+}
+
+.servicios-cliente__grilla {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+    gap: 1.2rem;
+}
+
+.servicios-cliente__tarjeta {
+    padding: 1rem 1.2rem;
+    background-color: white;
+    border-radius: 0.8rem;
+}
+
+.servicios-cliente__tarjeta img {
+    display: block;
+    width: 100%;
+    margin-bottom: 0.6rem;
+    border-radius: 0.5rem;
+}
+
+.servicios-cliente__tarjeta h3 {
+    margin: 0 0 0.25rem;
+    font-size: 1.05rem;
+}
+
+.servicios-cliente__tarjeta p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #333;
+}
+
+.servicios-cliente__precio {
+    display: block;
+    margin-top: 0.25rem;
+    font-weight: 700;
+    color: #b30000;
+}
+
+.servicios-cliente__vacio { color: #555; }
 @media (max-width: 600px) {
     .pagina-locales {
         padding: 32px 16px;

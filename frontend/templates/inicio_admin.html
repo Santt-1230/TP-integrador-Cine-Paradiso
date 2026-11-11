@@ -18,25 +18,28 @@
 
         <article class="tarjeta-resumen">
             <h2>Películas activas</h2>
-            <p>{{ cantidad_peliculas|default(0, true) }}</p>
+            <p>{{ cantidad_peliculas_activas if cantidad_peliculas_activas is not none else '--'}}</p>
         </article>
 
         <article class="tarjeta-resumen">
             <h2>Funciones programadas</h2>
-            <p>{{ cantidad_funciones|default(0, true) }}</p>
+            <p>{{ cantidad_funciones_programadas if cantidad_funciones_programadas is not none else '--' }}</p>
         </article>
 
         <article class="tarjeta-resumen">
             <h2>Ocupación promedio</h2>
-            <p>{{ ocupacion_promedio|default(0, true) }}%</p>
+    <p>
+        {% if ocupacion_promedio is not none %}
+            {{ ocupacion_promedio }}%
+        {% else %}
+            --
+        {% endif %}
+    </p>
         </article>
 
     </section>
 
-    <!-- Novedades -->
-    <a href="/admin/peliculas" class="inicio-admin__banner">
-        NOVEDADES / ESTRENOS
-    </a>
+
 
     <!-- Tabla de películas -->
     <section class="inicio-admin__novedades">

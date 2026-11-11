@@ -87,9 +87,6 @@ CREATE TABLE IF NOT EXISTS tokens_usuario (
 )CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 
-SET NAMES utf8mb4;
-
-
 CREATE TABLE IF NOT EXISTS funciones (
 	id_funcion INT AUTO_INCREMENT PRIMARY KEY,
 	id_pelicula INT NOT NULL,
@@ -169,6 +166,45 @@ CREATE TABLE IF NOT EXISTS compra_productos (
 	FOREIGN KEY (id_compra) REFERENCES compras(id_compra),
 	FOREIGN KEY (id_producto) REFERENCES productos(id_producto)
 );
+
+CREATE TABLE IF NOT EXISTS qr (
+    id_qr INT AUTO_INCREMENT PRIMARY KEY,
+    id_compra INT NOT NULL,
+    id_entrada INT NULL UNIQUE,
+    id_compra_producto INT NULL UNIQUE,
+    tipo ENUM('entrada', 'producto') NOT NULL,
+    token VARCHAR(64) NOT NULL UNIQUE,
+	token_manual VARCHAR(12) NOT NULL UNIQUE,
+    fecha_generacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    fecha_uso DATETIME NULL,
+    estado ENUM('valido', 'utilizado', 'expirado', 'cancelado')
+        NOT NULL DEFAULT 'valido',
+    id_validador INT NULL,
+
+    FOREIGN KEY (id_compra)
+        REFERENCES compras(id_compra),
+
+    FOREIGN KEY (id_entrada)
+        REFERENCES entradas(id_entrada),
+
+    FOREIGN KEY (id_compra_producto)
+        REFERENCES compra_productos(id_compra_producto),
+
+    FOREIGN KEY (id_validador)
+        REFERENCES usuarios(id_usuario),
+
+    CONSTRAINT chk_qr_tipo_referencia
+        CHECK (
+            (tipo = 'entrada'
+                AND id_entrada IS NOT NULL
+                AND id_compra_producto IS NULL)
+            OR
+            (tipo = 'producto'
+                AND id_entrada IS NULL
+                AND id_compra_producto IS NOT NULL)
+        )
+);
+
 
 
 INSERT INTO usuarios (nombre, apellido, email, fecha_nacimiento, contrasena_hash, rol, email_verificado) VALUES (
@@ -252,3 +288,14 @@ INSERT  IGNORE INTO `pelicula_genero` (`id_pelicula`, `id_genero`) VALUES (5,13)
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
+INSERT INTO productos (nombre, tipo, descripcion, precio) VALUES
+  ('Pochoclo mediano', 'comida', NULL, 3000),
+  ('Gaseosa 750 ml', 'bebida', NULL, 2000),
+  ('Acceso por vehículo', 'estacionamiento', NULL, 3000),
+  ('Ingreso prioritario a la sala', 'vip', NULL, 5000);
+
+INSERT INTO promociones (nombre, descripcion, vigente_desde, vigente_hasta)
+VALUES
+('2x1 los martes', 'Entradas 2x1', '2026-01-01', '2027-12-31'),
+('Combo pareja', 'Pochoclo + 2 gaseosas', '2026-01-01', '2027-12-31'),
+('Descuento en entradas', 'Promoción especial', '2026-01-01', '2027-12-31');

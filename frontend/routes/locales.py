@@ -112,4 +112,10 @@ def admin_locales():
                 locales = [l for l in locales if l['id_local'] == filtro_local]
             
     
-    return render_template("admin_locales.html", locales=locales, todos_los_locales=todos_los_locales,salas_configuradas=salas_configuradas, error=error, filtro_estado = filtro_estado, filtro_local=filtro_local)
+    return render_template("admin_locales.html", 
+                           locales=locales, 
+                           todos_los_locales=todos_los_locales,
+                           salas_configuradas=salas_configuradas, 
+                           error=error, 
+                           filtro_estado = filtro_estado, 
+                           filtro_local=filtro_local)

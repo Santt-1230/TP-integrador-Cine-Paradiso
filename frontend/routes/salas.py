@@ -11,7 +11,7 @@ CAMPOS_ENTEROS_SALA = ['numero_sala']
 def leer_formulario(campos):
     datos = {}
     for campo in campos:
-        datos[campo] = request.form.get(campo, '')
+        datos[campo] = api.request.form.get(campo, '')
     return datos
 
 def convertir_a_enteros(datos, campos):
