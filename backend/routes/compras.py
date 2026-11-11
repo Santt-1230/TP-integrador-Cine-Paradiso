@@ -1,8 +1,9 @@
 from flask import Blueprint, jsonify, session, request, send_file
 from io import BytesIO
-from utils import construir_error_api,login_requerido
+from utils import construir_error_api, validar_entero_positivo,login_requerido
 from services import compras as compras_services
 from services import pdf as pdf_services
+from validators import compras as compras_validators
 from services import mailer
 compras_bp = Blueprint('compras', __name__, url_prefix='/api')
 def usuario_registrado():
@@ -88,34 +89,28 @@ def registrar_compras():
 
     factura, error = compras_services.obtener_factura(id_compra)
     pdf = pdf_services.generar_pdf_factura(factura)
-
     email_cliente = factura["cliente"]["email"]
     numero = factura["factura"].get("numero") or f"compra-{id_compra}"
-
+    qrs, error_qr = compras_services.obtener_qr(id_compra, session["id_usuario"])
     adjuntos = [{
         "contenido": pdf,
         "nombre": f"factura-{numero}.pdf",
         "tipo": "application",
         "subtipo": "pdf",
-        }]
-
-    qrs, error_qr = compras_services.obtener_qr(id_compra,session["id_usuario"])
-
+    }]
     if not error_qr:
         adjuntos.append({
-        "contenido": pdf_services.generar_pdf_entradas(factura, qrs),
-        "nombre": f"entradas-{numero}.pdf",
-        "tipo": "application",
-        "subtipo": "pdf",
-    })
-
+            "contenido": pdf_services.generar_pdf_entradas(factura, qrs),
+            "nombre": f"entradas-{numero}.pdf",
+            "tipo": "application",
+            "subtipo": "pdf",
+        })
     mailer.enviar_mail(
         destino=email_cliente,
         asunto="Factura de compra - Cine Paradiso",
-        texto="¡Gracias por tu compra! Adjuntamos tu factura y tus entradas.",
+        texto="¡Gracias por tu compra! Adjuntamos tu factura y tus entradas con códigos QR.",
         adjuntos=adjuntos,
     )
-
     return jsonify({"message": "Compra registrada"}), 201
     
 @compras_bp.route('/compras/<int:id>/cancelacion', methods=['PATCH'])
@@ -201,4 +196,18 @@ def obtener_qr(id):
             message="No se pudieron generar los QR",
             description="No se pudo crear un QR para cada entrada confirmada"
         )), 500
-    return jsonify(qrs), 200
+    factura, error_factura = compras_services.obtener_factura(
+        id, None if rol == "administrador" else id_usuario
+    )
+    if error_factura == "COMPRA_INEXISTENTE":
+        return jsonify(construir_error_api(
+            code="COMPRA_INEXISTENTE",
+            message="COMPRA NO ENCONTRADA",
+            description=f"La compra de ID: {id} no existe o no le pertenece"
+        )), 404
+    pdf = pdf_services.generar_pdf_entradas(factura, qrs)
+    numero = factura["factura"].get("numero") or f"compra-{id}"
+    return send_file(
+        BytesIO(pdf), mimetype="application/pdf", as_attachment=True,
+        download_name=f"entradas-{numero}.pdf",
+    )
