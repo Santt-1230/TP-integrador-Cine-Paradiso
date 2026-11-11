@@ -1,16 +1,37 @@
-
-
-
 def validar_token(token: str) -> bool:
 
     if not isinstance(token, str):
         return False
 
-    if len(token) != 64:
+    token = token.strip()
+
+    # QR hexadecimal de 64 caracteres
+    if len(token) == 64:
+        return all(
+            caracter in "0123456789abcdef"
+            for caracter in token
+        )
+
+    # QR manual de 12 caracteres
+    if len(token) == 12:
+        return all(
+            caracter in "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+            for caracter in token
+        )
+
+    return False
+
+
+def validar_categoria(categoria: str) -> bool:
+
+    if not isinstance(categoria, str):
         return False
 
-    for caracter in token:
-        if caracter not in "0123456789abcdef":
-            return False
+    categorias_validas = {
+        "bebida",
+        "comida",
+        "estacionamiento",
+        "vip"
+    }
 
-    return True
+    return categoria in categorias_validas
