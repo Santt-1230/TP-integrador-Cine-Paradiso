@@ -4,6 +4,15 @@ from validators import salas as salas_validator
 from services  import funciones as services_funciones
 import utils as ut
 import constants as const
+def validar_programacion_sala(id_sala):
+    funciones = services_funciones.listar_funciones_por_sala(id_sala)
+    if funciones:
+        raise ValueError(ut.construir_error_api(
+            code=const.ERROR_CODE_SALA_CONFLICT,
+            message='Sala reservada',
+            description=f"La sala '{id_sala}' tiene {len(funciones)} funciones programadas"
+        ))
+
 def listar_salas(id_local=None):
     if id_local is not None:
         id_local = salas_validator.validar_id_local(id_local)
@@ -65,6 +74,9 @@ def actualizar_sala(id_sala, datos):
             message='Sin cambios',
             description='Debes modificar al menos un campo de la sala'
         ))
+    if cambios.get('estado') == 'inactiva':
+        validar_programacion_sala(id_sala)
+
     if 'numero_sala' in cambios:
         numero_nuevo = cambios['numero_sala']
         if salas_repository.existe_sala_editar(sala['id_local'], numero_nuevo, id_sala):
@@ -87,13 +99,7 @@ def desactivar_sala(id_sala):
             description=f"No existe una sala con el ID '{id_sala}'"
         ))
     
-    funciones = services_funciones.listar_funciones_por_sala(id_sala)
-    if funciones:
-        raise ValueError(ut.construir_error_api(
-            code=const.ERROR_CODE_SALA_CONFLICT,
-            message='Sala reservada',
-            description=f"La sala '{id_sala}' tiene {len(funciones)} funciones programadas"
-        ))
+    validar_programacion_sala(id_sala)
     return salas_repository.desactivar_sala(id_sala)
 
 def listar_salas_activas(id_local):
