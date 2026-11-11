@@ -89,3 +89,42 @@ h2 { font-size: 1.1rem; text-transform: uppercase; letter-spacing: .04em; margin
     .funcion .boton { grid-column: 1 / -1; text-align: center; }
 }
 
+
+#productos,
+#promociones {
+    margin-bottom: 40px;
+}
+
+.grilla {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+}
+
+.grilla-chica {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 250px));
+}
+
+.producto,
+.promo {
+    background-color: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+
+.producto h3,
+.promo h3 {
+    margin-top: 0;
+}
+
+.producto p,
+.promo p {
+    color: #666;
+}
+
+.precio {
+    color: #ff6464 !important;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
