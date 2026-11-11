@@ -1,5 +1,5 @@
 from flask import Blueprint, flash, redirect, render_template, request, session, url_for
-from api import pedir, ApiError
+from api import pedir, mensaje_error, verificar_estado, limpiar_sesion_front
 
 perfil_bp = Blueprint('perfil', __name__)
 
@@ -13,16 +13,26 @@ def perfil_seccion(seccion):
         return redirect(url_for("usuarios.login"))
 
     datos, historial = {}, {}
-    try:
-        datos = pedir("GET", "/api/usuarios/me")
-        if seccion in ("mis-compras", "peliculas-vistas"):
-            historial = pedir("GET", "/api/usuarios/me/historial")
-    except ApiError as e:
-        if e.estado == 401:
-            return redirect(url_for("usuarios.login"))
-        flash(e.mensaje, "error")
 
- # datos de prueba para peliculas vistas y mis compras
+    estado, res_datos = pedir("GET", "/api/usuarios/me")
+    redir = verificar_estado(estado)
+    if redir:
+        return redir
+
+    if estado == 200:
+        datos = res_datos
+    else:
+        flash(mensaje_error(res_datos), "error")
+
+    if seccion in ("mis-compras", "peliculas-vistas"):
+        estado_h, res_hist = pedir("GET", "/api/usuarios/me/historial")
+        redir_h = verificar_estado(estado_h)
+        if redir_h:
+            return redir_h
+
+        if estado_h == 200:
+            historial = res_hist
+
     historial = {
         "peliculas_vistas": [
             {
@@ -40,28 +50,25 @@ def perfil_seccion(seccion):
                 "clasificacion": "PG-13"
             }
         ],
-    "compras": [
-        {
-            "id_compra": 101,
-            "fecha_creacion": "27/10 - 20:30 HS",
-            "titulo_pelicula": "PELICULA 1",
-            "genero": "GÉNERO",
-            "poster_url": "https://url-del-poster.com/imagen.jpg", # Opcional
-            "servicios": [
-                {
-                    "nombre": "COMBO 1",
-                    "imagen_url": "https://url-del-combo.com/combo.jpg" # Opcional
-                }
-            ]
-        }
-    ]
+        "compras": [
+            {
+                "id_compra": 101,
+                "fecha_creacion": "27/10 - 20:30 HS",
+                "titulo_pelicula": "PELICULA 1",
+                "genero": "GÉNERO",
+                "poster_url": "https://url-del-poster.com/imagen.jpg",
+                "servicios": [
+                    {
+                        "nombre": "COMBO 1",
+                        "imagen_url": "https://url-del-combo.com/combo.jpg"
+                    }
+                ]
+            }
+        ]
     }
 
     print("CLAVES HISTORIAL (MOCK):", list(historial.keys()), flush=True)
     return render_template("perfil.html", perfil=datos, historial=historial, seccion=seccion)
-
-  #  print("CLAVES HISTORIAL:", list(historial.keys()) if isinstance(historial, dict) else type(historial), flush=True)
-  #  return render_template("perfil.html", perfil=datos, historial=historial)
 
 @perfil_bp.route('/mi-perfil/mi-cuenta', methods=['POST'])
 def cambiar_clave():
@@ -74,30 +81,60 @@ def cambiar_clave():
 
     if nueva != confirmar:
         flash("Las contraseñas nuevas no coinciden.", "clave_error")
-        return redirect(url_for("perfil.perfil"))
+        return redirect(url_for("perfil.perfil_seccion", seccion="mi-cuenta"))
 
-    try:
-        pedir("PATCH", "/api/usuarios/me/password",
-              {"contrasena_actual": actual, "contrasena_nueva": nueva})
+    estado, datos = pedir("PATCH", "/api/usuarios/me/password",
+                          {"contrasena_actual": actual, "contrasena_nueva": nueva})
+
+    redir = verificar_estado(estado)
+    if redir:
+        return redir
+
+    if estado == 200:
         flash("¡Contraseña actualizada con éxito!", "clave_exito")
-    except ApiError as e:
-        if e.estado == 401:
-            return redirect(url_for("usuarios.login"))
-        flash(e.mensaje, "clave_error")
-    return redirect(url_for("perfil.perfil"))
-    
+    else:
+        flash(mensaje_error(datos), "clave_error")
+
+    return redirect(url_for("perfil.perfil_seccion", seccion="mi-cuenta"))
+
+
 @perfil_bp.route('/mi-perfil/baja', methods=['POST'])
 def baja_cuenta():
     if "cookie_backend" not in session:
         return redirect(url_for("usuarios.login"))
 
-    try:
-        pedir("PATCH", "/api/usuarios/me/arrepentimiento")
-    except ApiError as e:
-        session.clear()
-        flash(e.mensaje, "error")
+    estado, datos = pedir("PATCH", "/api/usuarios/me/arrepentimiento")
+
+    redir = verificar_estado(estado)
+    if redir:
+        return redir
+
+    if estado == 200:
+        limpiar_sesion_front()
+        flash("Tu cuenta fue dada de baja.", "exito")
+        return redirect("/")
+    else:
+        flash(mensaje_error(datos), "error")
+        return redirect(url_for("perfil.perfil_seccion", seccion="mi-cuenta"))
+
+
+@perfil_bp.route('/mi-perfil/mis-compras', methods=['POST'])
+def cancelar_compra():
+    if "cookie_backend" not in session:
         return redirect(url_for("usuarios.login"))
 
-    session.clear()
-    flash("Tu cuenta fue dada de baja.", "exito")
-    return redirect("/")
+    id_compra = request.form.get('id_compra')
+
+    if id_compra:
+        estado, datos = pedir("POST", f"/api/compras/{id_compra}/cancelar")
+
+        redir = verificar_estado(estado)
+        if redir:
+            return redir
+
+        if estado == 200:
+            flash('Compra cancelada correctamente.', 'success')
+        else:
+            flash(mensaje_error(datos), 'error')
+
+    return redirect(url_for('perfil.perfil_seccion', seccion='mis-compras'))
