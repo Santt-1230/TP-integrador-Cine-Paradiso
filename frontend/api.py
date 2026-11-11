@@ -1,4 +1,8 @@
-"""Llamadas del Frontend al Backend (requests). Un solo lugar para la URL, el timeout y los errores."""
+"""Llamadas del frontend al backend con requests.
+
+Las funciones `get` y `pedir` devuelven siempre (estado, datos).
+Si algo falla, `datos` trae {"errors": [{"message": "..."}]} y se lee con mensaje_error().
+"""
 import os
 import requests
 from flask import session
@@ -6,66 +10,93 @@ from flask import session
 BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:5000")
 
 
-class ApiError(Exception):
-    def __init__(self, estado, mensaje):
-        super().__init__(mensaje)
-        self.estado = estado
-        self.mensaje = mensaje
+def _error(estado, mensaje):
+    """Arma un error con el mismo formato que usa el backend."""
+    return estado, {"errors": [{"message": mensaje}]}
 
-def _mensaje(respuesta):
+
+def mensaje_error(datos):
+    """Devuelve un texto legible a partir del cuerpo de error del backend, venga como venga."""
+    if not isinstance(datos, dict):
+        return "Ocurrió un error."
+
+    # El backend manda los errores como una lista: {"errors": [{...}]}
+    errores = datos.get("errors")
+    if isinstance(errores, list) and errores and isinstance(errores[0], dict):
+        error = errores[0]
+        return error.get("description") or error.get("message") or error.get("title") or "Error en el servidor."
+
+    for clave in ("mensaje", "message", "description"):
+        if datos.get(clave):
+            return datos[clave]
+
+    error = datos.get("error")
+    if isinstance(error, str):
+        return error
+    if isinstance(error, dict):
+        return error.get("description") or error.get("message") or "Error en el servidor."
+
+    return "Ocurrió un error."
+
+
+def cookies_backend():
+    """Cookie de sesión del backend, guardada en la sesión del frontend al hacer login."""
+    if "cookie_backend" in session:
+        return {"session": session["cookie_backend"]}
+    return {}
+
+
+def pedir(metodo, ruta, datos=None, params=None):
+    """Hace la llamada al backend y devuelve (estado, cuerpo).
+
+    Reenvía la cookie de sesión y guarda la nueva si el backend manda una (login).
+    Si no hay conexión o la respuesta no es JSON, devuelve (503/502, error).
+    """
     try:
-        errores = respuesta.json().get("errors") or []
-        if errores:
-            return errores[0].get("description") or errores[0].get("message")
-    except (ValueError, AttributeError):
-        pass
-    return "El servidor respondio con un error."
+        r = requests.request(
+            metodo, f"{BACKEND_URL}{ruta}",
+            json=datos, params=params, cookies=cookies_backend(), timeout=10,
+        )
+    except requests.RequestException:
+        return _error(503, "No se pudo conectar con el servidor. Intenta de nuevo en unos minutos.")
+
+    if "session" in r.cookies:
+        session["cookie_backend"] = r.cookies["session"]
+
+    if r.status_code == 204:  # sin cuerpo (por ejemplo, logout)
+        return 204, None
+
+    try:
+        return r.status_code, r.json()
+    except ValueError:
+        return _error(502, "El servidor devolvió una respuesta inválida.")
 
 
 def get(ruta, params=None):
-    try:
-        r = requests.get(f"{BACKEND_URL}{ruta}", params=params, timeout=10)
-    except requests.RequestException:
-        raise ApiError(503, "No se pudo conectar con el servidor. Intenta de nuevo en unos minutos.")
-    if not r.ok:
-        raise ApiError(404 if r.status_code == 404 else 502, _mensaje(r))
-    try:
-        return r.json()
-    except ValueError:
-        raise ApiError(502, "El servidor devolvio una respuesta invalida.")
+    """GET al backend. Devuelve (estado, cuerpo)."""
+    return pedir("GET", ruta, params=params)
 
 
 def get_lista(ruta, clave, params=None):
-    try:
-        datos = get(ruta, params)
-    except ApiError:
+    """Devuelve la lista que viene en el campo `clave`. Si falla o no hay nada, devuelve []."""
+    estado, datos = get(ruta, params)
+    if estado != 200:
         return []
     if isinstance(datos, dict):
         datos = datos.get(clave, [])
     return datos if isinstance(datos, list) else []
 
 
+def pedir_api(metodo, ruta, **opciones):
+    """Llamada simple al backend: acepta cualquier opción de requests (json, params, cookies...).
 
-def cookies_backend():
-    if "cookie_backend" in session: # La cookie de sesión del back se guarda dentro de la session del front
-        return {"session": session["cookie_backend"]}
-    return {}
-
-
-def pedir(metodo, ruta, datos=None):
+    Devuelve (estado, datos). No reenvía la sesión por sí sola.
+    """
     try:
-        r = requests.request(metodo, f"{BACKEND_URL}{ruta}", json=datos, cookies=cookies_backend(), timeout=10) #Si no hay conexion o se agota el tiempo de espera
+        respuesta = requests.request(metodo, BACKEND_URL + ruta, timeout=5, **opciones)
+        datos = respuesta.json()
+        return respuesta.status_code, datos
     except requests.RequestException:
-        raise ApiError(503, "No se pudo conectar con el servidor. Intenta de nuevo en unos minutos.")
-
-    if "session" in r.cookies: #El back mandó cookie (login)
-        session["cookie_backend"] = r.cookies["session"]
-
-    if not r.ok:
-        raise ApiError(r.status_code, _mensaje(r))
-    if r.status_code == 204: #None ya que el 204 (logout) no devuelve cuerpo
-        return None
-    try:
-        return r.json()
+        return 503, {"errors": [{"message": "No se pudo conectar con el Backend"}]}
     except ValueError:
-        raise ApiError(502, "El servidor devolvio una respuesta invalida.")
+        return 500, {"errors": [{"message": "El Backend devolvió una respuesta inválida"}]}
