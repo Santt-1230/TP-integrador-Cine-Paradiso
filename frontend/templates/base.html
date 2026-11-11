@@ -28,8 +28,8 @@
             </span>
         </nav>
 
-        <form class="buscador" action="#" method="get">
-            <input type="search" name="q" placeholder="Buscar película" aria-label="Buscar película">
+        <form class="buscador" action="{{ url_for('peliculas_front.buscar') }}" method="get">
+            <input type="search" name="q" value="{{ request.args.get('q', '') }}" placeholder="Buscar película" aria-label="Buscar película">
         </form>
 
         <details class="menu-usuario">
