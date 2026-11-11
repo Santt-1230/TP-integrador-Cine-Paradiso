@@ -13,3 +13,6 @@ def obtener_usuario_por_id(id):
 
 def actualizar_usuario(id, nombre, email, rol):
     admin_repository.actualizar_usuario(id, nombre, email, rol)
+
+
+

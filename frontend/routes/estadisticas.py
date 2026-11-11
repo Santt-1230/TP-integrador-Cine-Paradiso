@@ -1,4 +1,4 @@
-from flask import (Blueprint,render_template,request,session,redirect,url_for)
+from flask import Blueprint, render_template, request
 import api
 
 
@@ -6,112 +6,106 @@ estadisticas_bp = Blueprint("estadisticas", __name__, url_prefix="/admin")
 
 
 @estadisticas_bp.route("/estadisticas")
+@api.admin_front_requerido
 def estadisticas():
 
-    # Verificar que exista una sesión
-    if not session.get("id_usuario"):
-        return redirect(url_for("usuarios.login"))
-
-    # Verificar que sea administrador
-    if session.get("rol") != "administrador":
-        return redirect(url_for("peliculas_front.inicio"))
-
-    # Obtener período seleccionado
     periodo = request.args.get("periodo", "30")
 
     if periodo not in ("7", "30", "90", "365"):
         periodo = "30"
 
-    try:
+    # Valores por defecto en caso de error
+    datos_vacios = {
+        "ocupacion_promedio": 0,
+        "ventas_totales": 0,
+        "ventas_entradas": 0,
+        "ventas_productos": 0,
+        "cancelaciones": 0,
+        "ventas_por_genero": [],
+        "entradas_por_franja": [],
+        "ocupacion_por_funcion": [],
+        "ocupacion_por_pelicula": []
+    }
 
-        # VENTAS TOTALES
-        ventas_totales = api.pedir(
+    # Endpoints de estadísticas
+    consultas = {
+        "ventas_totales": "/api/estadisticas/ventas_totales",
+        "ventas_entradas": "/api/estadisticas/ventas_entradas",
+        "ventas_productos": "/api/estadisticas/venta_servicios",
+        "cancelaciones": "/api/estadisticas/cancelaciones",
+        "ventas_por_genero": "/api/estadisticas/ventas_por_genero",
+        "entradas_por_franja": "/api/estadisticas/franjas_horarias",
+        "ocupacion_por_funcion": "/api/estadisticas/ocupacion",
+        "ocupacion_por_pelicula": "/api/estadisticas/ocupacion/peliculas"
+    }
+
+    resultados = {}
+
+    # --------------------------------
+    # OBTENER ESTADÍSTICAS
+    # --------------------------------
+
+    for clave, ruta in consultas.items():
+
+        estado, datos = api.pedir(
             "GET",
-            "/api/estadisticas/ventas_totales",
+            ruta,
             params={"periodo": periodo}
         )
 
-        # ENTRADAS VENDIDAS
-        ventas_entradas = api.pedir(
-            "GET",
-            "/api/estadisticas/ventas_entradas",
-            params={"periodo": periodo}
-        )
+        # Comprobar errores de autenticación
+        redireccion = api.verificar_estado(estado)
 
-        # VENTAS DE PRODUCTOS
-        ventas_productos = api.pedir(
-            "GET",
-            "/api/estadisticas/venta_servicios",
-            params={"periodo": periodo}
-        )
+        if redireccion:
+            return redireccion
 
-        # CANCELACIONES
-        cancelaciones = api.pedir(
-            "GET",
-            "/api/estadisticas/cancelaciones",
-            params={"periodo": periodo}
-        )
+        # Comprobar otros errores
+        if estado != 200:
 
-        # VENTAS POR GÉNERO
-        ventas_por_genero = api.pedir(
-            "GET",
-            "/api/estadisticas/ventas_por_genero",
-            params={"periodo": periodo}
-        )
+            return render_template(
+                "estadisticas_admin.html",
+                periodo=periodo,
+                error=api.mensaje_error(datos),
+                **datos_vacios
+            )
 
-        # ENTRADAS POR FRANJA HORARIA
-        entradas_por_franja = api.pedir(
-            "GET",
-            "/api/estadisticas/franjas_horarias",
-            params={"periodo": periodo}
-        )
+        resultados[clave] = datos
 
-        # OCUPACIÓN POR FUNCIÓN
-        ocupacion_por_funcion = api.pedir(
-            "GET",
-            "/api/estadisticas/ocupacion",
-            params={"periodo": periodo}
-        )
+    # --------------------------------
+    # OBTENER RESULTADOS
+    # --------------------------------
 
-        # OCUPACIÓN POR PELÍCULA
-        ocupacion_por_pelicula = api.pedir(
-            "GET",
-            "/api/estadisticas/ocupacion/peliculas",
-            params={"periodo": periodo}
-        )
+    ventas_totales = resultados["ventas_totales"]
+    ventas_entradas = resultados["ventas_entradas"]
+    ventas_productos = resultados["ventas_productos"]
+    cancelaciones = resultados["cancelaciones"]
 
-    except api.ApiError as error:
+    ventas_por_genero = resultados["ventas_por_genero"]
+    entradas_por_franja = resultados["entradas_por_franja"]
 
-        # Si el backend ya no reconoce la sesión,
-        # volvemos a solicitar el inicio de sesión.
-        if error.estado == 401:
-            for clave in (
-                "id_usuario",
-                "nombre",
-                "apellido",
-                "rol",
-                "cookie_backend"
-            ):
-                session.pop(clave, None)
+    ocupacion_por_funcion = resultados["ocupacion_por_funcion"]
+    ocupacion_por_pelicula = resultados["ocupacion_por_pelicula"]
 
-            return redirect(url_for("usuarios.login"))
+    # Comprobar que los endpoints de listas devuelvan listas
+    listas = (
+        ventas_por_genero,
+        entradas_por_franja,
+        ocupacion_por_funcion,
+        ocupacion_por_pelicula
+    )
+
+    if not all(isinstance(lista, list) for lista in listas):
 
         return render_template(
             "estadisticas_admin.html",
             periodo=periodo,
-            error=error.mensaje,
-            ocupacion_promedio=0,
-            ventas_totales=0,
-            ventas_entradas=0,
-            ventas_productos=0,
-            cancelaciones=0,
-            ventas_por_genero=[],
-            entradas_por_franja=[],
-            ocupacion_por_funcion=[],
-            ocupacion_por_pelicula=[]
+            error="El servidor devolvió un formato de estadísticas inválido.",
+            **datos_vacios
         )
 
+    # --------------------------------
     # CALCULAR OCUPACIÓN PROMEDIO
+    # --------------------------------
 
     capacidad_total = sum(
         float(funcion.get("capacidad_total") or 0)
@@ -128,7 +122,9 @@ def estadisticas():
         if capacidad_total > 0 else 0
     )
 
-    # ENVIAR INFORMACIÓN A LA PLANTILLA
+    # --------------------------------
+    # RENDERIZAR ESTADÍSTICAS
+    # --------------------------------
 
     return render_template(
         "estadisticas_admin.html",

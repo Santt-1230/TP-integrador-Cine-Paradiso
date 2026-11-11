@@ -17,6 +17,7 @@ ERROR_CODE_DUPLICATE = 'duplicate.resource'
 ERROR_CODE_FORBIDDEN = 'forbidden'
 ERROR_CODE_EXTERNAL_SERVICE = 'external.service.error'
 
+ROLES_VALIDOS = {"cliente", "administrador"}
 ROL_ADMINISTRADOR = 'administrador'
 ERROR_CODE_SALA_NOT_FOUND = 'sala.not_found'
 ERROR_CODE_LOCAL_NOT_FOUND = 'local.not_found'

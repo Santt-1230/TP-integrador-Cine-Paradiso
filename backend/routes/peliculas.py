@@ -52,3 +52,5 @@ def editar_pelicula(id_pelicula):
 @admin_requerido
 def dar_de_baja_pelicula(id_pelicula):
     return _responder(*peliculas_service.dar_de_baja(id_pelicula))
+
+

@@ -15,13 +15,33 @@
     </div>
 
     <p>{{ locales|length }} Locales · {{ salas_configuradas }} Salas configuradas</p>
+    <div class="barra-filtros">
+        <nav class="filtros-salas" aria-label="Filtrar salas por estado">
+            <a href="{{ url_for('locales.admin_locales', estado='todas', local=filtro_local) }}"
+            class="filtro-chip {% if filtro_estado == 'todas' %}filtro-chip--activo{% endif %}">Todas</a>
+            <a href="{{ url_for('locales.admin_locales', estado='activa', local=filtro_local) }}"
+            class="filtro-chip {% if filtro_estado == 'activa' %}filtro-chip--activo{% endif %}">Activas</a>
+            <a href="{{ url_for('locales.admin_locales', estado='inactiva', local=filtro_local) }}"
+            class="filtro-chip {% if filtro_estado == 'inactiva' %}filtro-chip--activo{% endif %}">Inactivas</a>
+        </nav>
+
+        <form method="get" class="filtro-local">
+            <input type="hidden" name="estado" value="{{ filtro_estado }}">
+            <select name="local" class="filtro-local__select" aria-label="Filtrar por local">
+            <option value="">Todos los locales</option>
+            {% for local in todos_los_locales %}
+                <option value="{{ local.id_local }}" {% if filtro_local == local.id_local %}selected{% endif %}>{{ local.nombre }}</option>
+            {% endfor %}
+            </select>
+        </form>
+    </div>
 
     {% for local in locales %}
         <div class="tarjeta-local">
             <div class="cabecera-local">
                 <div>
                     <h2>{{ local.nombre }}</h2>
-                    <p>
+                    <p class="resumen-locales">
                         {{ local.salas | length }} Salas ·
                         {{ local.total_butacas }} butacas en total
                     </p>
@@ -50,13 +70,18 @@
                                     {% if sala.estado == 'activa' %}
                                         <form method="post" 
                                             action="{{ url_for('salas.desactivar_sala', id_sala=sala.id_sala) }}"
-                                            onsubmit="return confirm('¿Dar de baja la sala {{ sala.numero_sala }}?');">
-                                        <button type="submit" class="boton-tabla boton-tabla--baja">Dar de baja</button>
+                                            data-numero-sala="{{ sala.numero_sala }}">
+                                            <input type="hidden" name="estado" value="{{ filtro_estado }}">
+                                            <button type="submit" class="boton-tabla boton-tabla--baja">Dar de baja</button>
                                         </form>
                                     {% endif %}
                                 </div>
                             </td>
                         </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4">No hay salas para mostrar</td>
+                    </tr>
                     {% endfor %}
                 </tbody>
             </table>
@@ -65,4 +90,8 @@
         <p>No hay locales para mostrar</p>
     {% endfor %}
 </div>
+{% endblock %}
+
+{% block scripts_admin %}
+    <script src="{{ url_for('static', filename='js/salas.js') }}" defer></script>
 {% endblock %}

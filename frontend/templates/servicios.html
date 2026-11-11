@@ -1,124 +1,68 @@
-<!DOCTYPE html>
-<html lang="es">
+{% extends "base_peliculas.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Servicios - Cine paradiso</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
+{% block titulo %}Servicios · Cine Paradiso{% endblock %}
 
-<body>
+{% block contenido %}
 
-    <!-- ENCABEZADO -->
-    <header class="header-principal">
+<div class="contenedor">
 
-        <div class="logo">
-            CINE PARADISO
-        </div>
-
-        <nav class="menu-principal">
-
-            <a href="elegir-cine.html">ELEGI POR CINE</a>
-
-            <a href="elegir-pelicula.html">ELEGI POR PELICULA</a>
-
-            <details class="desplegable">
-                <summary class="cine-actual">
-                    CINE
-                </summary>
-
-                <ul>
-                    <li><a href="#">Cartelera</a></li>
-                    <li><a href="#">Proximos estrenos</a></li>
-                </ul>
-            </details>
-
-        </nav>
-
-        <div class="buscador">
-            <input type="search" placeholder="Buscar...">
-        </div>
-
-        <div class="usuario">
-
-        </div>
-    </header>
-
-    <!-- CONTENIDO PRINCIPAL -->
-    <main>
-        <!-- PROMOCIONES -->
-        <section class="productos">
-
-            <article class="producto">
-                <div class="imagen promo1"></div>
-                <h4>PROMO 1</h4>
-            </article>
-
-            <article class="producto">
-                <div class="imagen promo2"></div>
-                <h4>PROMO 2</h4>
-            </article>
-
-            <article class="producto">
-                <div class="imagen promo3"></div>
-                <h4>PROMO 3</h4>
-            </article>
-
-            <article class="producto">
-                <div class="imagen promo4"></div>
-                <h4>PROMO 4</h4>
-            </article>
-
-        </section>
-
-        <!-- COMIDAS -->
-        <section class="productos">
-
-            <article class="producto">
-                <div class="imagen comida1"></div>
-                <h4>COMIDA 1</h4>
-            </article>
-
-            <article class="producto">
-                <div class="imagen comida2"></div>
-                <h4>COMIDA 2</h4>
-            </article>
-
-            <article class="producto">
-                <div class="imagen comida3"></div>
-                <h4>COMIDA 3</h4>
-            </article>
-
-            <article class="producto">
-                <div class="imagen comida4"></div>
-                <h4>COMIDA 4</h4>
-            </article>
-
-        </section>
-
-    </main>
-
-    <!-- PIE DE PAGINA -->
-    <footer>
-
-        <h2>CINE PARADISO</h2>
-
-        <div class="redes">
-            <a href="#" aria-label="X"><i class="bi bi-twitter-x"></i></a>
-            <a href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
-            <a href="#" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
-        </div>
-
-        <nav class="footer-links">
-            <a href="#">About</a>
-            <a href="#">Authors</a>
-            <a href="#">Archive</a>
-            <a href="#">Terms and Conditions</a>
-            <a href="#">Cookie Policy</a>
-        </nav>
-
-    </footer>
+    {% if error %}
+        <p class="vacio">{{ error }}</p>
+    {% endif %}
     
-</body>
-</html>
+    {% if promociones %}
+    <section id="promociones">
+        <div class="seccion-titulo">
+            <h2>Promociones</h2>
+        </div>
+
+    <div class="grilla grilla-chica">
+        {% for promo in promociones %}
+        <article class="promo">
+            {% if promo.imagen_url %}
+                <img src="{{ promo.imagen_url }}"
+                     alt="{{ promo.nombre }}"
+                     loading="lazy">
+            {% endif %}
+
+            <h3>{{ promo.nombre }}</h3>
+
+            {% if promo.descripcion %}
+                <p>{{ promo.descripcion }}</p>
+            {% endif %}
+        </article>
+        {% endfor %}
+    </div>
+    </section>
+    {% endif %}
+
+    <section id="productos">
+        <div class="seccion-titulo">
+            <h2>Productos</h2>
+        </div>
+
+        {% if productos %}
+        <div class="grilla grilla-chica">
+            {% for producto in productos %}
+            <article class="producto">
+                <h3>{{ producto.nombre }}</h3>
+
+                {% if producto.descripcion %}
+                    <p>{{ producto.descripcion }}</p>
+                {% endif %}
+
+                {% if producto.precio is not none %}
+                    <p class="precio">$ {{ producto.precio }}</p>
+                {% endif %}
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+            <p class="vacio">Por ahora no hay productos disponibles.</p>
+        {% endif %}
+    </section>
+
+</div>
+
+{% endblock %}
+
