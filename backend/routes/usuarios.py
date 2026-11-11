@@ -61,6 +61,31 @@ def login():
     session["rol"] = usuario["rol"] 
     return jsonify({"usuario": usuario}), 200
 
+
+@usuarios_bp.route("/auth/olvide-contrasena", methods=["POST"])
+def olvide_contrasena():
+    datos = request.get_json(silent=True)
+    error = usuarios_validator.validar_olvide_contrasena(datos)
+    if error:
+        return jsonify(construir_error_api(*error)), 400
+
+    usuarios_service.solicitar_recuperacion(datos["email"].strip())
+    return jsonify({"mensaje": "Si el email tiene una cuenta, te enviamos un mail para cambiar la contraseña"}), 200
+
+
+@usuarios_bp.route("/auth/restablecer-contrasena", methods=["POST"])
+def restablecer_contrasena():
+    datos = request.get_json(silent=True)
+    error = usuarios_validator.validar_restablecer_contrasena(datos)
+    if error:
+        return jsonify(construir_error_api(*error)), 400
+
+    exito, error = usuarios_service.restablecer_contrasena(datos["token"].strip(), datos["contrasena_nueva"])
+    if not exito:
+        return jsonify(construir_error_api(*error)), 400
+    return jsonify({"mensaje": "Contraseña actualizada correctamente"}), 200
+
+
 @usuarios_bp.route("/auth/logout", methods=["POST"])
 @login_requerido
 def logout():
