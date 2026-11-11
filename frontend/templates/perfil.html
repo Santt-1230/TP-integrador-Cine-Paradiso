@@ -136,9 +136,11 @@
                                     PRESENTÁ TU QR EN LA ENTRADA<br>A LAS SALAS DE TU CINE
                                 </p>
                             </div>
-
                         </div>
                     </div>
+                    <form id="form-baja-cuenta" method="post" action="{{ url_for('perfil.cancelar_compra') }}">
+                    <button type="submit">Cancelar compra</button>
+                    </form>
                 {% else %}
                     <p class="sin-compras">No se encontraron compras registradas en tu historial.</p>
                 {% endfor %}
