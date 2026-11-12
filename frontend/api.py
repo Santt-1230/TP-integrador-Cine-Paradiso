@@ -57,7 +57,7 @@ def pedir(metodo, ruta, datos=None, params=None):
     try:
         r = requests.request(
             metodo, f"{BACKEND_URL}{ruta}",
-            json=datos, params=params, cookies=cookies_backend(), timeout=10,
+            json=datos, params=params, cookies=cookies_backend(), timeout=60,
         )
     except requests.RequestException:
         return _error(503, "No se pudo conectar con el servidor. Intenta de nuevo en unos minutos.")
