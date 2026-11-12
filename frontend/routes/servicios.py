@@ -41,12 +41,14 @@ def datos_del_formulario():
     except ValueError:
         pass
     descripcion = request.form.get("descripcion", "").strip()
+    imagen_url = request.form.get("imagen_url", "").strip()
     return {
         "nombre": request.form.get("nombre", "").strip(),
         "tipo": request.form.get("tipo", ""),
         "descripcion": descripcion or None,
         "precio": precio,
         "activo": "activo" in request.form,
+        "imagen_url": imagen_url or None,
     }
 
 

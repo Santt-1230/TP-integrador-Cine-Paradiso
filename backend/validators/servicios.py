@@ -16,7 +16,7 @@ def validar(datos, es_creacion):
     if es_creacion or "precio" in datos:
         precio = datos.get("precio")
         if isinstance(precio, bool) or not isinstance (precio, (int, float)) or precio <= 0:
-            return "El precio debe ser un numero mayor o igual a 0"
+            return "El precio debe ser un numero mayor a 0"
 
     if "descripcion" in datos:
         descripcion = datos.get("descripcion")
@@ -25,6 +25,11 @@ def validar(datos, es_creacion):
 
     if "activo" in datos and not isinstance(datos["activo"], bool):
         return "Activo debe ser verdadero o falso"
+
+    if "imagen_url" in datos:
+        imagen_url = datos["imagen_url"]
+        if not isinstance(imagen_url, str) or not imagen_url.strip() or len(imagen_url) > 500:
+            return "La imagen es obligatoria (hasta 500 caracteres)"
 
     return None
 

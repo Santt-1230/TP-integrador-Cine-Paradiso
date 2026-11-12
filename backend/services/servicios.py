@@ -29,6 +29,7 @@ def crear_servicio(datos):
         datos.get("descripcion"),
         datos["precio"],
         datos.get("activo", True),
+        datos.get("imagen_url"),
     )
     return obtener_servicio_por_id(resultado["id"])
 
@@ -44,6 +45,7 @@ def actualizar_servicio(id_producto, datos):
         datos.get("descripcion", actual["descripcion"]),
         datos.get("precio", actual["precio"]),
         datos.get("activo", actual["activo"]),
+        datos.get("imagen_url", actual["imagen_url"]),
     )
     return obtener_servicio_por_id(id_producto)
 
