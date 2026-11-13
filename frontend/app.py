@@ -13,6 +13,7 @@ from routes.servicios import servicios_bp
 from routes.funciones import funciones_front_bp
 from routes.salas import salas_bp
 from routes.compras import compras_bp
+from routes.admin_peliculas import admin_peliculas_bp
 load_dotenv()
 
 
@@ -35,6 +36,7 @@ app.register_blueprint(funciones_front_bp)
 app.register_blueprint(salas_bp)
 app.register_blueprint(compras_bp)
 app.register_blueprint(servicios_bp)
+app.register_blueprint(admin_peliculas_bp)
 
 
 if __name__ == "__main__":
