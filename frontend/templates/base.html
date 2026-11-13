@@ -34,7 +34,7 @@
         </form>
 
         <details class="menu-usuario">
-            {% if session.get('id_usuario') %}
+            {% if session.get('id_usuario') and session.get('rol') == 'cliente' %}
                 <summary class="usuario">
                     <span class="nombre-usuario">{{ session.get('nombre') }} {{ session.get('apellido') }}</span>
                     <i class="bi bi-person-fill"></i>
@@ -42,6 +42,18 @@
                 <div class="panel-usuario usuario-iniciado">
                     <a class="mi-perfil" href="{{ url_for('perfil.perfil_seccion') }}">Mi perfil</a>
                     <form method="post" class="form-cerrar" action="{{ url_for('usuarios.logout') }}">
+                        <button type="submit" class="boton-texto">Cerrar sesión</button>
+                    </form>
+                </div>
+            {% elif session.get('id_usuario') and session.get('rol') == 'administrador' %}
+            <summary class="usuario">
+                    <span class="nombre-usuario">{{ session.get('nombre') }} {{ session.get('apellido') }}</span>
+                    <i class="bi bi-person-fill"></i>
+                </summary>
+                <div class="panel-usuario usuario-iniciado" id="usuario-admin">
+                    <a class="mi-perfil" id="boton-admin" href="{{ url_for('admin.admin') }}">Admin</a>
+                    <a class="mi-perfil" href="{{ url_for('perfil.perfil_seccion') }}">Mi perfil</a>
+                    <form method="post" class="form-cerrar" id="cerrar-admin" action="{{ url_for('usuarios.logout') }}">
                         <button type="submit" class="boton-texto">Cerrar sesión</button>
                     </form>
                 </div>

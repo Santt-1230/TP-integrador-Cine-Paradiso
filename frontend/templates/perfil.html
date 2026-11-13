@@ -122,89 +122,101 @@
             </div>
         </section>
         <section id="mis-compras" class="seccion-contenido {{ 'activa' if seccion == 'mis-compras' }}">
-    <h2>MIS COMPRAS</h2>
+            <h2>MIS COMPRAS</h2>
 
-    <div class="contenedor-lista-compras">
-        {% for compra in historial.compras %}
-            <div class="tarjeta-compra-layout">
-                
-                <div class="header-fecha">
-                    <h3>{{ compra.fecha_creacion }}</h3>
-                </div>
-
-                <div class="cuerpo-compra-grid">
-                    
-                    <!-- 1. Película -->
-                    <div class="columna-item">
-                        <div class="contenedor-poster pastel-purpura">
-                            {% if compra.poster_url %}
-                                <img src="{{ compra.poster_url }}" alt="{{ compra.titulo_pelicula }}" class="poster-img">
-                            {% endif %}
+            <div class="contenedor-lista-compras">
+                {% for compra in historial.compras %}
+                    {% if compra.estado != 'cancelada' %}
+                    <div class="tarjeta-compra-layout">
+                        
+                        <div class="header-fecha">
+                            <h3>{{ compra.fecha_creacion }}</h3>
                         </div>
-                        <span class="etiqueta-categoria">{{ compra.genero | default('CINE') | upper }}</span>
-                        <h4 class="titulo-item">{{ compra.titulo_pelicula | upper }}</h4>
-                    </div>
 
-                    <!-- 2. Combo / Servicios -->
-                    <div class="columna-item">
-                        {% if compra.servicios %}
-                            {% for servicio in compra.servicios %}
-                                <div class="contenedor-poster pastel-azul">
-                                    {% if servicio.imagen_url %}
-                                        <img src="{{ servicio.imagen_url }}" alt="{{ servicio.nombre }}" class="poster-img">
+                        <div class="cuerpo-compra-grid">
+                            
+                            <!-- 1. Película -->
+                            <div class="columna-item">
+                                <div class="contenedor-poster pastel-purpura">
+                                    {% if compra.poster_url %}
+                                        <img src="{{ compra.poster_url }}" alt="{{ compra.titulo_pelicula }}" class="poster-img">
                                     {% endif %}
                                 </div>
-                                <span class="etiqueta-categoria">COMBO</span>
-                                <h4 class="titulo-item">{{ servicio.nombre | upper }}</h4>
-                                <span class="badge-retirar">RETIRAR</span>
-                            {% endfor %}
-                        {% else %}
-                            <div class="contenedor-poster pastel-azul"></div>
-                            <span class="etiqueta-categoria">COMBO</span>
-                            <h4 class="titulo-item">SIN COMBO</h4>
-                        {% endif %}
-                    </div>
+                                <span class="etiqueta-categoria">{{ compra.genero | default('CINE') | upper }}</span>
+                                <h4 class="titulo-item">{{ compra.titulo_pelicula | upper }}</h4>
+                            </div>
 
-                    <!-- 3. Entradas y Descarga PDF -->
-                    <div class="columna-qr">
-                        <h4 class="titulo-qr">TU FACTURA</h4>
-                        <div class="contenedor-qr-box">
-                            <a href="{{ url_for('perfil.descargar_pdf_compra', compra_id=compra.id_compra) }}" class="btn-descargar-pdf">
-                                <i class="bi bi-file-earmark-pdf"></i> Descargar factura</a> 
-                        </div>
-                        <p class="instruccion-qr">
-                            DATOS DE COMPRA
-                        </p>
-                        <br>
-                        <h4 class="titulo-qr">TUS ENTRADAS</h4>
-                        <div class="contenedor-qr-box">
-                            <a href="{{ url_for('perfil.descargar_pdf_compra', compra_id=compra.id_compra) }}" class="btn-descargar-pdf">
-                                <i class="bi bi-file-earmark-pdf"></i> Descargar entradas</a> 
-                        </div>
-                        <p class="instruccion-qr">
-                            PRESENTÁ TUS QR EN LA ENTRADA<br>A LAS SALAS DE TU CINE
-                        </p>
-                    </div>
-                </div>
+                            <!-- 2. Combo / Servicios -->
+                            <div class="columna-item">
+                                {% if compra.servicios %}
+                                    {% for servicio in compra.servicios %}
+                                        <div class="contenedor-poster pastel-azul">
+                                            {% if servicio.imagen_url %}
+                                                <img src="{{ servicio.imagen_url }}" alt="{{ servicio.nombre }}" class="poster-img">
+                                            {% endif %}
+                                        </div>
+                                        <span class="etiqueta-categoria">COMBO</span>
+                                        <h4 class="titulo-item">{{ servicio.nombre | upper }}</h4>
+                                    <!-- <span class="badge-retirar">RETIRAR</span> --> 
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="contenedor-poster pastel-azul"></div>
+                                    <span class="etiqueta-categoria">COMBO</span>
+                                    <h4 class="titulo-item">SIN COMBO</h4>
+                                {% endif %}
+                            </div>
 
-                <!-- 4. Acción de Cancelación -->
-                <div class="acciones-compra">
-                    {% if compra.estado != 'cancelada' %}
-                        <form method="post" action="{{ url_for('perfil.cancelar_compra') }}" onsubmit="return confirm('¿Confirmás que querés cancelar esta compra?');">
-                            <!-- Input oculto para que la ruta POST reciba el ID de la compra -->
-                            <input type="hidden" name="id_compra" value="{{ compra.id_compra }}">
-                            <button type="submit" class="btn-cancelar">Cancelar compra</button>
-                        </form>
-                    {% else %}
-                        <span class="estado-cancelado">Compra Cancelada</span>
+                            <!-- 3. Entradas y Descarga PDF -->
+                            <div class="columna-qr">
+                                <h4 class="titulo-qr">TU FACTURA</h4>
+                                <div class="contenedor-qr-box">
+                                    <a href="{{ url_for('perfil.descargar_pdf_compra', compra_id=compra.id_compra) }}" class="btn-descargar-pdf">
+                                        <i class="bi bi-file-earmark-pdf"></i> Descargar factura</a> 
+                                </div>
+                                <p class="instruccion-qr">
+                                    DATOS DE COMPRA
+                                </p>
+                                <br>
+                                <h4 class="titulo-qr">TUS ENTRADAS</h4>
+                                <div class="contenedor-qr-box">
+                                    <a href="{{ url_for('perfil.descargar_pdf_compra', compra_id=compra.id_compra) }}" class="btn-descargar-pdf">
+                                        <i class="bi bi-file-earmark-pdf"></i> Descargar entradas</a> 
+                                </div>
+                                <p class="instruccion-qr">
+                                    PRESENTÁ TUS QR EN LA ENTRADA<br>A LAS SALAS DE TU CINE
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- 4. Acción de Cancelación -->
+                        <div class="acciones-compra">
+                            {% if compra.estado != 'cancelada' and compra.puede_cancelar %}
+                                <form class="form-cancelar" data-inicio="{{ compra.fecha_funcion_iso }}" method="post" action="{{ url_for('perfil.cancelar_compra') }}" onsubmit="return confirm('¿Confirmás que querés cancelar esta compra?');">
+                                    <input type="hidden" name="id_compra" value="{{ compra.id_compra }}">
+                                    <button type="submit" class="btn-cancelar">Cancelar compra</button>
+                                </form>
+                            {% endif %}
+                        </div>
+
+
+                    </div>
                     {% endif %}
-                </div>
-
+                {% else %}
+                    <p class="sin-compras">No se encontraron compras registradas en tu historial.</p>
+                {% endfor %}
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="contenedor-alertas">
+                            {% for category, message in messages %}
+                                <div class="alerta alerta-{{ category }}">
+                                    <span>{{ message }}</span>
+                                    <button type="button" class="cerrar-alerta" onclick="this.parentElement.remove();">&times;</button>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
             </div>
-        {% else %}
-            <p class="sin-compras">No se encontraron compras registradas en tu historial.</p>
-        {% endfor %}
-    </div>
         </section>
         <section id="resenas" class="seccion-contenido {{ 'activa' if seccion == 'resenas' }}">
             <h2>Reseñas</h2>
