@@ -28,7 +28,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Desplegable de cambiar contraseña
     const btnToggle = document.getElementById('btn-toggle-clave');
     const contenedorClave = document.getElementById('contenedor-cambiar-clave');
     const flecha = document.getElementById('flecha-clave');
@@ -41,7 +40,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Aviso si las contraseñas nuevas no coinciden (no envía nada)
     const formClave = document.getElementById('form-cambiar-clave');
     if (formClave) {
         formClave.addEventListener('submit', (e) => {
@@ -69,7 +67,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 document.addEventListener('DOMContentLoaded', function () {
-    // 1. Toggle Mostrar / Ocultar Formulario de Editar Datos
     const btnEditar = document.getElementById('btn-toggle-editar');
     const btnCancelar = document.getElementById('btn-cancelar-editar');
     const vistaDatos = document.getElementById('vista-datos-perfil');
@@ -87,7 +84,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // 2. Toggle Contraer / Descontraer Cambiar Contraseña
     const btnClave = document.getElementById('btn-toggle-clave');
     const contenedorClave = document.getElementById('contenedor-cambiar-clave');
     const flechaClave = document.getElementById('flecha-clave');
@@ -104,7 +100,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 
-// 3. Función para Ver / Ocultar Contraseña con el Ojito
 function toggleVisibilidadPassword(idInput, icono) {
     const input = document.getElementById(idInput);
     if (input.type === 'password') {
