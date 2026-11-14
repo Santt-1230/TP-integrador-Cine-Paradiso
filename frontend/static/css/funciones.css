@@ -1,3 +1,34 @@
+.menu-secundario-funciones {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    padding: .55rem 1rem;
+    background: #fff;
+    font-size: .8rem;
+    text-transform: uppercase;
+}
+
+.menu-secundario-funciones a:hover {
+    text-decoration: underline;
+}
+
+/* Mantiene el pie al fondo y lo compacta solo en las páginas de funciones. */
+body:has(main > .funciones-pagina:not(.checkout-pagina)) main {
+    flex: 1;
+}
+
+body:has(main > .funciones-pagina:not(.checkout-pagina)) footer {
+    padding: 1rem;
+}
+
+body:has(main > .funciones-pagina:not(.checkout-pagina)) .redes {
+    margin: .5rem 0 .75rem;
+}
+
+body:has(main > .funciones-pagina:not(.checkout-pagina)) .footer-links {
+    gap: 1rem;
+}
+
 .funciones-pagina {
     width: min(1100px, 92%);
     margin: 2rem auto;
