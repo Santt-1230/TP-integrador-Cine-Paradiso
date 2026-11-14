@@ -85,8 +85,15 @@ def actualizar_sala(id_sala, datos):
                 message='Numero de sala ocupado',
                 description=f"Ya existe una sala con el numero {numero_nuevo} en el local {sala['id_local']}."
             ))
-    
-    return salas_repository.actualizar_sala(id_sala, cambios)
+    sala_editada = salas_repository.actualizar_sala(id_sala, cambios)
+
+    if sala_editada is None:
+        raise ValueError(ut.construir_error_api(
+            code = const.ERROR_CODE_SALA_CONFLICT,
+            message='Butacas con entrada activa',
+            description='No se pueden quitar butacas con entradas futuras activas'
+        ))
+    return sala_editada
 
 
 def desactivar_sala(id_sala):

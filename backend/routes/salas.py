@@ -3,7 +3,9 @@ import mysql.connector
 import utils as ut
 import constants as const
 from services import salas as salas_services
+import logging
 
+logger = logging.getLogger(__name__)
 salas_bp = Blueprint('salas', __name__, url_prefix='/api')
 
 @salas_bp.route('/salas' , methods= ['GET'])
@@ -119,6 +121,7 @@ def actualizar_sala(id_sala):
         return jsonify(respuesta), 400
 
     except (RuntimeError, mysql.connector.Error):
+        logger.exception('Error al actualizar la sala %s', id_sala)
         return jsonify(ut.construir_error_db()), 500
     
     

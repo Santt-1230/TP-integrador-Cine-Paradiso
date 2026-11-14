@@ -3,6 +3,7 @@ import string
 load_dotenv()
 ENTERO_POSITIVO_MINIMO = 1
 BUTACAS_POR_FILA = 20
+CAPACIDAD_MAXIMA = 300
 
 ERROR_MESSAGE_DATABASE_ERROR = 'No se pudo completar la operacion por un problema con la base de datos'
 ERROR_DESCRIPTION_DATABASE_ERROR = 'Ocurrio un problema al consultar la base de datos'

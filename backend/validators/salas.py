@@ -19,10 +19,17 @@ def validar_numero_sala(numero_sala)->int:
         )
 
 def validar_capacidad(capacidad)->int:
-    return ut.validar_entero_positivo(
+    capacidad = ut.validar_entero_positivo(
         capacidad, const.ENTERO_POSITIVO_MINIMO, 'capacidad'
-        )
+    )
+    if capacidad > const.CAPACIDAD_MAXIMA:
+        raise ValueError(ut.construir_error_api(
+            code=const.ERROR_CODE_INVALID_PARAMETER,
+            message='Capacidad invalida',
+            description=f'La capacidad no puede superar {const.CAPACIDAD_MAXIMA} butacas'
+        ))
 
+    return capacidad
 def validar_actualizacion_sala(datos):
     if not isinstance(datos, dict) or not datos:
         raise ValueError(ut.construir_error_api(
@@ -31,7 +38,7 @@ def validar_actualizacion_sala(datos):
             description="Ingresa numero_sala o estado"
         ))
     for campo in datos:
-        if campo not in ('numero_sala', 'estado'):
+        if campo not in ('numero_sala', 'estado', 'capacidad'):
             raise ValueError(ut.construir_error_api(
                 code=const.ERROR_CODE_INVALID_PARAMETER,
                 message='Campo no modificable',
@@ -48,4 +55,8 @@ def validar_actualizacion_sala(datos):
                 description='El estado debe ser activa o inactiva'
             ))
         cambios['estado'] = datos['estado']
+
+    if 'capacidad' in datos:
+        cambios['capacidad'] = validar_capacidad(datos['capacidad'])  
+    
     return cambios
