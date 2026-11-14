@@ -1,0 +1,17 @@
+{# Formulario de login: lo usan el desplegable del header (base.html) y la pagina login.html #}
+<form class="form-login" method="post" action="{{ url_for('usuarios.login') }}">
+    <label>Mail
+        <input type="email" name="email" required>
+    </label>
+
+    <label>Contraseña
+        <input type="password" name="contrasena" required>
+    </label>
+    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; text-transform: none;">
+        <span>Mostrar contraseña</span>
+        <input type="checkbox" style="width: auto; margin: 0;" onchange="this.closest('form').querySelectorAll('input[name*=contrasena]').forEach(i => i.type = this.checked ? 'text' : 'password')">
+    </label>
+    <a class="enlace-chico" href="{{ url_for('usuarios.olvide_contrasena') }}">Olvidé mi contraseña</a>
+    <button type="submit" class="boton-oscuro">Iniciar sesión</button>
+    <p class="enlace-chico">¿No tenés cuenta? <a href="{{ url_for('usuarios.registro') }}">Crear cuenta</a></p>
+</form>

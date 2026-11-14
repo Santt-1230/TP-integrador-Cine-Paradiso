@@ -1,4 +1,4 @@
-from backend.repositories import admin as admin_repository
+from repositories import admin as admin_repository
 
 
 def obtener_usuarios():
@@ -13,3 +13,6 @@ def obtener_usuario_por_id(id):
 
 def actualizar_usuario(id, nombre, email, rol):
     admin_repository.actualizar_usuario(id, nombre, email, rol)
+
+
+

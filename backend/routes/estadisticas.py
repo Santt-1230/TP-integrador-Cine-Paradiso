@@ -1,68 +1,111 @@
-from flask import Blueprint, jsonify, request 
+from flask import Blueprint, jsonify, request
+
 from repositories.estadisticas import (
-    obtener_ventas_totales, obtener_ventas_entradas, 
-    obtener_ventas_productos, obtener_ventas_por_genero, 
-    obtener_cancelaciones, obtener_entradas_vendidas_por_franja,
-    obtener_ocupacion_por_funcion, obtener_ocupacion_por_pelicula)
-from utils import requiere_admin
+    obtener_ventas_totales,
+    obtener_ventas_entradas,
+    obtener_ventas_productos,
+    obtener_ventas_por_genero,
+    obtener_cancelaciones,
+    obtener_entradas_vendidas_por_franja,
+    obtener_ocupacion_por_funcion,
+    obtener_ocupacion_por_pelicula
+)
 
-estadisticas_bp = Blueprint("estadisticas", __name__, url_prefix="/api/estadisticas")
+from utils import admin_requerido
 
 
-@estadisticas_bp.route("/ocupacion/<int:id_funcion>", methods=["GET"])
-@requiere_admin
-def get_estadisticas_ocupacion(id_funcion):
-    resultado = obtener_ocupacion_por_funcion(id_funcion)
-    return jsonify(resultado), 200
+estadisticas_bp = Blueprint(
+    "estadisticas",
+    __name__,
+    url_prefix="/api/estadisticas"
+)
 
-@estadisticas_bp.route("/ocupacion/pelicula/<int:id_pelicula>", methods=["GET"])
-@requiere_admin
-def get_estadisticas_ocupacion_pelicula(id_pelicula):
-    resultado = obtener_ocupacion_por_pelicula(id_pelicula)
-    return jsonify(resultado), 200
+
+
+def ejecutar_consulta_periodo(funcion, *args):
+
+    periodo = request.args.get("periodo", "30")
+
+    try:
+        resultado = funcion(*args, periodo=periodo)
+        return jsonify(resultado), 200
+
+    except ValueError as error:
+        return jsonify({"mensaje": str(error)}), 400
+
 
 
 @estadisticas_bp.route("/ventas_totales", methods=["GET"])
-@requiere_admin
+@admin_requerido
 def get_estadisticas_ventas():
-    periodo = request.args.get("periodo", "mensual")
-    resultado = obtener_ventas_totales(periodo)
-    return jsonify(resultado), 200
+    return ejecutar_consulta_periodo(obtener_ventas_totales)
 
 
 @estadisticas_bp.route("/ventas_entradas", methods=["GET"])
-@requiere_admin
+@admin_requerido
 def get_estadisticas_ventas_entradas():
-    periodo = request.args.get("periodo")
-    resultado = obtener_ventas_entradas(periodo)
-    return jsonify(resultado), 200
+    return ejecutar_consulta_periodo(obtener_ventas_entradas)
 
 
 @estadisticas_bp.route("/venta_servicios", methods=["GET"])
-@requiere_admin
+@admin_requerido
 def get_estadisticas_venta_servicios():
-    periodo = request.args.get("periodo")
-    resultado = obtener_ventas_productos(periodo)
-    return jsonify(resultado), 200
+    return ejecutar_consulta_periodo(obtener_ventas_productos)
 
 
 @estadisticas_bp.route("/ventas_por_genero", methods=["GET"])
-@requiere_admin
+@admin_requerido
 def get_estadisticas_ventas_por_genero():
-    resultado = obtener_ventas_por_genero()
-    return jsonify(resultado), 200
+    return ejecutar_consulta_periodo(obtener_ventas_por_genero)
+
+
 
 
 @estadisticas_bp.route("/cancelaciones", methods=["GET"])
-@requiere_admin
+@admin_requerido
 def get_estadisticas_cancelaciones():
-    periodo = request.args.get("periodo")
-    resultado = obtener_cancelaciones(periodo)
-    return jsonify(resultado), 200
+    return ejecutar_consulta_periodo(obtener_cancelaciones)
+
 
 
 @estadisticas_bp.route("/franjas_horarias", methods=["GET"])
-@requiere_admin
+@admin_requerido
 def get_estadisticas_franjas_horarias():
-    resultado = obtener_entradas_vendidas_por_franja()
-    return jsonify(resultado), 200
+    return ejecutar_consulta_periodo(
+        obtener_entradas_vendidas_por_franja
+    )
+
+
+
+@estadisticas_bp.route("/ocupacion", methods=["GET"])
+@admin_requerido
+def get_estadisticas_ocupacion():
+    return ejecutar_consulta_periodo(
+        obtener_ocupacion_por_funcion
+    )
+
+
+@estadisticas_bp.route("/ocupacion/<int:id_funcion>", methods=["GET"])
+@admin_requerido
+def get_estadisticas_ocupacion_funcion(id_funcion):
+    return ejecutar_consulta_periodo(
+        obtener_ocupacion_por_funcion,
+        id_funcion
+    )
+
+
+@estadisticas_bp.route("/ocupacion/peliculas", methods=["GET"])
+@admin_requerido
+def get_estadisticas_ocupacion_peliculas():
+    return ejecutar_consulta_periodo(
+        obtener_ocupacion_por_pelicula
+    )
+
+
+@estadisticas_bp.route("/ocupacion/pelicula/<int:id_pelicula>",methods=["GET"])
+@admin_requerido
+def get_estadisticas_ocupacion_pelicula(id_pelicula):
+    return ejecutar_consulta_periodo(
+        obtener_ocupacion_por_pelicula,
+        id_pelicula
+    )

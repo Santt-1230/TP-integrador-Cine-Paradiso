@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block titulo %}Mi cuenta - Cine Paradiso{% endblock %}
+
+{% block estilos_extra %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/usuarios.css') }}">
+{% endblock %}
+
+{# "usuario" es el diccionario que devuelve GET /api/usuarios/me; si no llega, los campos quedan vacios #}
+{% set u = usuario or {} %}
+
+{% block contenido %}
+<section class="pagina-formulario">
+    <h1>Mi cuenta</h1>
+
+    {% if error %}
+        <p class="mensaje-error">{{ error }}</p>
+    {% endif %}
+    {% if mensaje %}
+        <p class="mensaje-ok">{{ mensaje }}</p>
+    {% endif %}
+
+    <form class="tarjeta-formulario" method="post" action="{{ url_for('usuarios.mi_cuenta') }}">
+        <h2>Información personal</h2>
+
+        <label>Nombre
+            <input type="text" name="nombre" value="{{ u.nombre }}" maxlength="150" required>
+        </label>
+
+        <label>Apellido
+            <input type="text" name="apellido" value="{{ u.apellido }}" maxlength="150" required>
+        </label>
+
+        <label>Mail
+            <input type="email" value="{{ u.email }}" disabled>
+        </label>
+
+        <label>Fecha de nacimiento
+            <input type="date" value="{{ u.fecha_nacimiento }}" disabled>
+        </label>
+
+        <button type="submit" class="boton-oscuro">Actualizar mis datos</button>
+    </form>
+
+    <form class="tarjeta-formulario" method="post" action="{{ url_for('usuarios.cambiar_correo') }}">
+        <h2>Cambiar correo electrónico</h2>
+
+        <label>Correo actual
+            <input type="email" value="{{ u.email }}" disabled>
+        </label>
+
+        <label>Correo nuevo
+            <input type="email" name="email" maxlength="200" required>
+        </label>
+
+        <button type="submit" class="boton-oscuro">Cambiar correo</button>
+    </form>
+
+    <form class="tarjeta-formulario" method="post" action="{{ url_for('usuarios.cambiar_contrasena') }}">
+        <h2>Cambiar contraseña</h2>
+
+        <label>Contraseña actual
+            <input type="password" name="contrasena_actual" required>
+        </label>
+
+        <label>Contraseña nueva
+            <input type="password" name="contrasena_nueva" minlength="8" required>
+        </label>
+
+        <label>Repetir contraseña nueva
+            <input type="password" name="repetir_contrasena" minlength="8" required>
+        </label>
+        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; text-transform: none;">
+            <span>Mostrar contraseña</span>
+            <input type="checkbox" style="width: auto; margin: 0;" onchange="this.closest('form').querySelectorAll('input[name*=contrasena]').forEach(i => i.type = this.checked ? 'text' : 'password')">
+        </label>
+        <button type="submit" class="boton-oscuro">Cambiar contraseña</button>
+    </form>
+</section>
+{% endblock %}

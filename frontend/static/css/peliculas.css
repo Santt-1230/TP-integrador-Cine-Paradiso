@@ -1,0 +1,130 @@
+/* Estilos de Peliculas y cartelera. Usa los colores de style.css (header #ff6464, fondo #d9d7d7,
+   desplegable #b30000) y no modifica nada de lo que define la base visual. */
+main { flex: 1; }
+
+.contenedor { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; }
+.centrado { text-align: center; }
+.vacio { color: #555; }
+.caja { background: #fff; border-radius: 8px; padding: 1rem 1.2rem; }
+
+h1 { font-size: 1.8rem; margin: 0 0 1rem; }
+h2 { font-size: 1.1rem; text-transform: uppercase; letter-spacing: .04em; margin: 1.5rem 0 .6rem; }
+
+/* Segunda barra del header */
+.menu-secundario {
+    display: flex; justify-content: center; gap: 2rem;
+    padding: .55rem 1rem; background: #f2f2f2;
+    font-size: .8rem; text-transform: uppercase;
+}
+.menu-secundario a:hover { text-decoration: underline; }
+
+/* Botones y filtros */
+.boton, .filtros button {
+    display: inline-block; background: #b30000; color: #fff; border: 0;
+    padding: .6rem 1.3rem; border-radius: 999px; font-weight: 600; cursor: pointer;
+}
+.boton:hover, .filtros button:hover { background: #8f0000; }
+.filtros { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; margin-bottom: 1.5rem; }
+.filtros input, .filtros select {
+    border: 0; border-radius: 999px; padding: .5rem 1rem; background: #fff; font-size: .9rem;
+}
+.filtros input { min-width: 220px; }
+
+/* Portada de la pagina principal */
+.hero {
+    display: flex; gap: 2rem; align-items: center; justify-content: center;
+    background: #2b2b2b; color: #fff; padding: 2rem 3rem;
+}
+.hero img, .hero .sin-poster { width: 180px; aspect-ratio: 2 / 3; object-fit: cover; border-radius: 8px; }
+.hero-texto { max-width: 520px; }
+.hero-texto h1 { font-size: 2.2rem; margin: .2rem 0 .6rem; }
+.hero .meta { color: #ddd; margin: 0 0 1.2rem; }
+.etiqueta { margin: 0; color: #ff6464; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; font-size: .8rem; }
+
+/* Secciones y grillas */
+.seccion-titulo { display: flex; justify-content: space-between; align-items: baseline; margin: 2rem 0 .8rem; }
+.seccion-titulo h2 { margin: 0; }
+.seccion-titulo a { font-size: .85rem; text-decoration: underline; }
+.grilla { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1.5rem; }
+.grilla-chica { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+
+/* Tarjeta de pelicula */
+.tarjeta { background: #fff; border-radius: 10px; overflow: hidden; padding-bottom: .9rem; }
+.tarjeta img, .sin-poster { width: 100%; aspect-ratio: 2 / 3; object-fit: cover; display: block; }
+.sin-poster { display: flex; align-items: center; justify-content: center; background: #bdbdbd; color: #444; }
+.tarjeta h3 { font-size: 1rem; margin: .7rem .9rem .2rem; }
+.tarjeta a:hover h3 { text-decoration: underline; }
+.tarjeta-meta, .tarjeta-generos { margin: 0 .9rem; font-size: .82rem; color: #555; }
+
+/* Promociones y productos */
+.promo, .producto { background: #fff; border-radius: 10px; padding: 1rem 1.2rem; }
+.promo img { width: 100%; border-radius: 8px; margin-bottom: .6rem; }
+.promo h3, .producto h3 { margin: 0 0 .3rem; font-size: 1rem; }
+.promo p, .producto p { margin: .2rem 0; font-size: .88rem; color: #444; }
+.precio { font-weight: 700; color: #b30000 !important; }
+
+/* Detalle */
+.detalle { display: grid; grid-template-columns: minmax(200px, 300px) 1fr; gap: 2.5rem; align-items: start; }
+.detalle-poster img, .detalle-poster .sin-poster { width: 100%; aspect-ratio: 2 / 3; border-radius: 10px; object-fit: cover; }
+.datos { display: flex; flex-wrap: wrap; gap: .5rem; list-style: none; padding: 0; margin: 0 0 .6rem; }
+.datos li { background: #fff; border-radius: 999px; padding: .25rem .8rem; font-size: .85rem; }
+.periodo { margin: 0; font-size: .85rem; color: #555; }
+
+@media (max-width: 700px) {
+    .hero { flex-direction: column; text-align: center; padding: 1.5rem 1rem; }
+    .detalle { grid-template-columns: 1fr; }
+    .grilla, .grilla-chica { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+    .detalle-poster { max-width: 240px; margin: 0 auto; }
+    .menu-secundario { gap: 1rem; flex-wrap: wrap; }
+}
+
+/* Funciones de una pelicula (detalle) */
+.dia-funciones h3 { margin: 1.2rem 0 .5rem; font-size: 1rem; }
+.funciones { list-style: none; padding: 0; margin: 0; display: grid; gap: .6rem; }
+.funcion { display: grid; grid-template-columns: auto 1fr auto auto; gap: 1rem; align-items: center; }
+.funcion-hora { font-size: 1.3rem; font-weight: 700; }
+.funcion-detalle small { display: block; color: #555; font-size: .8rem; }
+@media (max-width: 600px) {
+    .funcion { grid-template-columns: auto 1fr; }
+    .funcion .boton { grid-column: 1 / -1; text-align: center; }
+}
+
+
+#productos,
+#promociones {
+    margin-bottom: 40px;
+}
+
+.grilla {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+}
+
+.grilla-chica {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 250px));
+}
+
+.producto,
+.promo {
+    background-color: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+
+.producto h3,
+.promo h3 {
+    margin-top: 0;
+}
+
+.producto p,
+.promo p {
+    color: #666;
+}
+
+.precio {
+    color: #ff6464 !important;
+    font-weight: bold;
+    font-size: 1.1rem;
+}

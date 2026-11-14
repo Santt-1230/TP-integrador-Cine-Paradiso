@@ -1,0 +1,68 @@
+{% extends "base_peliculas.html" %}
+
+{% block titulo %}Servicios · Cine Paradiso{% endblock %}
+
+{% block contenido %}
+
+<div class="contenedor">
+
+    {% if error %}
+        <p class="vacio">{{ error }}</p>
+    {% endif %}
+    
+    {% if promociones %}
+    <section id="promociones">
+        <div class="seccion-titulo">
+            <h2>Promociones</h2>
+        </div>
+
+    <div class="grilla grilla-chica">
+        {% for promo in promociones %}
+        <article class="promo">
+            {% if promo.imagen_url %}
+                <img src="{{ promo.imagen_url }}"
+                     alt="{{ promo.nombre }}"
+                     loading="lazy">
+            {% endif %}
+
+            <h3>{{ promo.nombre }}</h3>
+
+            {% if promo.descripcion %}
+                <p>{{ promo.descripcion }}</p>
+            {% endif %}
+        </article>
+        {% endfor %}
+    </div>
+    </section>
+    {% endif %}
+
+    <section id="productos">
+        <div class="seccion-titulo">
+            <h2>Productos</h2>
+        </div>
+
+        {% if productos %}
+        <div class="grilla grilla-chica">
+            {% for producto in productos %}
+            <article class="producto">
+                <h3>{{ producto.nombre }}</h3>
+
+                {% if producto.descripcion %}
+                    <p>{{ producto.descripcion }}</p>
+                {% endif %}
+
+                {% if producto.precio is not none %}
+                    <p class="precio">$ {{ producto.precio }}</p>
+                {% endif %}
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+            <p class="vacio">Por ahora no hay productos disponibles.</p>
+        {% endif %}
+    </section>
+
+</div>
+
+{% endblock %}
+

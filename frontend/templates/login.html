@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block titulo %}Iniciar sesión - Cine Paradiso{% endblock %}
+
+{% block estilos_extra %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/usuarios.css') }}">
+{% endblock %}
+
+{% block contenido %}
+<section class="pagina-formulario">
+    <h1>Iniciar sesión</h1>
+
+    <div class="tarjeta-formulario tarjeta-angosta">
+        {% if error %}
+            <p class="mensaje-error">{{ error }}</p>
+        {% endif %}
+        {% include "form_login.html" %}
+    </div>
+</section>
+{% endblock %}

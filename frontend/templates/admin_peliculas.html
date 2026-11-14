@@ -1,0 +1,99 @@
+{% extends "base_admin.html" %}
+
+{% block titulo %}Películas · Administración{% endblock %}
+
+{% block estilos_extra %}
+    {{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin_peliculas.css') }}">
+{% endblock %}
+
+{% block contenido_admin %}
+<div class="servicios-admin">
+
+    <div class="servicios-admin__encabezado">
+        <div>
+            <p class="servicios-admin__migas">Administración / Películas</p>
+            <h1>Películas</h1>
+            <p class="servicios-admin__descripcion">Todo el catálogo: vigentes, próximas, vencidas y dadas de baja.</p>
+        </div>
+    </div>
+
+    {% if error %}
+        <p class="servicios-admin__error">{{ error }}</p>
+    {% endif %}
+
+    <form class="filtros-admin" method="get" action="{{ url_for('admin_peliculas.listado') }}">
+        <input type="search" name="q" value="{{ q }}" placeholder="Buscar por nombre" aria-label="Buscar por nombre">
+        <select name="estado" aria-label="Estado de cartelera">
+            <option value="">Todas</option>
+            {% for clave, texto in estados.items() %}
+                <option value="{{ clave }}" {% if estado == clave %}selected{% endif %}>{{ texto }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="boton-tabla boton-tabla--agregar">Filtrar</button>
+        {% if q or estado %}
+            <a class="servicios-admin__accion" href="{{ url_for('admin_peliculas.listado') }}">Limpiar</a>
+        {% endif %}
+    </form>
+
+    <div class="servicios-admin__tarjeta">
+        <div class="tabla-contenedor">
+            <table class="tabla-admin">
+
+                <thead>
+                    <tr>
+                        <th>Película</th>
+                        <th>Géneros</th>
+                        <th>Duración</th>
+                        <th>Clasificación</th>
+                        <th>En cartelera</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for p in peliculas %}
+                    <tr>
+                        <td>
+                            <div class="pelicula-admin">
+                                {% if p.poster_url %}
+                                    <img src="{{ p.poster_url }}" alt="" class="pelicula-admin__poster">
+                                {% else %}
+                                    <span class="pelicula-admin__poster pelicula-admin__poster--vacio"></span>
+                                {% endif %}
+                                <span>{{ p.nombre }}</span>
+                            </div>
+                        </td>
+                        <td>{{ p.generos|join(', ') if p.generos else '—' }}</td>
+                        <td>{{ p.duracion_min }} min</td>
+                        <td>{{ p.clasificacion or '—' }}</td>
+                        <td>
+                            {{ (p.cartelera_desde|fecha_ar) if p.cartelera_desde else 'Sin inicio' }}
+                            –
+                            {{ (p.cartelera_hasta|fecha_ar) if p.cartelera_hasta else 'sin fin' }}
+                        </td>
+                        <td>
+                            {% if p.estado_cartelera == 'vigente' %}
+                                <span class="estado-admin">Vigente</span>
+                            {% else %}
+                                <span class="estado-admin estado-admin--inactivo">{{ estados.get(p.estado_cartelera, p.estado_cartelera) }}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6">No hay películas para mostrar.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+
+            </table>
+        </div>
+
+        <div class="servicios-admin__pie">
+            Mostrando {{ peliculas|length }} películas
+        </div>
+    </div>
+    <p class="servicios-admin__aviso">Solo las películas vigentes se ven en la cartelera pública. Una película próxima empieza en una fecha futura; una vencida ya terminó su período; una inactiva fue dada de baja.</p>
+</div>
+{% endblock %}

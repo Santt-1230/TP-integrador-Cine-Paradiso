@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block titulo %}Crear cuenta - Cine Paradiso{% endblock %}
+
+{% block estilos_extra %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/usuarios.css') }}">
+{% endblock %}
+
+{% block contenido %}
+<section class="pagina-formulario">
+    <h1>Crear cuenta</h1>
+
+    <form class="tarjeta-formulario" method="post" action="{{ url_for('usuarios.registro') }}">
+        {% if error %}
+            <p class="mensaje-error">{{ error }}</p>
+        {% endif %}
+
+        <label>Nombre
+            <input type="text" name="nombre" placeholder="ej. Juan" maxlength="150" required>
+        </label>
+
+        <label>Apellido
+            <input type="text" name="apellido" placeholder="ej. Perez" maxlength="150" required>
+        </label>
+
+        <label>Mail
+            <input type="email" name="email"  placeholder="ej. usuario@ejemplo.com" maxlength="200" required>
+        </label>
+
+        <label>Fecha de nacimiento
+            <input type="date" name="fecha_nacimiento" max="{{fecha_maxima}}" required>
+        </label>
+
+        <label>Contraseña
+            <input type="password" name="contrasena" minlength="8" required>
+        </label>
+
+        <label>Repetir contraseña
+            <input type="password" name="repetir_contrasena" minlength="8" required>
+        </label>
+        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; text-transform: none;">
+            <span>Mostrar contraseña</span>
+            <input type="checkbox" style="width: auto; margin: 0;" onchange="this.closest('form').querySelectorAll('input[name*=contrasena]').forEach(i => i.type = this.checked ? 'text' : 'password')">
+        </label>
+        <button type="submit" class="boton-oscuro">Crear cuenta</button>
+    </form>
+</section>
+{% endblock %}

@@ -1,8 +1,19 @@
 from werkzeug.security import generate_password_hash, check_password_hash #Importa funciones de la libreria Werkzeug para el cifrado y verificacion de contraseñas
 from repositories import usuarios as usuarios_repository
+from repositories import tokens as tokens_repository
+import hashlib
+import os #Permite interactuar con el sistema operativo y variables del entorno del servidor
+import secrets #Para generar tokens o numeros aleatorios
+from services import mailer #EPara armar y enviar correos electronicos
 
 SESION_INVALIDA = ("SESION_INVALIDA","Sesion no valida", "La sesion no es valida")
 EMAIL_DUPLICADO = ("EMAIL_DUPLICADO", "Email en uso", "El email que quieres usar ya esta en uso")
+EMAIL_PENDIENTE = ("EMAIL_PENDIENTE", "Email pendiente", "Ese email ya tiene un registro pendiente de confirmacion. Revisa tu correo o pedi que te reenviemos el mail")
+EMAIL_NO_VERIFICADO = ("EMAIL_NO_VERIFICADO", "Email sin confirmar", "Tenes que confirmar tu email antes de iniciar sesion. Revisa tu correo")
+TOKEN_INVALIDO = ("TOKEN_INVALIDO", "Link invalido", "El link de confirmacion no es valido o ya vencio")
+MAIL_NO_ENVIADO = ("MAIL_NO_ENVIADO", "Mail no enviado", "Tu cuenta fue creada, pero no pudimos enviar el mail de confirmacion. Pedi que te lo reenviemos")
+MINUTOS_VALIDEZ_TOKEN = 15
+TOKEN_RECUPERACION_INVALIDO = ("TOKEN_INVALIDO", "Link invalido", "El link para cambiar la contraseña no es valido o ya vencio")
 
 def usuario_publico(usuario):
     user_id = usuario.get("id") or usuario.get("id_usuario")
@@ -13,21 +24,55 @@ def usuario_publico(usuario):
         "email":            usuario.get("email", ""),
         "fecha_nacimiento": str(usuario["fecha_nacimiento"]),
         "rol":              usuario.get("rol", "cliente"),
-        "activo":           bool(usuario.get("activo", True))
+        "activo":           bool(usuario.get("activo", True)),
+        "email_verificado": bool(usuario.get("email_verificado", False))
     }
+
+def hashear_token(token):
+    return hashlib.sha256(token.encode()).hexdigest()
+
+def enviar_verificacion(id_usuario, nombre, email):
+    token = secrets.token_urlsafe(32)  # el token real solo viaja por mail; en la base se guarda su hash
+    tokens_repository.invalidar_tokens(id_usuario, "verificar_email")  # el link anterior deja de servir
+    tokens_repository.crear_token(id_usuario, "verificar_email", hashear_token(token), MINUTOS_VALIDEZ_TOKEN)
+
+    link = f"{os.getenv('FRONTEND_URL', 'http://localhost:5001')}/verificar-email?token={token}"
+    texto = (f"Hola {nombre}!\n\n"
+             f"Para activar tu cuenta de Cine Paradiso confirma tu email entrando a este link "
+             f"(vale {MINUTOS_VALIDEZ_TOKEN} minutos):\n{link}\n\n"
+             f"Si no creaste una cuenta, ignora este mensaje.")
+    return mailer.enviar_mail(email, "Confirma tu email - Cine Paradiso", texto)
 
 
 def registrar_usuario(nombre, apellido, email, fecha_nacimiento, contrasena):
     email = email.lower()
-
-    if usuarios_repository.buscar_por_email(email):
-        return None, EMAIL_DUPLICADO
+    existente = usuarios_repository.buscar_por_email(email)
+    if existente:
+        if existente.get("email_verificado"):
+            return None, EMAIL_DUPLICADO
+        return None, EMAIL_PENDIENTE
 
     contrasena_hash = generate_password_hash(contrasena)
     id_nuevo = usuarios_repository.crear_usuario(nombre, apellido,email, fecha_nacimiento, contrasena_hash)
-    usuario = usuarios_repository.buscar_por_id(id_nuevo)
 
+    if not enviar_verificacion(id_nuevo, nombre, email):
+        return None, MAIL_NO_ENVIADO
+    
+    usuario = usuarios_repository.buscar_por_id(id_nuevo)
     return usuario_publico(usuario), None
+
+def verificar_email(token):
+    registro = tokens_repository.buscar_token_valido(hashear_token(token), "verificar_email")
+    if not registro:
+        return False, TOKEN_INVALIDO
+    usuarios_repository.marcar_email_verificado(registro["id_usuario"])
+    tokens_repository.marcar_usado(registro["id_token"])
+    return True, None
+
+def reenviar_verificacion(email):
+    usuario = usuarios_repository.buscar_por_email(email.lower())
+    if usuario and usuario.get("activo") and not usuario.get("email_verificado"):
+        enviar_verificacion(usuario["id_usuario"], usuario["nombre"], usuario["email"])
 
 
 def autenticar_usuario(email, contrasena):
@@ -40,6 +85,9 @@ def autenticar_usuario(email, contrasena):
     if not usuario.get("activo", True):
         return None, ("CUENTA_DESACTIVADA", "Cuenta desactivada", "La cuenta está desactivada")
 
+    if not usuario.get("email_verificado"):
+        return None, EMAIL_NO_VERIFICADO
+    
     return usuario_publico(usuario), None
 
 
@@ -134,3 +182,42 @@ def obtener_historial(id_usuario):
 
     peliculas_vistas = usuarios_repository.listar_peliculas_vistas(id_usuario)
     return {"compras": historial_compras, "peliculas_vistas": peliculas_vistas}, None
+
+def dar_de_baja(id_usuario):
+    usuario = buscar_usuario_activo(id_usuario)
+    if not usuario:
+        return False, SESION_INVALIDA
+    usuarios_repository.desactivar_usuario(id_usuario)
+    return True, None
+
+def enviar_recuperacion(id_usuario, nombre, email):
+    token = secrets.token_urlsafe(32)
+    tokens_repository.invalidar_tokens(id_usuario, "recuperar_contrasena")  # el link anterior deja de servir
+    tokens_repository.crear_token(id_usuario, "recuperar_contrasena", hashear_token(token), MINUTOS_VALIDEZ_TOKEN)
+
+    link = f"{os.getenv('FRONTEND_URL', 'http://localhost:5001')}/restablecer-contrasena?token={token}"
+    texto = (f"Hola {nombre}!\n\n"
+             f"Para cambiar tu contraseña de Cine Paradiso entra a este link "
+             f"(vale {MINUTOS_VALIDEZ_TOKEN} minutos):\n{link}\n\n"
+             f"Si no lo pediste vos, ignora este mensaje.")
+    return mailer.enviar_mail(email, "Cambiar contraseña - Cine Paradiso", texto)
+
+
+def solicitar_recuperacion(email):
+    usuario = usuarios_repository.buscar_por_email(email.lower())
+    if usuario and usuario.get("activo"):  # si el email no existe no se avisa, asi nadie puede averiguar quien tiene cuenta
+        enviar_recuperacion(usuario["id_usuario"], usuario["nombre"], usuario["email"])
+
+
+def restablecer_contrasena(token, contrasena_nueva):
+    registro = tokens_repository.buscar_token_valido(hashear_token(token), "recuperar_contrasena")
+    if not registro:
+        return False, TOKEN_RECUPERACION_INVALIDO
+
+    usuario = buscar_usuario_activo(registro["id_usuario"])
+    if not usuario:
+        return False, TOKEN_RECUPERACION_INVALIDO
+
+    usuarios_repository.actualizar_contrasena(registro["id_usuario"], generate_password_hash(contrasena_nueva))
+    tokens_repository.marcar_usado(registro["id_token"])
+    return True, None

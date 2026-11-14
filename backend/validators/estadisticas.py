@@ -1,15 +1,13 @@
 def validar_periodo_estadisticas(periodo):
 
-    periodos_validos = ("anual", "mensual", "diario")
+    periodos_validos = ("7", "30", "90", "365")
 
-    if not isinstance(periodo, str):
-        raise ValueError("El período debe ser un texto")
+    if not isinstance(periodo, (str, int)):
+        raise ValueError("El período debe ser válido")
 
-    periodo = periodo.strip().lower()
+    periodo = str(periodo).strip()
 
     if periodo not in periodos_validos:
-        raise ValueError(
-            "El período debe ser anual, mensual o diario"
-        )
+        raise ValueError("El período debe ser 7, 30, 90 o 365 días")
 
     return periodo

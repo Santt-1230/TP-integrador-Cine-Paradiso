@@ -15,26 +15,76 @@ def registro():
     usuario, error = usuarios_service.registrar_usuario(
         datos.get("nombre", "").strip(), datos.get("apellido", "").strip(),datos.get("email", "").strip(), datos.get("fecha_nacimiento", "").strip(), datos.get("contrasena", ""))
     if error:
-        return jsonify(construir_error_api(*error)), 409
+        estado = 502 if error[0] == "MAIL_NO_ENVIADO" else 409
+        return jsonify(construir_error_api(*error)), estado
 
-    return jsonify(usuario), 201
+    return jsonify({"usuario":usuario,"mensaje":"Te enviamos un mail para verificar tu cuenta"}), 201
+
+@usuarios_bp.route("/auth/verificar-email", methods=["POST"])
+def verificar_email():
+    datos = request.get_json(silent=True)
+    error = usuarios_validator.validar_token(datos)
+    if error:
+        return jsonify(construir_error_api(*error)), 400
+
+    exito, error = usuarios_service.verificar_email(datos["token"].strip())
+    if not exito:
+        return jsonify(construir_error_api(*error)), 400
+    return jsonify({"mensaje": "Email confirmado correctamente"}), 200
+
+
+@usuarios_bp.route("/auth/reenviar-verificacion", methods=["POST"])
+def reenviar_verificacion():
+    datos = request.get_json(silent=True)
+    error = usuarios_validator.validar_reenvio(datos)
+    if error:
+        return jsonify(construir_error_api(*error)), 400
+
+    usuarios_service.reenviar_verificacion(datos["email"].strip())
+    return jsonify({"mensaje": "Si el email esta pendiente de confirmacion, te enviamos un nuevo mail"}), 200
 
 @usuarios_bp.route("/auth/login", methods=["POST"])
 def login():
     datos = request.get_json(silent=True)
     error = usuarios_validator.validar_login(datos)
-    if error: #Valida el formato en el cual el usuario escribio
+    if error: 
         return jsonify(construir_error_api(*error)), 400
 
     usuario, error = usuarios_service.autenticar_usuario(
         datos.get("email", "").strip(), datos.get("contrasena", ""))
-    if error: #Valida los datos contra la base de datos
-        return jsonify(construir_error_api(*error)), 401
+    if error: 
+        estado = 403 if error[0] == "EMAIL_NO_VERIFICADO" else 401
+        return jsonify(construir_error_api(*error)), estado
 
     session.clear() #Borra cualquier dato de sesion previa antes de inicaiar una nueva
     session["id_usuario"] = usuario["id_usuario"] #Guarda una cookie con el id de la persona autenticad
     session["rol"] = usuario["rol"] 
     return jsonify({"usuario": usuario}), 200
+
+
+@usuarios_bp.route("/auth/olvide-contrasena", methods=["POST"])
+def olvide_contrasena():
+    datos = request.get_json(silent=True)
+    error = usuarios_validator.validar_olvide_contrasena(datos)
+    if error:
+        return jsonify(construir_error_api(*error)), 400
+
+    usuarios_service.solicitar_recuperacion(datos["email"].strip())
+    return jsonify({"mensaje": "Si el email tiene una cuenta, te enviamos un mail para cambiar la contraseña"}), 200
+
+
+@usuarios_bp.route("/auth/restablecer-contrasena", methods=["POST"])
+def restablecer_contrasena():
+    datos = request.get_json(silent=True)
+    error = usuarios_validator.validar_restablecer_contrasena(datos)
+    if error:
+        return jsonify(construir_error_api(*error)), 400
+
+    exito, error = usuarios_service.restablecer_contrasena(datos["token"].strip(), datos["contrasena_nueva"])
+    if not exito:
+        return jsonify(construir_error_api(*error)), 400
+    return jsonify({"mensaje": "Contraseña actualizada correctamente"}), 200
+
 
 @usuarios_bp.route("/auth/logout", methods=["POST"])
 @login_requerido
@@ -75,14 +125,11 @@ def ver_perfil():
 @login_requerido
 def cambiar_contrasena():
     datos = request.get_json(silent=True) or {}
-    actual = datos.get("contrasena_actual", "")
-    nueva = datos.get("nueva_contrasena") or datos.get("contrasena_nueva", "")
-    repetir = datos.get("repetir_contrasena")
-   
-    error = usuarios_validator.validar_contrasena(nueva, repetir)
+    error = usuarios_validator.validar_cambio_contrasena(datos)
+       
     if error:
         return jsonify(construir_error_api(*error)), 400
-    exito, error = usuarios_service.cambiar_contrasena(session["id_usuario"], actual, nueva)
+    exito, error = usuarios_service.cambiar_contrasena(session["id_usuario"], datos["contrasena_actual"], datos["contrasena_nueva"])
     if not exito:
         if error[0] == "SESION_INVALIDA":
             session.clear()
@@ -99,3 +146,12 @@ def ver_historial():
         return jsonify(construir_error_api(*error)), 401
 
     return jsonify(historial), 200
+
+@usuarios_bp.route("/usuarios/me/arrepentimiento", methods=["PATCH"])
+@login_requerido
+def arrepentimiento():
+    exito, error = usuarios_service.dar_de_baja(session["id_usuario"])
+    session.clear()
+    if not exito:
+        return jsonify(construir_error_api(*error)), 401
+    return jsonify({"mensaje": "Cuenta dada de baja correctamente"}), 200

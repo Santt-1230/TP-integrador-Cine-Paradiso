@@ -1,0 +1,80 @@
+/* Estilos de las paginas de usuario: login, registro y mi cuenta */
+
+.pagina-formulario {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.pagina-formulario h1 {
+    margin: 0 0 1rem;
+    text-transform: uppercase;
+}
+
+.tarjeta-formulario {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    margin-bottom: 1.5rem;
+    padding: 2rem;
+    background: #5a5a5a;
+    border-radius: 8px;
+}
+
+.tarjeta-formulario h2 {
+    margin: 0;
+    color: #fff;
+    text-transform: uppercase;
+}
+
+.tarjeta-formulario label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #fff;
+}
+
+.tarjeta-formulario input {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 0.7rem 0.8rem;
+    border: 0;
+    border-radius: 8px;
+    background: #1c1c1c;
+    color: #fff;
+    font: inherit;
+    font-size: 0.95rem;
+}
+
+.tarjeta-formulario input:disabled { opacity: 0.6; }
+
+.tarjeta-angosta {
+    max-width: 380px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.mensaje-error,
+.mensaje-ok {
+    margin: 0 0 0.5rem;
+    padding: 0.6rem 0.8rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+}
+
+.mensaje-error { background: #ffd6d6; color: #8a0000; }
+.mensaje-ok { background: #d4f5dc; color: #135c2a; }
+
+@media (max-width: 700px) {
+    .tarjeta-formulario { padding: 1.2rem; }
+}
+
+input[type="date"] {
+    color-scheme: dark;
+    color: #fff;
+}
