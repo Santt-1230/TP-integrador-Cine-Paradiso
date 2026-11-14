@@ -34,7 +34,7 @@ def pagina_funciones():
     error = None if estado == 200 else api.mensaje_error(datos)
     return render_template(
         "funciones.html", funciones=funciones, filtros=request.args,
-        error=error, locales=[],
+        error=error
     )
 
 
@@ -47,7 +47,8 @@ def pagina_butacas(id_funcion):
     error = None if estado == 200 else api.mensaje_error(datos)
     return render_template(
         "funcion_butacas.html", id_funcion=id_funcion, butacas=butacas,
-        error=error, locales=[],
+        cantidad_columnas=cantidad_columnas,
+        error=error
     ), estado if estado >= 500 else 200
 
 
@@ -64,7 +65,7 @@ def admin_funciones():
     funciones = datos.get("funciones", []) if estado == 200 else []
     error = None if estado == 200 else api.mensaje_error(datos)
     return render_template(
-        "admin_funciones.html", funciones=funciones, error=error, locales=[]
+        "admin_funciones.html", funciones=funciones, error=error
     )
 
 
@@ -93,13 +94,11 @@ def admin_nueva_funcion():
     if error is None:
         error = error_salas
     return render_template(
-        "funcion_form.html", funcion=None, error=error, salas=salas, locales=[]
+        "funcion_form.html", funcion=None, error=error
     )
 
 
-@funciones_front_bp.route(
-    "/admin/funciones/<int:id_funcion>/editar", methods=["GET", "POST"]
-)
+@funciones_front_bp.route("/admin/funciones/<int:id_funcion>/editar", methods=["GET", "POST"])
 @api.admin_front_requerido
 def admin_editar_funcion(id_funcion):
     error = None
@@ -138,18 +137,15 @@ def admin_editar_funcion(id_funcion):
     if error is None:
         error = error_salas
     return render_template(
-        "funcion_form.html", funcion=funcion, error=error, salas=salas, locales=[]
+        "funcion_form.html", funcion=funcion, error=error
     )
 
 
-@funciones_front_bp.route(
-    "/admin/funciones/<int:id_funcion>/cancelar", methods=["POST"]
-)
+@funciones_front_bp.route("/admin/funciones/<int:id_funcion>/cancelar", methods=["POST"])
 @api.admin_front_requerido
 def admin_cancelar_funcion(id_funcion):
     estado, respuesta = api.pedir(
-        "PATCH", f"/api/funciones/{id_funcion}",
-        datos={"estado": "cancelada"}
+        "PATCH", f"/api/funciones/{id_funcion}", datos={"estado": "cancelada"}
     )
     redireccion = api.verificar_estado(estado)
     if redireccion:
@@ -157,6 +153,6 @@ def admin_cancelar_funcion(id_funcion):
     if estado != 200:
         return render_template(
             "admin_funciones.html", funciones=[],
-            error=api.mensaje_error(respuesta), locales=[]
+            error=api.mensaje_error(respuesta)
         )
     return redirect(url_for("funciones_front.admin_funciones"))
