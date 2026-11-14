@@ -392,8 +392,8 @@ footer {
     width: 50%;
 }
 .btn-cancelar{
-    width: 15%;
-    background-color:#b30000;
+    width: 30%;
+    background-color:#f6b5b5;
     border-width: 0;
     color: white;
 }
@@ -432,7 +432,7 @@ footer {
 }
 
 .seccion-arrepentimiento {
-  
+  margin-top: 1rem;
   border-radius: 8px;
   background-color: #f9f9f9;
 }
@@ -441,6 +441,24 @@ footer {
   color: #666;
   font-size: 0.95rem;
   margin-bottom: 16px;
+}
+
+.seccion-arrepentimiento summary {
+    cursor: pointer;
+    list-style: none;                 
+}
+.seccion-arrepentimiento summary::-webkit-details-marker { display: none; }
+
+.seccion-arrepentimiento summary h3 {
+    display: inline;                  
+    margin: 0;
+}
+.seccion-arrepentimiento summary::after {
+    content: " ▼";
+    font-size: 0.8em;
+}
+.seccion-arrepentimiento[open] summary::after {
+    content: " ▲";
 }
 
 .form-group {
