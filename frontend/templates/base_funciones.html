@@ -5,8 +5,9 @@
 {% endblock %}
 
 {% block menu_secundario %}
-    <nav class="menu-secundario" aria-label="Secciones de funciones">
-        <a href="{{ url_for('funciones_front.pagina_funciones') }}">Funciones</a>
-        <a href="{{ url_for('funciones_front.admin_funciones') }}">Administrar funciones</a>
+    <nav class="menu-secundario menu-secundario-funciones" aria-label="Secciones">
+        <a href="{{ url_for('peliculas_front.lista') }}">Cartelera</a>
+        <a href="{{ url_for('peliculas_front.inicio') }}#promociones">Promociones</a>
+        <a href="{{ url_for('peliculas_front.inicio') }}#productos">Productos</a>
     </nav>
 {% endblock %}
