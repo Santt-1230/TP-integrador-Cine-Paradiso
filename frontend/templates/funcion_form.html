@@ -19,9 +19,19 @@
         <label>ID de película
             <input type="number" name="id_pelicula" min="1" required value="{{ funcion.id_pelicula if funcion else '' }}">
         </label>
-        <label>ID de sala
-            <input type="number" name="id_sala" min="1" required value="{{ funcion.id_sala if funcion else '' }}">
+        <label>Sala activa
+            <select name="id_sala" required>
+                <option value="">Elegí una sala</option>
+                {% for sala in salas %}
+                <option value="{{ sala.id_sala }}" {% if funcion and funcion.id_sala == sala.id_sala %}selected{% endif %}>
+                    {{ sala.nombre_local }} · Sala {{ sala.numero_sala }}
+                </option>
+                {% endfor %}
+            </select>
         </label>
+        {% if not salas %}
+        <p class="mensaje-error">No hay salas activas disponibles para programar una función.</p>
+        {% endif %}
         <label>Fecha y hora de inicio
             <input type="datetime-local" name="fecha_hora_inicio" required value="{{ inicio }}">
         </label>
