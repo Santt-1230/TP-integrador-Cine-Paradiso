@@ -5,26 +5,6 @@ import api
 funciones_front_bp = Blueprint("funciones_front", __name__)
 
 
-def obtener_salas_activas():
-    estado, respuesta = api.pedir("GET", "/api/locales")
-    if estado != 200:
-        return [], api.mensaje_error(respuesta)
-
-    salas = []
-    for local in respuesta.get("locales", []):
-        estado, datos = api.pedir(
-            "GET", f"/api/locales/{local['id_local']}/salas"
-        )
-        if estado != 200:
-            return [], api.mensaje_error(datos)
-
-        for sala in datos.get("salas", []):
-            sala["nombre_local"] = local["nombre"]
-            salas.append(sala)
-
-    return salas, None
-
-
 
 
 @funciones_front_bp.route("/funciones", methods=["GET"])
@@ -44,6 +24,11 @@ def pagina_butacas(id_funcion):
         "GET", f"/api/funciones/{id_funcion}/butacas"
     )
     butacas = datos.get("butacas", []) if estado == 200 else []
+    cantidad_columnas = max(
+        (sum(1 for butaca in butacas if butaca.get("fila") == fila)
+         for fila in {butaca.get("fila") for butaca in butacas}),
+        default=0,
+    )
     error = None if estado == 200 else api.mensaje_error(datos)
     return render_template(
         "funcion_butacas.html", id_funcion=id_funcion, butacas=butacas,
@@ -58,10 +43,6 @@ def admin_funciones():
     estado, datos = api.pedir(
         "GET", "/api/funciones", params={"incluir_canceladas": "true"}
     )
-    redireccion = api.verificar_estado(estado)
-    if redireccion:
-        return redireccion
-
     funciones = datos.get("funciones", []) if estado == 200 else []
     error = None if estado == 200 else api.mensaje_error(datos)
     return render_template(
@@ -83,16 +64,10 @@ def admin_nueva_funcion():
         estado, respuesta = api.pedir(
             "POST", "/api/funciones", datos=datos
         )
-        redireccion = api.verificar_estado(estado)
-        if redireccion:
-            return redireccion
         if estado == 201:
             return redirect(url_for("funciones_front.admin_funciones"))
         error = api.mensaje_error(respuesta)
 
-    salas, error_salas = obtener_salas_activas()
-    if error is None:
-        error = error_salas
     return render_template(
         "funcion_form.html", funcion=None, error=error
     )
@@ -115,27 +90,18 @@ def admin_editar_funcion(id_funcion):
         estado, respuesta = api.pedir(
             "PATCH", f"/api/funciones/{id_funcion}", datos=datos
         )
-        redireccion = api.verificar_estado(estado)
-        if redireccion:
-            return redireccion
         if estado == 200:
             return redirect(url_for("funciones_front.admin_funciones"))
         error = api.mensaje_error(respuesta)
 
-    estado, respuesta = api.pedir(
+    estado, respuesta = api.pedir_api(
         "GET", f"/api/funciones/{id_funcion}"
     )
-    redireccion = api.verificar_estado(estado)
-    if redireccion:
-        return redireccion
     if estado == 200:
         funcion = respuesta.get("funcion")
     elif error is None:
         error = api.mensaje_error(respuesta)
 
-    salas, error_salas = obtener_salas_activas()
-    if error is None:
-        error = error_salas
     return render_template(
         "funcion_form.html", funcion=funcion, error=error
     )
@@ -147,9 +113,6 @@ def admin_cancelar_funcion(id_funcion):
     estado, respuesta = api.pedir(
         "PATCH", f"/api/funciones/{id_funcion}", datos={"estado": "cancelada"}
     )
-    redireccion = api.verificar_estado(estado)
-    if redireccion:
-        return redireccion
     if estado != 200:
         return render_template(
             "admin_funciones.html", funciones=[],
