@@ -7,8 +7,6 @@ import api
 funciones_front_bp = Blueprint("funciones_front", __name__)
 
 
-<<<<<<< HEAD
-=======
 def datos_formulario_funcion(filtros=None):
     filtros = filtros or {}
 
@@ -102,7 +100,6 @@ def datos_formulario_funcion(filtros=None):
         "funciones_consultadas": criterios_completos,
         "error_opciones": "; ".join(errores) if errores else None,
     }
->>>>>>> origin/feature/funciones
 
 
 @funciones_front_bp.route("/funciones", methods=["GET"])
