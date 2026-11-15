@@ -34,12 +34,62 @@ def desactivar_butacas(cursor, ids_butacas):
         parametros.append(id_butaca)
     cursor.execute(sql, parametros)
 
-def quitar_butacas(cursor, id_sala, cantidad):
-    ids_butacas = obtener_butacas_a_quitar(cursor, id_sala, cantidad)
-    if validar_disponibilidad_futura(cursor, ids_butacas):
+def cambiar_estado_butacas(cursor, ids_butacas, estado):
+    valores = ', '.join(['%s'] * len(ids_butacas))
+    sql = 'UPDATE butacas SET estado = %s' f'WHERE id_butaca IN ({valores})'
+    parametros = [estado]
+    for id_butaca in ids_butacas:
+        parametros.append(id_butaca)
+
+    cursor.execute(sql, tuple(parametros))
+
+def armar_asientos(filas):
+    asientos = set()
+    for item in filas:
+        for numero in range(1, item['capacidad'] + 1):
+            asientos.add((item['fila'],numero))
+    return asientos
+
+def sincronizar_butacas(cursor, id_sala, filas):
+    deseados = armar_asientos(filas)
+    sql = 'SELECT id_butaca, fila, numero, estado FROM butacas WHERE id_sala = %s FOR UPDATE'
+
+    cursor.execute(sql, (id_sala,))
+    existentes = {}
+    for butaca in cursor.fetchall():
+        existentes[(butaca['fila'], butaca['numero'])] = butaca
+
+    a_desactivar = []
+    a_reactivar = []
+    a_crear = []
+
+    for asiento, butaca in existentes.items():
+        if asiento not in deseados and butaca['estado'] == 'activa':
+            a_desactivar.append(butaca['id_butaca'])
+        if asiento in deseados and butaca['estado'] == 'inactiva':
+            a_reactivar.append(butaca['id_butaca'])
+
+    for asiento in deseados:
+        if asiento not in existentes:
+            a_crear.append(asiento)
+
+    if a_desactivar and validar_disponibilidad_futura(cursor, a_desactivar):
         return False
-    desactivar_butacas(cursor, ids_butacas)
+
+    if a_desactivar:
+        cambiar_estado_butacas(cursor, a_desactivar, 'inactiva')
+    if a_reactivar:
+        cambiar_estado_butacas(cursor, a_reactivar, 'activa')
+
+    sql = 'INSERT INTO butacas (id_sala, fila, numero) VALUES (%s, %s, %s)'
+    parametros = (id_sala, fila, numero)
+
+    for fila, numero in sorted(a_crear):
+        cursor.execute(sql, parametros)
+
     return True
+
+
 
 def reactivar_butacas(cursor, id_sala, cantidad):
     sql = 'SELECT id_butaca FROM butacas WHERE id_sala = %s' \
@@ -72,14 +122,19 @@ def existe_sala_editar(id_local, numero_sala, id_sala):
 def listar_salas_por_local(id_local = None, estado = None)->list[dict]:
     sql = 'SELECT s.* , l.nombre AS nombre_local FROM salas s ' \
     'INNER JOIN locales l ON l.id_local = s.id_local'
+    condiciones = []
     parametros = []
 
+
     if id_local is not None:
-        sql += ' WHERE s.id_local = %s'
+        condiciones.append('s.id_local = %s')
         parametros.append(id_local)
     if estado is not None:
-        sql += ' WHERE s.estado = %s'
+        condiciones.append('s.estado = %s')
         parametros.append(estado)
+    
+    if condiciones:
+        sql += ' WHERE ' + ' AND '.join(condiciones)
     sql += ' ORDER BY s.id_local, s.numero_sala'
     return ejecutar_consulta(sql, tuple(parametros))
 
@@ -123,44 +178,22 @@ def obtener_butacas(id_sala:int) -> list[dict]:
     return ejecutar_consulta(sql, (id_sala,))
 
     
-def ajustar_butacas(cursor, id_sala, capacidad_nueva):
-    sql = 'SELECT capacidad FROM salas WHERE id_sala = %s FOR UPDATE'
-    cursor.execute(sql, (id_sala,))
-    sala = cursor.fetchone()
-
-    capacidad_anterior = sala['capacidad']
-    diferencia = capacidad_nueva - capacidad_anterior
-
-    if diferencia > 0:
-        reactivadas = reactivar_butacas(cursor, id_sala, diferencia)
-        faltan = diferencia - reactivadas
-
-        if faltan > 0:
-            sql = 'SELECT COUNT(*) AS total FROM butacas WHERE id_sala = %s'
-            cursor.execute(sql, (id_sala,))
-            total_existentes = cursor.fetchone()['total']
-            insertar_butacas(id_sala, faltan, cursor=cursor, inicio=total_existentes)
-        
-        return True
-
-    
-    if diferencia < 0:
-        return quitar_butacas(cursor, id_sala, abs(diferencia))
-
-    return True
-
 def actualizar_sala(id_sala, cambios):
     with transaccion() as cursor:
-        if 'capacidad' in cambios:
-            ajustar_butacas(cursor, id_sala, cambios['capacidad'])
-    campos = []
-    parametros = []
-    for campo, valor in cambios.items():
-        campos.append(f"{campo} = %s")
-        parametros.append(valor)
-    parametros.append(id_sala)
-    sql = f"UPDATE salas SET {', '.join(campos)} WHERE id_sala = %s"
-    ejecutar_mutacion(sql, tuple(parametros))
+        if 'filas' in cambios:
+            filas = cambios.pop('filas')
+            if not sincronizar_butacas(cursor, id_sala, filas):
+                return None
+            cambios['capacidad'] = sum(item['cantidad'] for item in filas)
+
+        campos = []
+        parametros = []
+        for campo, valor in cambios.items():
+            campos.append(f"{campo} = %s")
+            parametros.append(valor)
+        parametros.append(id_sala)
+        sql = f"UPDATE salas SET {', '.join(campos)} WHERE id_sala = %s"
+        cursor.execute(sql, tuple(parametros))
     return listar_sala_por_id(id_sala)
 
 def desactivar_sala(id_sala):

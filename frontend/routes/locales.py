@@ -95,18 +95,18 @@ def admin_locales():
         if estado_respuesta:
             return estado_respuesta
         if estado != 200:
+            error = api.mensaje_error(datos_respuesta)
             locales = []
         else:
             salas = datos_respuesta.get('salas', [])
             salas_configuradas = len(salas)
-
+            butacas_por_local = datos_respuesta.get('butacas_por_local', {})
             for local in locales:
                 local['salas'] = []
-                local['total_butacas'] = 0
                 for sala in salas:
                     if sala['id_local'] == local['id_local']:
                         local['salas'].append(sala)
-                        local['total_butacas'] += sala['capacidad']
+                    local['total_butacas'] = butacas_por_local.get(str(local['id_local']), 0)
 
             if filtro_local is not None:
                 locales = [l for l in locales if l['id_local'] == filtro_local]

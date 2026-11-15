@@ -18,7 +18,11 @@ def obtener_salas():
         return jsonify(resultado), 200
 
     except ValueError as error:
-        return jsonify(error.args[0]), 400
+        respuesta = error.args[0]
+        codigo = respuesta['errors'][0]['code']
+        if codigo == const.ERROR_CODE_LOCAL_NOT_FOUND:
+            return jsonify(respuesta), 404
+        return jsonify(respuesta), 400
     
     except (RuntimeError, mysql.connector.Error):
         return jsonify(ut.construir_error_db()), 500

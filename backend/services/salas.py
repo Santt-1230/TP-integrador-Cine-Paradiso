@@ -16,13 +16,22 @@ def validar_programacion_sala(id_sala):
 def listar_salas(id_local=None, estado=None):
     if id_local is not None:
         id_local = salas_validator.validar_id_local(id_local)
+        local = locales_repository.obtener_local_id(id_local)
+        if local is None:
+            raise ValueError(ut.construir_error_api(
+                code=const.ERROR_CODE_LOCAL_NOT_FOUND,
+                message='Local no encontrado',
+                description=f"No existe un Local con el id '{id_local}'"
+            ))
     estado = salas_validator.validar_filtro_estado(estado)
     salas = salas_repository.listar_salas_por_local(id_local, estado)
 
     butacas_por_local = {}
     for sala in salas:
         id_del_local = sala['id_local']
-        butacas_por_local[id_del_local] = butacas_por_local.get(id_del_local, 0) + sala['capacidad']
+        if id_del_local not in butacas_por_local:
+            butacas_por_local[id_del_local] = 0
+        butacas_por_local[id_del_local] += sala['capacidad']
 
     return {'salas':salas, 'salas_configuradas':len(salas), 'butacas_por_local':butacas_por_local,}
 
@@ -74,7 +83,7 @@ def actualizar_sala(id_sala, datos):
             description=f"No existe una sala con el ID '{id_sala}'."
         ))
     for campo in list(cambios):
-        if sala[campo] == cambios[campo]:
+        if campo != 'filas' and sala[campo] == cambios[campo]:
             del cambios[campo]
     if not cambios:
         raise ValueError(ut.construir_error_api(

@@ -71,10 +71,18 @@
                                         <form method="post" 
                                             action="{{ url_for('salas.desactivar_sala', id_sala=sala.id_sala) }}"
                                             data-numero-sala="{{ sala.numero_sala }}">
-                                            <input type="hidden" name="estado" value="{{ filtro_estado }}">
                                             <button type="submit" class="boton-tabla boton-tabla--baja">Dar de baja</button>
+                                            <input type="hidden" name="estado" value="{{ filtro_estado }}">
                                         </form>
-                                    {% endif %}
+                                    {% else %}        
+                                        <form method="post" 
+                                            action="{{ url_for('salas.editar_sala', id_sala=sala.id_sala) }}"
+                                            data-numero-sala="{{ sala.numero_sala }}">
+                                            <input type="hidden" name="nuevo_estado" value="activa">
+                                            <input type="hidden" name="estado" value="{{ filtro_estado }}">
+                                            <button type="submit" class="boton boton-tabla--activar">Activar</button>
+                                        </form>           
+                                    {% endif %}      
                                 </div>
                             </td>
                         </tr>
