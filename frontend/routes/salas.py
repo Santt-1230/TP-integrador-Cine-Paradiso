@@ -4,8 +4,8 @@ import api
 salas_bp = Blueprint('salas', __name__)
 
 CAMPOS_NUEVA_SALA = ['id_local', 'numero_sala', 'capacidad']
-CAMPOS_EDITAR_SALA = ['numero_sala', 'estado']
-CAMPOS_ENTEROS_SALA = ['numero_sala']
+CAMPOS_EDITAR_SALA = ['numero_sala', 'estado', 'capacidad']
+CAMPOS_ENTEROS_SALA = ['numero_sala', 'capacidad']
 
 
 def leer_formulario(campos):
@@ -73,7 +73,7 @@ def editar_sala(id_sala):
         datos_back = convertir_a_enteros(datos, CAMPOS_ENTEROS_SALA)
     
     except ValueError:
-        error = 'El numero de sala tiene que ser un numero'
+        error = 'El numero de sala y la capacidad tienen que ser numeros'
         return render_template('admin_editar_sala.html', datos = datos, id_sala = id_sala, error = error)
 
     estado, datos_respuesta = api.pedir('PATCH', f'/api/salas/{id_sala}', datos_back)
