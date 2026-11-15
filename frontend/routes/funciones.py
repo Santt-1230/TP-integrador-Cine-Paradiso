@@ -104,12 +104,33 @@ def datos_formulario_funcion(filtros=None):
 
 @funciones_front_bp.route("/funciones", methods=["GET"])
 def pagina_funciones():
-    estado, datos = api.pedir_api("GET", "/api/funciones", params=request.args)
+    filtros = {
+        campo: request.args.get(campo, "")
+        for campo in ("pelicula_id", "local_id", "fecha")
+    }
+    parametros_api = {campo: valor for campo, valor in filtros.items() if valor}
+
+    estado, datos = api.pedir_api("GET", "/api/funciones", params=parametros_api)
     funciones = datos.get("funciones", []) if estado == 200 else []
     error = None if estado == 200 else api.mensaje_error(datos)
+
+    estado_peliculas, datos_peliculas = api.pedir_api("GET", "/api/peliculas")
+    peliculas = datos_peliculas.get("peliculas", []) if estado_peliculas == 200 else []
+    estado_locales, datos_locales = api.pedir_api("GET", "/api/locales")
+    locales = datos_locales.get("locales", []) if estado_locales == 200 else []
+
+    if error is None and estado_peliculas != 200:
+        error = api.mensaje_error(datos_peliculas)
+    if error is None and estado_locales != 200:
+        error = api.mensaje_error(datos_locales)
+
     return render_template(
-        "funciones.html", funciones=funciones, filtros=request.args,
-        error=error
+        "funciones.html",
+        funciones=funciones,
+        peliculas=peliculas,
+        locales=locales,
+        filtros=filtros,
+        error=error,
     )
 
 
@@ -131,8 +152,13 @@ def pagina_butacas(id_funcion):
 @funciones_front_bp.route("/admin/funciones", methods=["GET"])
 @api.admin_front_requerido
 def admin_funciones():
+    local_id = request.args.get("local_id", "")
+    filtros = {"incluir_canceladas": "true"}
+    if local_id:
+        filtros["local_id"] = local_id
+
     estado, datos = api.pedir(
-        "GET", "/api/funciones", params={"incluir_canceladas": "true"}
+        "GET", "/api/funciones", params=filtros
     )
     redireccion = api.verificar_estado(estado)
     if redireccion:
@@ -140,8 +166,17 @@ def admin_funciones():
 
     funciones = datos.get("funciones", []) if estado == 200 else []
     error = None if estado == 200 else api.mensaje_error(datos)
+    estado_locales, datos_locales = api.get("/api/locales")
+    locales = datos_locales.get("locales", []) if estado_locales == 200 else []
+    if estado_locales != 200 and error is None:
+        error = api.mensaje_error(datos_locales)
+
     return render_template(
-        "admin_funciones.html", funciones=funciones, error=error
+        "admin_funciones.html",
+        funciones=funciones,
+        locales=locales,
+        local_id=local_id,
+        error=error,
     )
 
 
@@ -251,4 +286,20 @@ def admin_cancelar_funcion(id_funcion):
             "admin_funciones.html", funciones=[],
             error=api.mensaje_error(respuesta)
         )
+    return redirect(url_for("funciones_front.admin_funciones"))
+
+
+@funciones_front_bp.route("/admin/funciones/<int:id_funcion>/eliminar", methods=["POST"])
+@api.admin_front_requerido
+def admin_eliminar_funcion(id_funcion):
+    estado, respuesta = api.pedir("DELETE", f"/api/funciones/{id_funcion}")
+    redireccion = api.verificar_estado(estado)
+    if redireccion:
+        return redireccion
+
+    if estado == 200:
+        api.flash("La función cancelada se eliminó correctamente", "success")
+    else:
+        api.flash(api.mensaje_error(respuesta), "error")
+
     return redirect(url_for("funciones_front.admin_funciones"))
