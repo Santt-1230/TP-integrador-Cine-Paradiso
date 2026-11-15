@@ -19,7 +19,7 @@ def obtener_butacas_a_quitar(cursor, id_sala, cantidad):
 def validar_disponibilidad_futura(cursor, ids_butacas):
     valores = ', '.join(['%s'] * len(ids_butacas))
 
-    sql = "SELECT COUNT(*) AS cantidad FROM entradas e JOIN funciones f ON f.id_funcion = e.id_funcion" \
+    sql = "SELECT COUNT(*) AS cantidad FROM entradas e JOIN funciones f ON f.id_funcion = e.id_funcion " \
     f'WHERE e.id_butaca IN ({valores})' "AND f.fecha_hora_inicio > NOW()" \
     " AND f.estado = 'programada' AND e.estado IN ('reservada', 'confirmada')"
     cursor.execute(sql, tuple(ids_butacas))
@@ -29,7 +29,7 @@ def validar_disponibilidad_futura(cursor, ids_butacas):
 def desactivar_butacas(cursor, ids_butacas):
     valores = ', '.join(['%s'] * len(ids_butacas))
     sql = 'UPDATE butacas SET estado = %s' f'WHERE id_butaca IN ({valores})'
-    parametros = ['inaciva']
+    parametros = ['inactiva']
     for id_butaca in ids_butacas:
         parametros.append(id_butaca)
     cursor.execute(sql, parametros)
@@ -47,17 +47,16 @@ def reactivar_butacas(cursor, id_sala, cantidad):
     cursor.execute(sql, (id_sala, 'inactiva', cantidad))
 
     butacas = cursor.fetchall()
-    ids_butacas = [butaca['ids_butaca'] for butaca in butacas]
+    ids_butacas = [butaca['id_butaca'] for butaca in butacas]
 
     if ids_butacas:
         valores = ', '.join(['%s'] * len(ids_butacas))
-        sql = 'UPDATE butacas SET estado = %s'
-        f'WHERE id_butaca = IN ({valores})'
+        sql = 'UPDATE butacas SET estado = %s ' f'WHERE id_butaca IN ({valores})'
         parametros = ['activa']
         for id_butaca in ids_butacas:
             parametros.append(id_butaca)
 
-        cursor.execute(sql, parametros)
+        cursor.execute(sql, tuple(parametros))
     return len(ids_butacas)
 
 def existe_sala_crear(id_local, numero_sala):
@@ -70,15 +69,19 @@ def existe_sala_editar(id_local, numero_sala, id_sala):
     parametros = (id_local, numero_sala, id_sala)
     return bool(ejecutar_consulta(sql, parametros))
 
-def listar_salas_por_local(id_local = None)->list[dict]:
+def listar_salas_por_local(id_local = None, estado = None)->list[dict]:
     sql = 'SELECT s.* , l.nombre AS nombre_local FROM salas s ' \
     'INNER JOIN locales l ON l.id_local = s.id_local'
-    parametros = ()
+    parametros = []
+
     if id_local is not None:
-        sql += " WHERE s.id_local = %s"
-        parametros = (id_local, )
-    sql += " ORDER BY s.id_local, s.numero_sala"
-    return ejecutar_consulta(sql, parametros)
+        sql += ' WHERE s.id_local = %s'
+        parametros.append(id_local)
+    if estado is not None:
+        sql += ' WHERE s.estado = %s'
+        parametros.append(estado)
+    sql += ' ORDER BY s.id_local, s.numero_sala'
+    return ejecutar_consulta(sql, tuple(parametros))
 
 def listar_sala_por_id(id_sala: int)-> dict | None:
     sql = 'SELECT * FROM salas WHERE id_sala = %s'

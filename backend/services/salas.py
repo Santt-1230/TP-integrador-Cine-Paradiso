@@ -13,10 +13,18 @@ def validar_programacion_sala(id_sala):
             description=f"La sala '{id_sala}' tiene {len(funciones)} funciones programadas"
         ))
 
-def listar_salas(id_local=None):
+def listar_salas(id_local=None, estado=None):
     if id_local is not None:
         id_local = salas_validator.validar_id_local(id_local)
-    return salas_repository.listar_salas_por_local(id_local)
+    estado = salas_validator.validar_filtro_estado(estado)
+    salas = salas_repository.listar_salas_por_local(id_local, estado)
+
+    butacas_por_local = {}
+    for sala in salas:
+        id_del_local = sala['id_local']
+        butacas_por_local[id_del_local] = butacas_por_local.get(id_del_local, 0) + sala['capacidad']
+
+    return {'salas':salas, 'salas_configuradas':len(salas), 'butacas_por_local':butacas_por_local,}
 
 def listar_sala_id(id_sala):
     id_sala = salas_validator.validar_id_sala(id_sala)

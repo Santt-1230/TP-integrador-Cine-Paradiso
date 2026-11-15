@@ -30,6 +30,21 @@ def validar_capacidad(capacidad)->int:
         ))
 
     return capacidad
+
+def validar_estado(estado)->str:
+    if estado not in ('activa', 'inactiva'):
+        raise ValueError(ut.construir_error_api(
+            code=const.ERROR_CODE_INVALID_PARAMETER,
+            message='Estado invalido',
+            description='El estado debe ser activa o inactiva'
+        ))
+    return estado
+
+def validar_filtro_estado(estado)->str:
+    if estado is None or estado == '':
+        return None
+    return validar_estado(estado)
+
 def validar_actualizacion_sala(datos):
     if not isinstance(datos, dict) or not datos:
         raise ValueError(ut.construir_error_api(
@@ -48,15 +63,9 @@ def validar_actualizacion_sala(datos):
     if 'numero_sala' in datos:
         cambios['numero_sala'] = validar_numero_sala(datos['numero_sala'])
     if 'estado' in datos:
-        if datos['estado'] not in ('activa', 'inactiva'):
-            raise ValueError(ut.construir_error_api(
-                code=const.ERROR_CODE_INVALID_PARAMETER,
-                message='Estado invalido',
-                description='El estado debe ser activa o inactiva'
-            ))
-        cambios['estado'] = datos['estado']
-
+        cambios['estado'] = validar_estado(datos['estado'])
     if 'capacidad' in datos:
         cambios['capacidad'] = validar_capacidad(datos['capacidad'])  
     
     return cambios
+

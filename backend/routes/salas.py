@@ -12,9 +12,10 @@ salas_bp = Blueprint('salas', __name__, url_prefix='/api')
 @ut.admin_requerido
 def obtener_salas():
     id_local = request.args.get('id_local')
+    estado = request.args.get('estado')
     try: 
-        salas = salas_services.listar_salas(id_local)
-        return jsonify({'salas':salas}), 200
+        resultado = salas_services.listar_salas(id_local, estado)
+        return jsonify(resultado), 200
 
     except ValueError as error:
         return jsonify(error.args[0]), 400
