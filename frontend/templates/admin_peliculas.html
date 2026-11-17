@@ -16,6 +16,7 @@
             <h1>Películas</h1>
             <p class="servicios-admin__descripcion">Todo el catálogo: vigentes, próximas, vencidas y dadas de baja.</p>
         </div>
+        <a class="boton-tabla boton-tabla--agregar" href="{{ url_for('admin_peliculas.nueva') }}">+ Agregar película</a>
     </div>
 
     {% if error %}

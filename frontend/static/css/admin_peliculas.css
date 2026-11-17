@@ -35,3 +35,49 @@
     flex: none;
 }
 
+.pelicula-admin__sub {
+    display: block;
+    color: #7b7f8a;
+    font-weight: 400;
+    font-size: 11px;
+}
+
+.pelicula-admin__sinopsis {
+    max-width: 320px;
+    font-size: 12px;
+    color: #5b6575;
+}
+
+.importar-admin {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 210px;
+}
+
+.importar-admin label {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 11px;
+    color: #5b6575;
+}
+
+.importar-admin input {
+    padding: 0.35rem 0.5rem;
+    border: 1px solid #d9dee6;
+    border-radius: 0.35rem;
+    font-family: inherit;
+    font-size: 12px;
+}
+
+.servicios-admin__encabezado .servicios-admin__accion {
+    white-space: nowrap;
+}
+
+.paginacion-admin {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
