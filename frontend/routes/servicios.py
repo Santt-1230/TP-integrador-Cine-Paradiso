@@ -3,7 +3,7 @@ import api
 
 servicios_bp = Blueprint("servicios", __name__)
 
-TIPOS = ("comida", "bebida", "estacionamiento", "vip")
+TIPOS = ("Comida", "Bebida", "Estacionamiento", "VIP")
 
 def redirigir_al_login():
     return redirect(url_for("usuarios.login"))
@@ -52,6 +52,19 @@ def datos_del_formulario():
     }
 
 
+def datos_de_promocion():
+    descripcion = request.form.get("descripcion", "").strip()
+    return {
+        "nombre": request.form.get("nombre", "").strip(),
+        "descripcion": descripcion or None,
+        "imagen_url": request.form.get("imagen_url", "").strip(),
+        "vigente_desde": request.form.get("vigente_desde", ""),
+        "vigente_hasta": request.form.get("vigente_hasta", ""),
+        "activa": "activa" in request.form,
+    }
+
+
+
 @servicios_bp.route("/servicios")
 def servicios():
     estado_productos, productos = api.pedir("GET", "/api/servicios")
@@ -61,7 +74,7 @@ def servicios():
         error = api.mensaje_error(productos)
         productos = []
     if estado_promociones != 200:
-        error = api.mensaje_error(promociones)
+        error = error or api.mensaje_error(promociones)
         promociones = []
     return render_template("servicios.html", productos=productos, promociones=promociones, error=error)
 
@@ -71,13 +84,22 @@ def admin_servicios():
     respuesta = verificar_admin()
     if respuesta:
         return respuesta
-    estado, datos_respuesta = api.pedir("GET", "/api/servicios", params={"incluir_inactivos": "true"})
+    error = None
+    estado, servicios = api.pedir("GET", "/api/servicios", params={"incluir_inactivos": "true"})
     respuesta = verificar_estado(estado)
     if respuesta:
         return respuesta
     if estado != 200:
-        return render_template("admin_servicios.html", servicios=[], error=api.mensaje_error(datos_respuesta))
-    return render_template("admin_servicios.html", servicios=datos_respuesta)
+        error = api.mensaje_error(servicios)
+        servicios = []
+    estado, promociones = api.pedir("GET", "/api/promociones", params={"incluir_inactivas": "true"})
+    respuesta = verificar_estado(estado)
+    if respuesta:
+        return respuesta
+    if estado != 200:
+        error = error or api.mensaje_error(promociones)
+        promociones = []
+    return render_template("admin_servicios.html", servicios=servicios, promociones=promociones, error=error)
 
 
 @servicios_bp.route("/admin/servicios/<int:id_producto>/dar-de-baja", methods=["POST"])
@@ -149,4 +171,76 @@ def admin_servicio_editar(id_producto):
         datos["id_producto"] = id_producto
         return render_template("admin_servicio_form.html", servicio=datos, tipos=TIPOS,
                                error=api.mensaje_error(datos_respuesta))
+    return redirigir_al_listado()
+
+
+@servicios_bp.route("/admin/promociones/nueva", methods=["GET", "POST"])
+def admin_promocion_nueva():
+    respuesta = verificar_admin()
+    if respuesta:
+        return respuesta
+    if request.method == "GET":
+        return render_template("admin_promocion_form.html", promocion={})
+    datos = datos_de_promocion()
+    estado, datos_respuesta = api.pedir("POST", "/api/promociones", datos)
+    respuesta = verificar_estado(estado)
+    if respuesta:
+        return respuesta
+    if estado != 201:
+        return render_template("admin_promocion_form.html", promocion=datos,
+                               error=api.mensaje_error(datos_respuesta))
+    return redirigir_al_listado()
+
+
+@servicios_bp.route("/admin/promociones/<int:id_promocion>/editar", methods=["GET", "POST"])
+def admin_promocion_editar(id_promocion):
+    respuesta = verificar_admin()
+    if respuesta:
+        return respuesta
+    if request.method == "GET":
+        estado, datos_respuesta = api.pedir("GET", f"/api/promociones/{id_promocion}")
+        respuesta = verificar_estado(estado)
+        if respuesta:
+            return respuesta
+        if estado != 200:
+            flash(api.mensaje_error(datos_respuesta), "error")
+            return redirigir_al_listado()
+        return render_template("admin_promocion_form.html", promocion=datos_respuesta)
+    datos = datos_de_promocion()
+    estado, datos_respuesta = api.pedir("PATCH", f"/api/promociones/{id_promocion}", datos)
+    respuesta = verificar_estado(estado)
+    if respuesta:
+        return respuesta
+    if estado != 200:
+        datos["id_promocion"] = id_promocion
+        return render_template("admin_promocion_form.html", promocion=datos,
+                               error=api.mensaje_error(datos_respuesta))
+    return redirigir_al_listado()
+
+
+@servicios_bp.route("/admin/promociones/<int:id_promocion>/dar-de-baja", methods=["POST"])
+def admin_promocion_dar_de_baja(id_promocion):
+    respuesta = verificar_admin()
+    if respuesta:
+        return respuesta
+    estado, datos_respuesta = api.pedir("DELETE", f"/api/promociones/{id_promocion}")
+    respuesta = verificar_estado(estado)
+    if respuesta:
+        return respuesta
+    if estado != 200:
+        flash(api.mensaje_error(datos_respuesta), "error")
+    return redirigir_al_listado()
+
+
+@servicios_bp.route("/admin/promociones/<int:id_promocion>/activar", methods=["POST"])
+def admin_promocion_activar(id_promocion):
+    respuesta = verificar_admin()
+    if respuesta:
+        return respuesta
+    estado, datos_respuesta = api.pedir("PATCH", f"/api/promociones/{id_promocion}", {"activa": True})
+    respuesta = verificar_estado(estado)
+    if respuesta:
+        return respuesta
+    if estado != 200:
+        flash(api.mensaje_error(datos_respuesta), "error")
     return redirigir_al_listado()

@@ -1,0 +1,54 @@
+{% extends "base_admin.html" %}
+
+{% block contenido_admin  %}
+<div class="servicios-admin">
+
+    <div class="servicios-admin__encabezado">
+        <div>
+            <p class="servicios-admin__migas">Administración / Servicios / Promociones</p>
+            <h1>{{ 'Editar promoción' if promocion.id_promocion else 'Nueva promoción' }}</h1>
+        </div>
+    </div>
+
+    {% if error %}
+        <p class="servicios-admin__error">{{ error }}</p>
+    {% endif %}
+
+    <form method="post" class="formulario-admin">
+        <div class="campo-formulario">
+            <label for="nombre">Nombre</label>
+            <input id="nombre" type="text" name="nombre" value="{{ promocion.nombre or '' }}" required>
+        </div>
+
+        <div class="campo-formulario">
+            <label for="descripcion">Descripción</label>
+            <input id="descripcion" type="text" name="descripcion" value="{{ promocion.descripcion or '' }}">
+        </div>
+
+        <div class="campo-formulario">
+            <label for="imagen_url">Imagen (URL o ruta)</label>
+            <input id="imagen_url" type="text" name="imagen_url" value="{{ promocion.imagen_url or '' }}" required>
+        </div>
+
+        <div class="campo-formulario">
+            <label for="vigente_desde">Vigente desde</label>
+            <input id="vigente_desde" type="date" name="vigente_desde" value="{{ promocion.vigente_desde or '' }}" required>
+        </div>
+
+        <div class="campo-formulario">
+            <label for="vigente_hasta">Vigente hasta</label>
+            <input id="vigente_hasta" type="date" name="vigente_hasta" value="{{ promocion.vigente_hasta or '' }}" required>
+        </div>
+
+        <label class="servicios-admin__check">
+            <input type="checkbox" name="activa" {% if promocion.get('activa', True) %}checked{% endif %}>
+            Activa
+        </label>
+
+        <div class="servicios-admin__pie-formulario">
+            <a class="servicios-admin__accion" href="{{ url_for('servicios.admin_servicios') }}">Cancelar</a>
+            <button type="submit" class="servicios-admin__boton">Guardar</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

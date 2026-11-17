@@ -1,4 +1,4 @@
-TIPOS_VALIDOS = ("comida", "bebida", "estacionamiento", "vip")
+TIPOS_VALIDOS = ("Comida", "Bebida", "Estacionamiento", "VIP")
 
 def validar(datos, es_creacion):
     if not isinstance(datos, dict):
@@ -11,7 +11,7 @@ def validar(datos, es_creacion):
 
     if es_creacion or "tipo" in datos:
         if datos.get("tipo") not in TIPOS_VALIDOS:
-            return "El tipo debe ser: comida, bebida, estacionamiento o vip"
+            return "El tipo debe ser: Comida, Bebida, Estacionamiento o VIP"
 
     if es_creacion or "precio" in datos:
         precio = datos.get("precio")

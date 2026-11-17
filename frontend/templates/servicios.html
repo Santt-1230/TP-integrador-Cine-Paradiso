@@ -20,9 +20,9 @@
         {% for promo in promociones %}
         <article class="promo">
             {% if promo.imagen_url %}
-                <img src="{{ promo.imagen_url }}"
-                     alt="{{ promo.nombre }}"
-                     loading="lazy">
+                <img class="servicios-cliente__imagen"
+                     src="{{ promo.imagen_url }}"
+                     alt="{{ promo.nombre }}">
             {% endif %}
 
             <h3>{{ promo.nombre }}</h3>
