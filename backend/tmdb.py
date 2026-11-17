@@ -48,6 +48,21 @@ def detalle(id_tmdb):
     return _get(f"/movie/{id_tmdb}", append_to_response="release_dates")
 
 
+# Generos de TMDB (por su id, que no cambia) con el nombre en español que usa el sitio.
+GENEROS_ES = {
+    28: "Acción", 12: "Aventura", 16: "Animación", 35: "Comedia", 80: "Crimen",
+    99: "Documental", 18: "Drama", 10751: "Familia", 14: "Fantasía", 36: "Historia",
+    27: "Terror", 10402: "Música", 9648: "Misterio", 10749: "Romance",
+    878: "Ciencia ficción", 10770: "Película de TV", 53: "Suspense", 10752: "Bélica",
+    37: "Western",
+}
+
+
+def nombre_genero(genero):
+    """Nombre en español de un genero de TMDB ({"id":..., "name":...}). Si no esta en la tabla, usa el de TMDB."""
+    return GENEROS_ES.get(genero.get("id")) or (genero.get("name") or "").strip()
+
+
 def url_poster(path):
     return f"{IMG}{path}" if path else None
 
