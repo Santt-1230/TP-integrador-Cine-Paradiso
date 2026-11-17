@@ -7,6 +7,24 @@ import api
 funciones_front_bp = Blueprint("funciones_front", __name__)
 
 
+def fecha_hora_legible(valor):
+    try:
+        return datetime.fromisoformat(valor).strftime("%d/%m/%Y %H:%M")
+    except (TypeError, ValueError):
+        return valor or "Horario no disponible"
+
+
+def agregar_horarios_legibles(funciones):
+    for funcion in funciones:
+        funcion["inicio_legible"] = fecha_hora_legible(
+            funcion.get("fecha_hora_inicio")
+        )
+        funcion["fin_legible"] = fecha_hora_legible(
+            funcion.get("fecha_hora_fin")
+        )
+    return funciones
+
+
 def datos_formulario_funcion(filtros=None):
     filtros = filtros or {}
 
@@ -81,16 +99,7 @@ def datos_formulario_funcion(filtros=None):
     estado, respuesta = respuestas["funciones"]
     funciones_existentes = respuesta.get("funciones", []) if estado == 200 else []
 
-    for funcion in funciones_existentes:
-        for campo, salida in (
-            ("fecha_hora_inicio", "inicio_legible"),
-            ("fecha_hora_fin", "fin_legible"),
-        ):
-            valor = funcion.get(campo)
-            try:
-                funcion[salida] = datetime.fromisoformat(valor).strftime("%d/%m/%Y %H:%M")
-            except (TypeError, ValueError):
-                funcion[salida] = valor or "Horario no disponible"
+    agregar_horarios_legibles(funciones_existentes)
 
     return {
         "peliculas": peliculas,
@@ -112,6 +121,7 @@ def pagina_funciones():
 
     estado, datos = api.pedir_api("GET", "/api/funciones", params=parametros_api)
     funciones = datos.get("funciones", []) if estado == 200 else []
+    agregar_horarios_legibles(funciones)
     error = None if estado == 200 else api.mensaje_error(datos)
 
     estado_peliculas, datos_peliculas = api.pedir_api("GET", "/api/peliculas")
@@ -165,6 +175,7 @@ def admin_funciones():
         return redireccion
 
     funciones = datos.get("funciones", []) if estado == 200 else []
+    agregar_horarios_legibles(funciones)
     error = None if estado == 200 else api.mensaje_error(datos)
     estado_locales, datos_locales = api.get("/api/locales")
     locales = datos_locales.get("locales", []) if estado_locales == 200 else []

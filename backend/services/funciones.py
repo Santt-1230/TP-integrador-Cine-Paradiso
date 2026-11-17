@@ -15,7 +15,14 @@ def serializar_funcion(funcion):
     return funcion
 
 
+def actualizar_estados_funciones_vencidas():
+    """Finaliza las funciones programadas cuyo horario ya terminó."""
+    funciones_repository.finalizar_funciones_vencidas()
+
+
 def listar_funciones(filtros, incluir_canceladas=False):
+    actualizar_estados_funciones_vencidas()
+
     pelicula_id = filtros.get("pelicula_id")
     local_id = filtros.get("local_id")
     id_sala = filtros.get("id_sala")
@@ -46,12 +53,22 @@ def listar_funciones_por_sala(id_sala, incluir_canceladas=False):
     )
 
 
+def listar_funciones_por_local(id_local, incluir_canceladas=False):
+    """Lista las funciones de un local sin pedir otros filtros."""
+    id_local = funciones_validator.validar_id(id_local, "local_id")
+    return listar_funciones(
+        {"local_id": id_local}, incluir_canceladas=incluir_canceladas
+    )
+
+
 def obtener_funcion(id_funcion):
+    actualizar_estados_funciones_vencidas()
     id_funcion = funciones_validator.validar_id(id_funcion, "id_funcion")
     return serializar_funcion(funciones_repository.obtener_funcion(id_funcion))
 
 
 def obtener_butacas(id_funcion):
+    actualizar_estados_funciones_vencidas()
     id_funcion = funciones_validator.validar_id(id_funcion, "id_funcion")
     funcion = funciones_repository.obtener_funcion(id_funcion)
     if funcion is None:
@@ -95,6 +112,7 @@ def crear_funcion(datos):
 
 
 def actualizar_funcion(id_funcion, datos):
+    actualizar_estados_funciones_vencidas()
     if not isinstance(datos, dict) or not datos:
         raise ValueError("Envía al menos un campo en formato JSON")
 
@@ -176,6 +194,35 @@ def actualizar_funcion(id_funcion, datos):
     funciones_repository.actualizar_funcion(id_funcion, campos)
     funcion = serializar_funcion(funciones_repository.obtener_funcion(id_funcion))
     return funcion, None
+
+
+def eliminar_funcion(id_funcion):
+    id_funcion = funciones_validator.validar_id(id_funcion, "id_funcion")
+    resultado = funciones_repository.eliminar_funcion_cancelada(id_funcion)
+
+    if resultado == "no_encontrada":
+        return None, (
+            404,
+            "FUNCION_NO_ENCONTRADA",
+            "Función no encontrada",
+            "No existe ese ID de función",
+        )
+    if resultado == "no_cancelada":
+        return None, (
+            409,
+            "FUNCION_NO_CANCELADA",
+            "No se puede eliminar",
+            "Solo se pueden eliminar funciones canceladas",
+        )
+    if resultado == "con_compras":
+        return None, (
+            409,
+            "FUNCION_CON_COMPRAS",
+            "No se puede eliminar",
+            "La función conserva compras en el historial",
+        )
+
+    return True, None
 
 
 def reservar_butacas(datos, id_usuario):
