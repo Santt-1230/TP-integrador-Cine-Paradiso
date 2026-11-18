@@ -74,11 +74,14 @@
                             {{ (p.cartelera_hasta|fecha_ar) if p.cartelera_hasta else 'sin fin' }}
                         </td>
                         <td>
-                            {% if p.estado_cartelera == 'vigente' %}
-                                <span class="estado-admin">Vigente</span>
-                            {% else %}
-                                <span class="estado-admin estado-admin--inactivo">{{ estados.get(p.estado_cartelera, p.estado_cartelera) }}</span>
-                            {% endif %}
+                            <a class="estado-link" href="{{ url_for('admin_peliculas.cambiar_estado', id_pelicula=p.id_pelicula) }}" title="Cambiar el estado">
+                                {% if p.estado_cartelera == 'vigente' %}
+                                    <span class="estado-admin">Vigente</span>
+                                {% else %}
+                                    <span class="estado-admin estado-admin--inactivo">{{ estados.get(p.estado_cartelera, p.estado_cartelera) }}</span>
+                                {% endif %}
+                                <span class="estado-link__cambiar">Cambiar</span>
+                            </a>
                         </td>
                     </tr>
                     {% else %}
