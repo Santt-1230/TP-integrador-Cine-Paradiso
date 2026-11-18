@@ -15,7 +15,17 @@ def finalizar_funciones_vencidas():
     return ejecutar_mutacion(sql)
 
 
+def marcar_funciones_finalizadas():
+    # nada las marca al terminar, así que se actualizan cuando se consultan
+    ejecutar_mutacion(
+        "UPDATE funciones SET estado = 'finalizada' "
+        "WHERE estado = 'programada' AND fecha_hora_fin < NOW()",
+        (),
+    )
+
+
 def listar_funciones(pelicula_id=None, local_id=None, fecha=None, incluir_canceladas=False, id_sala = None):
+    marcar_funciones_finalizadas()
     sql = (
         "SELECT f.id_funcion, f.id_pelicula, p.nombre AS pelicula, "
         "f.id_sala, s.numero_sala, s.id_local, l.nombre AS local, "

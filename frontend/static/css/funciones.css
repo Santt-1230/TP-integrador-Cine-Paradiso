@@ -380,3 +380,65 @@ body:has(main > .funciones-pagina:not(.checkout-pagina)) .footer-links {
         flex-direction: column;
     }
 }
+
+.funcion-centrada > h1,
+.funcion-centrada > .mensaje-error,
+.funcion-centrada > form {
+    max-width: 640px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.formulario-funcion form.funcion-form {
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+    gap: 1.25rem 1.5rem;
+    padding: 1.75rem 1.9rem;
+}
+
+.funcion-form .mensaje-error {
+    grid-column: 1 / -1;
+    margin: 0;
+}
+
+.funcion-form select,
+.funcion-form input[type="datetime-local"],
+.funcion-form input[type="number"] {
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 1rem;
+}
+
+.funcion-form select {
+    padding: .6rem;
+    border: 1px solid #aaa;
+    border-radius: 6px;
+    font-family: inherit;
+}
+
+.funcion-fecha {
+    display: grid;
+    gap: .6rem;
+}
+
+.funcion-form label.funcion-ahora {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+}
+
+.funcion-botones {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: center;
+    gap: .9rem;
+    margin-top: .5rem;
+}
+
+@media (max-width: 560px) {
+    .formulario-funcion form.funcion-form {
+        grid-template-columns: 1fr;
+    }
+}

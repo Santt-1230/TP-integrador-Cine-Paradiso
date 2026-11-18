@@ -245,6 +245,10 @@ a {
     box-shadow: var(--admin-sombra);
 }
 
+.inicio-admin__novedades > h2 {
+    padding-left: 19px;
+}
+
 .inicio-admin__seccion-encabezado {
     display: flex;
     align-items: center;

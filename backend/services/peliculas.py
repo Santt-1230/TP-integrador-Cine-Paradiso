@@ -88,7 +88,7 @@ def importar(datos):
         return None, _con_estado(validador.parametro_invalido(
             "TMDB no informa la duracion de esta pelicula; enviar 'duracion_min' en el pedido"))
 
-    nombres_generos = [n for n in ((g.get("name") or "").strip()[:50] for g in t.get("genres") or []) if n]
+    nombres_generos = [n for n in (tmdb.nombre_genero(g)[:50] for g in t.get("genres") or []) if n]
     try:
         id_pelicula = repo.crear_con_generos(
             id_externo, nombre[:255], (t.get("overview") or "").strip() or None,
