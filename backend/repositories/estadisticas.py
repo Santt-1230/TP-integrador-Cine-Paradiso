@@ -1,10 +1,19 @@
-from db import ejecutar_consulta
+from db import ejecutar_consulta, ejecutar_mutacion
 from datetime import datetime, timedelta
 
 
 # =========================================================
 # FECHAS
 # =========================================================
+
+def _marcar_funciones_finalizadas():
+    # las estadísticas cuentan solo las finalizadas, y nada las marca al terminar
+    ejecutar_mutacion(
+        "UPDATE funciones SET estado = 'finalizada' "
+        "WHERE estado = 'programada' AND fecha_hora_fin < NOW()",
+        (),
+    )
+
 
 def obtener_fecha_inicio(periodo=30):
 
@@ -225,6 +234,7 @@ def obtener_entradas_vendidas_por_franja(periodo=30):
 # =========================================================
 
 def obtener_ocupacion_por_funcion(id_funcion=None, periodo=30):
+    _marcar_funciones_finalizadas()
 
     fecha_desde = obtener_fecha_inicio(periodo)
 
@@ -300,6 +310,7 @@ def obtener_ocupacion_por_funcion(id_funcion=None, periodo=30):
 # =========================================================
 
 def obtener_ocupacion_por_pelicula(id_pelicula=None, periodo=30):
+    _marcar_funciones_finalizadas()
 
     fecha_desde = obtener_fecha_inicio(periodo)
 

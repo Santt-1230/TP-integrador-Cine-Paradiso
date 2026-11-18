@@ -20,9 +20,9 @@
         {% for promo in promociones %}
         <article class="promo">
             {% if promo.imagen_url %}
-                <img src="{{ promo.imagen_url }}"
-                     alt="{{ promo.nombre }}"
-                     loading="lazy">
+                <img class="servicios-cliente__imagen"
+                     src="{{ promo.imagen_url }}"
+                     alt="{{ promo.nombre }}">
             {% endif %}
 
             <h3>{{ promo.nombre }}</h3>
@@ -45,6 +45,13 @@
         <div class="grilla grilla-chica">
             {% for producto in productos %}
             <article class="producto">
+                {% if producto.imagen_url %}
+                    <img class="servicios-cliente__imagen" src="{{ producto.imagen_url }}"
+                                alt="{{ producto.nombre }}">
+                {% else %}
+                    <div class="servicios-cliente__imagen servicios-cliente__imagen--vacia" ></div>
+                {% endif %}
+
                 <h3>{{ producto.nombre }}</h3>
 
                 {% if producto.descripcion %}

@@ -3,10 +3,29 @@ from datetime import timedelta
 import mysql.connector
 
 import constants as const
-from db import ejecutar_consulta, ejecutar_mutacion, obtener_conexion
+from db import ejecutar_consulta, ejecutar_mutacion, obtener_conexion, transaccion
+
+
+def finalizar_funciones_vencidas():
+    """Marca como finalizados los turnos programados cuya hora de fin ya pasó."""
+    sql = (
+        "UPDATE funciones SET estado = 'finalizada' "
+        "WHERE estado = 'programada' AND fecha_hora_fin <= NOW()"
+    )
+    return ejecutar_mutacion(sql)
+
+
+def marcar_funciones_finalizadas():
+    # nada las marca al terminar, así que se actualizan cuando se consultan
+    ejecutar_mutacion(
+        "UPDATE funciones SET estado = 'finalizada' "
+        "WHERE estado = 'programada' AND fecha_hora_fin < NOW()",
+        (),
+    )
 
 
 def listar_funciones(pelicula_id=None, local_id=None, fecha=None, incluir_canceladas=False, id_sala = None):
+    marcar_funciones_finalizadas()
     sql = (
         "SELECT f.id_funcion, f.id_pelicula, p.nombre AS pelicula, "
         "f.id_sala, s.numero_sala, s.id_local, l.nombre AS local, "
@@ -18,6 +37,8 @@ def listar_funciones(pelicula_id=None, local_id=None, fecha=None, incluir_cancel
         "AND (c.estado = 'confirmada' OR "
         "(c.estado = 'pendiente' AND c.expira_en > NOW())) LIMIT 1) "
         "AS tiene_entradas_activas "
+        ", EXISTS (SELECT 1 FROM compras c "
+        "WHERE c.id_funcion = f.id_funcion LIMIT 1) AS tiene_compras "
         "FROM funciones f "
         "INNER JOIN peliculas p ON p.id_pelicula = f.id_pelicula "
         "INNER JOIN salas s ON s.id_sala = f.id_sala "
@@ -162,6 +183,32 @@ def actualizar_funcion(id_funcion, campos):
     parametros.append(id_funcion)
     sql = "UPDATE funciones SET " + ", ".join(partes) + " WHERE id_funcion = %s"
     ejecutar_mutacion(sql, tuple(parametros))
+
+
+def eliminar_funcion_cancelada(id_funcion):
+    with transaccion() as cursor:
+        cursor.execute(
+            "SELECT estado FROM funciones WHERE id_funcion = %s FOR UPDATE",
+            (id_funcion,),
+        )
+        funcion = cursor.fetchone()
+        if not funcion:
+            return "no_encontrada"
+        if funcion["estado"] != "cancelada":
+            return "no_cancelada"
+
+        cursor.execute(
+            "SELECT id_compra FROM compras WHERE id_funcion = %s LIMIT 1",
+            (id_funcion,),
+        )
+        if cursor.fetchone():
+            return "con_compras"
+
+        cursor.execute(
+            "DELETE FROM funciones WHERE id_funcion = %s",
+            (id_funcion,),
+        )
+    return "eliminada"
 
 
 def listar_butacas_funcion(id_funcion):
