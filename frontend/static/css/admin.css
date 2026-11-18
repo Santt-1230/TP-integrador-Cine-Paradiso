@@ -363,6 +363,47 @@ a {
 .formulario-admin{
     gap: 1.2rem;
 }
+.fila-formulario {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.fila-formulario .etiqueta-fila {
+    flex: 0 0 55px;
+}
+
+.fila-formulario input {
+    flex: 1;
+    min-width: 0;
+}
+
+.eliminar-fila {
+    padding: 10px 12px;
+    border: 1px solid var(--admin-rojo-oscuro);
+    border-radius: 7px;
+    background: white;
+    color: var(--admin-rojo-oscuro);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.eliminar-fila:hover {
+    background: #fff0f0;
+}
+
+#agregar-fila {
+    align-self: flex-start;
+    margin-top: 8px;
+}
+
+#agregar-fila:disabled,
+.eliminar-fila:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
 @media (max-width: 900px) {
     .admin-sidebar {
         flex-basis: 190px;
@@ -779,23 +820,19 @@ a {
     padding-right: 12px;
 }
 
-.acciones-tabla a {
+
+.boton-tabla {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    height: 32px;
     box-sizing: border-box;
-    margin: 0;
-    vertical-align: top;
-}
-
-.boton-tabla{
-    display: inline-block;
-    padding: 6px 14px;
+    height: 32px;
+    padding: 0 14px;
     border: none;
     border-radius: 6px;
     font: inherit;
     font-weight: 600;
+    line-height: 1;
     text-decoration: none;
     cursor: pointer;
     transition: transform 0.1s, filter 0.15s;
@@ -819,6 +856,10 @@ a {
 }
 .boton-tabla--baja{
     background-color: #e5484d;
+    color: #fff;
+}
+.boton-tabla--activar{
+    background-color: #1a7f37;
     color: #fff;
 }
 .error-campo {

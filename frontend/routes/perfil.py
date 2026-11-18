@@ -57,23 +57,23 @@ def perfil_seccion(seccion):
         else:
             flash(mensaje_error(res_hist), "error")
 
-    # 3. Enriquecer cada compra con los datos de su función y entradas
+    # 3. Completar datos de película, póster, total y fecha de compra
     if seccion == 'mis-compras':
         zona_ar = ZoneInfo("America/Argentina/Buenos_Aires")
         ahora = datetime.now(zona_ar)
         compras_activas = []
         cache_funciones = {}
+        cache_peliculas = {}
 
         for compra in (historial.get("compras") or []):
             if compra.get("estado") == "cancelada":
                 continue
 
-            # Buscar datos de la función (película, póster, sala, horario)
+            # Buscar datos de la función
             id_funcion = compra.get("id_funcion")
             if id_funcion and id_funcion not in cache_funciones:
                 est_f, res_f = pedir("GET", f"/api/funciones/{id_funcion}")
                 if est_f == 200 and isinstance(res_f, dict):
-                    print("DATOS FUNCION:", res_f, flush=True)
                     cache_funciones[id_funcion] = res_f.get("funcion") or res_f
                 else:
                     cache_funciones[id_funcion] = {}
@@ -83,26 +83,47 @@ def perfil_seccion(seccion):
             sala = funcion.get("sala") if isinstance(funcion.get("sala"), dict) else {}
             local = funcion.get("local") if isinstance(funcion.get("local"), dict) else {}
 
-            # Título, póster y género
-            compra["titulo_pelicula"] = (
+            titulo = (
                 pelicula.get("titulo")
                 or funcion.get("titulo_pelicula")
                 or funcion.get("titulo")
                 or (funcion.get("pelicula") if isinstance(funcion.get("pelicula"), str) else None)
                 or "Película"
             )
-            compra["poster_url"] = (
+            poster_url = (
                 pelicula.get("poster_url")
                 or pelicula.get("imagen_url")
+                or pelicula.get("portada")
                 or funcion.get("poster_url")
                 or funcion.get("imagen_url")
                 or ""
             )
-            compra["genero"] = (
-                pelicula.get("genero")
-                or funcion.get("genero")
-                or "CINE"
-            )
+            genero = pelicula.get("genero") or funcion.get("genero") or "CINE"
+
+            # Si la función no trajo el póster, buscarlo en /api/peliculas/<id_pelicula>
+            id_pelicula = pelicula.get("id_pelicula") or funcion.get("id_pelicula") or compra.get("id_pelicula")
+            if not poster_url and id_pelicula:
+                if id_pelicula not in cache_peliculas:
+                    est_p, res_p = pedir("GET", f"/api/peliculas/{id_pelicula}")
+                    if est_p == 200 and isinstance(res_p, dict):
+                        cache_peliculas[id_pelicula] = res_p.get("pelicula") or res_p
+                    else:
+                        cache_peliculas[id_pelicula] = {}
+
+                peli_data = cache_peliculas.get(id_pelicula, {})
+                poster_url = (
+                    peli_data.get("poster_url")
+                    or peli_data.get("imagen_url")
+                    or peli_data.get("portada")
+                    or peli_data.get("imagen")
+                    or ""
+                )
+                if genero == "CINE" and peli_data.get("genero"):
+                    genero = peli_data.get("genero")
+
+            compra["titulo_pelicula"] = titulo
+            compra["poster_url"] = poster_url
+            compra["genero"] = genero
 
             # Local, sala y butacas armadas desde 'entradas'
             compra["local"] = local.get("nombre") or funcion.get("local_nombre") or funcion.get("local") or ""
@@ -112,35 +133,41 @@ def perfil_seccion(seccion):
             butacas_ordenadas = sorted(entradas, key=lambda e: (str(e.get("fila", "")), int(e.get("numero", 0))))
             compra["butacas"] = ", ".join(f"{e.get('fila', '')}{e.get('numero', '')}" for e in butacas_ordenadas)
 
-            # Normalizar imágenes de combos/servicios
-            for srv in (compra.get("servicios") or []):
-                if not srv.get("imagen_url"):
-                    srv["imagen_url"] = srv.get("imagen") or srv.get("foto_url") or ""
+            # Formatear precio total (ej: $33.000,00)
+            total_num = float(compra.get("total") or 0)
+            compra["total_formateado"] = f"${total_num:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
 
-            # Fecha de inicio de función (para mostrar arriba y habilitar cancelación)
-            valor_fecha = funcion.get("fecha_hora_inicio") or compra.get("fecha_hora")
-            if valor_fecha:
+            # Fecha de COMPRA (para mostrar en el encabezado de la tarjeta)
+            fecha_compra_raw = compra.get("fecha_hora") or compra.get("fecha_creacion")
+            if fecha_compra_raw:
                 try:
-                    inicio_funcion = datetime.fromisoformat(str(valor_fecha).replace("Z", "+00:00"))
+                    dt_compra = datetime.fromisoformat(str(fecha_compra_raw).replace("Z", "+00:00"))
+                    if dt_compra.tzinfo is None:
+                        dt_compra = dt_compra.replace(tzinfo=zona_ar)
+                    else:
+                        dt_compra = dt_compra.astimezone(zona_ar)
+                    compra["fecha_formateada"] = dt_compra.strftime("%d/%m/%Y - %H:%M HS")
+                except ValueError:
+                    compra["fecha_formateada"] = str(fecha_compra_raw)
+            else:
+                compra["fecha_formateada"] = ""
+
+            # Fecha de FUNCIÓN (solo para habilitar o bloquear la cancelación)
+            fecha_funcion_raw = funcion.get("fecha_hora_inicio")
+            if fecha_funcion_raw:
+                try:
+                    inicio_funcion = datetime.fromisoformat(str(fecha_funcion_raw).replace("Z", "+00:00"))
                     if inicio_funcion.tzinfo is None:
                         inicio_funcion = inicio_funcion.replace(tzinfo=zona_ar)
                     else:
                         inicio_funcion = inicio_funcion.astimezone(zona_ar)
 
-                    # Solo habilita cancelar si tenemos el horario real de la función
-                    if funcion.get("fecha_hora_inicio"):
-                        compra["puede_cancelar"] = ahora < (inicio_funcion - timedelta(hours=1))
-                    else:
-                        compra["puede_cancelar"] = False
-
-                    compra["fecha_formateada"] = inicio_funcion.strftime("%d/%m/%Y - %H:%M HS")
+                    compra["puede_cancelar"] = ahora < (inicio_funcion - timedelta(hours=1))
                     compra["fecha_hora_inicio"] = inicio_funcion.isoformat()
                 except ValueError:
                     compra["puede_cancelar"] = False
-                    compra["fecha_formateada"] = str(valor_fecha)
             else:
                 compra["puede_cancelar"] = False
-                compra["fecha_formateada"] = ""
 
             compras_activas.append(compra)
 
