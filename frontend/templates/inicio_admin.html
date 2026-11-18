@@ -55,6 +55,7 @@
                     <th>Película</th>
                     <th>Estreno</th>
                     <th>Funciones</th>
+                    <th>Próxima función</th>
                     <th>Estado</th>
                 </tr>
             </thead>
@@ -72,6 +73,7 @@
                     </td>
                     <td>{{ pelicula.fecha_estreno }}</td>
                     <td>{{ pelicula.cantidad_funciones }}</td>
+                    <td>{% for linea in pelicula.proxima_funcion %}<div>{{ linea }}</div>{% else %}—{% endfor %}</td>
                     <td>{{ pelicula.estado }}</td>
                 </tr>
                 {% endfor %}

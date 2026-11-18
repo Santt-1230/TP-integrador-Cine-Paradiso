@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 
 from flask import Blueprint, render_template, url_for, flash, request, redirect
 
@@ -31,6 +31,53 @@ def _contar_funciones(id_pelicula):
     return len(funciones) if isinstance(funciones, list) else "—"
 
 
+def _hora_funcion(texto):
+    try:
+        return datetime.fromisoformat(str(texto).replace(" ", "T")).replace(tzinfo=None)
+    except ValueError:
+        return None
+
+
+def _proximas_funciones():
+    # id de película -> "En curso (hasta 03:36)" o la fecha de su próxima función
+    estado, datos = pedir("GET", "/api/funciones", params={"incluir_canceladas": "true"})
+    funciones = datos.get("funciones", []) if estado == 200 and isinstance(datos, dict) else []
+    ahora = datetime.now()
+    lista = []
+    for f in funciones:
+        if f.get("estado") != "programada":
+            continue
+        inicio = _hora_funcion(f.get("fecha_hora_inicio"))
+        fin = _hora_funcion(f.get("fecha_hora_fin"))
+        if not inicio or not fin or fin <= ahora:
+            continue
+        cine = f.get("local")
+        sufijo = " · " + cine if cine else ""
+        if inicio <= ahora:
+            candidata = (0, inicio, "En curso (hasta " + fin.strftime("%H:%M") + ")" + sufijo)
+        else:
+            candidata = (1, inicio, inicio.strftime("%d/%m %H:%M") + sufijo)
+        lista.append((f.get("id_pelicula"), candidata))
+    resultado = {}
+    for id_pelicula, c in sorted(lista, key=lambda par: par[1][:2]):
+        resultado.setdefault(id_pelicula, []).append(c[2])
+    return resultado
+
+
+def _cantidad_funciones():
+    # funciones que todavía no terminaron (programadas o en curso), por película
+    estado, datos = pedir("GET", "/api/funciones", params={"incluir_canceladas": "true"})
+    funciones = datos.get("funciones", []) if estado == 200 and isinstance(datos, dict) else []
+    ahora = datetime.now()
+    cantidades = {}
+    for f in funciones:
+        fin = _hora_funcion(f.get("fecha_hora_fin"))
+        if f.get("estado") == "programada" and fin and fin > ahora:
+            id_pelicula = f.get("id_pelicula")
+            cantidades[id_pelicula] = cantidades.get(id_pelicula, 0) + 1
+    return cantidades
+
+
 def _novedades_inicio():
     estado, respuesta = pedir("GET", "/api/admin/peliculas")
     if estado != 200 or not isinstance(respuesta, dict):
@@ -40,13 +87,16 @@ def _novedades_inicio():
     peliculas = [p for p in respuesta.get("peliculas", []) if p.get("estado_cartelera") in TEXTO_ESTADO]
     # primero las vigentes y después las próximas, por fecha de inicio
     peliculas.sort(key=lambda p: (p["estado_cartelera"] != "vigente", p.get("cartelera_desde") or ""))
+    proximas = _proximas_funciones()
+    cantidades = _cantidad_funciones()
 
     return [
         {
             "nombre": p.get("nombre"),
             "poster_url": p.get("poster_url"),
             "fecha_estreno": _fecha_ar(p.get("cartelera_desde")),
-            "cantidad_funciones": _contar_funciones(p.get("id_pelicula")),
+            "cantidad_funciones": cantidades.get(p.get("id_pelicula"), 0),
+            "proxima_funcion": proximas.get(p.get("id_pelicula"), []),
             "estado": TEXTO_ESTADO[p["estado_cartelera"]],
         }
         for p in peliculas[:10]
