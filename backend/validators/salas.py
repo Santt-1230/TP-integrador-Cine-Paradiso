@@ -6,7 +6,7 @@ from constants import (
     BUTACAS_POR_FILA)
 import string
 
-CAMPOS_eDITABLES = ('numero', 'estado', 'letras', 'cantidades')
+CAMPOS_EDITABLES = ('numero_sala', 'estado', 'letras', 'cantidades')
 def validar_id_local(valor):
     try:
         return int(valor)
@@ -143,7 +143,7 @@ def validar_actualizacion_sala(datos):
     if not isinstance(datos, dict) or not datos:
         raise error_datos('Ingrese numero_sala, estado, letras o cantidades')
     for campo in datos:
-        if campo not in ('numero_sala', 'estado', 'capacidad', 'filas'):
+        if campo not in CAMPOS_EDITABLES:
             raise error_datos(f"No se puede modificar el campo '{campo}'")
     cambios = {}
     if 'numero_sala' in datos:
