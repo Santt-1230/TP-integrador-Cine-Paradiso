@@ -73,7 +73,7 @@ def perfil_seccion(seccion):
 
         if estado_h == 200:
             if not historial.get("compras") and not historial.get("peliculas_vistas"):
-                historial = historial_de_prueba()   # PRUEBA: borrar antes de commitear
+                historial = historial_de_prueba()  
 
         # Procesamos las compras dentro de historial
     if seccion == 'mis-compras':
