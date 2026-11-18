@@ -2,21 +2,45 @@
 {% from "_componentes.html" import tarjeta %}
 {% block titulo %}Cine Paradiso{% endblock %}
 {% block contenido %}
-{% if peliculas %}
-    {% set destacada = peliculas[0] %}
-    <section class="hero">
-        {% if destacada.poster_url %}
-            <img src="{{ destacada.poster_url }}" alt="Poster de {{ destacada.nombre }}">
-        {% else %}
-            <div class="sin-poster">Sin póster</div>
-        {% endif %}
-        <div class="hero-texto">
-            <p class="etiqueta">Novedad</p>
-            <h1>{{ destacada.nombre }}</h1>
-            <p class="meta">{{ destacada.duracion_min }} min{% if destacada.clasificacion %} · {{ destacada.clasificacion }}{% endif %}{% if destacada.generos %} · {{ destacada.generos | join(', ') }}{% endif %}</p>
-            <a class="boton" href="{{ url_for('peliculas_front.detalle', id_pelicula=destacada.id_pelicula) }}">Ver película</a>
+{% if destacadas %}
+<div class="contenedor">
+    <section class="carrusel">
+        <div class="carrusel-pista">
+            {% for p in destacadas %}
+            {% set total = destacadas|length %}
+            {% set actual = loop.index %}
+            <article class="carrusel-slide" id="peli-{{ loop.index }}">
+                <div class="carrusel-card">
+                    <a class="carrusel-poster" href="{{ url_for('peliculas_front.detalle', id_pelicula=p.id_pelicula) }}">
+                        {% if p.poster_url %}
+                            <img src="{{ p.poster_url }}" alt="Poster de {{ p.nombre }}">
+                        {% else %}
+                            <div class="sin-poster">Sin póster</div>
+                        {% endif %}
+                    </a>
+                    <div class="carrusel-texto">
+                        <p class="carrusel-etiqueta">En cartelera</p>
+                        <h1>{{ p.nombre }}</h1>
+                        <p class="carrusel-meta">{{ p.duracion_min }} min{% if p.clasificacion %} · {{ p.clasificacion }}{% endif %}{% if p.generos_txt %} · {{ p.generos_txt }}{% endif %}</p>
+                        {% if p.sinopsis_corta %}<p class="carrusel-sinopsis">{{ p.sinopsis_corta }}</p>{% endif %}
+                        {% if p.proxima_funcion %}<p class="carrusel-funcion">Próxima función: {{ p.proxima_funcion }}</p>{% endif %}
+                        <a class="boton" href="{{ url_for('peliculas_front.detalle', id_pelicula=p.id_pelicula) }}">Ver película</a>
+                    </div>
+                </div>
+                {% if total > 1 %}
+                <a class="carrusel-flecha carrusel-flecha--izq" href="#peli-{{ total if loop.first else loop.index - 1 }}" aria-label="Anterior">&lsaquo;</a>
+                <a class="carrusel-flecha carrusel-flecha--der" href="#peli-{{ 1 if loop.last else loop.index + 1 }}" aria-label="Siguiente">&rsaquo;</a>
+                <div class="carrusel-puntos">
+                    {% for n in range(1, total + 1) %}
+                    <a href="#peli-{{ n }}" aria-label="Película {{ n }}"{% if n == actual %} class="activo"{% endif %}></a>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </article>
+            {% endfor %}
         </div>
     </section>
+</div>
 {% endif %}
 
 <div class="contenedor">
