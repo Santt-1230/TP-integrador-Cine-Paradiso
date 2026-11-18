@@ -138,6 +138,40 @@ def admin_funciones():
     )
 
 
+SITUACIONES_HISTORIAL = ("Programada", "En curso", "Finalizada", "Cancelada")
+
+
+@funciones_front_bp.route("/admin/funciones/historial")
+@api.admin_front_requerido
+def admin_historial_funciones():
+    estado, datos = api.pedir("GET", "/api/funciones", params={"incluir_canceladas": "true"})
+    redireccion = api.verificar_estado(estado)
+    if redireccion:
+        return redireccion
+
+    funciones = datos.get("funciones", []) if estado == 200 and isinstance(datos, dict) else []
+    error = None if estado == 200 else api.mensaje_error(datos)
+
+    for funcion in funciones:
+        if funcion.get("estado") == "cancelada":
+            funcion["situacion"] = "Cancelada"
+        else:
+            funcion["situacion"] = _situacion_funcion(funcion)
+
+    filtro = request.args.get("situacion", "")
+    if filtro in SITUACIONES_HISTORIAL:
+        funciones = [f for f in funciones if f["situacion"] == filtro]
+    else:
+        filtro = ""
+
+    # las más recientes primero
+    funciones.sort(key=lambda f: str(f.get("fecha_hora_inicio")), reverse=True)
+    return render_template(
+        "admin_funciones_historial.html",
+        funciones=funciones, error=error, filtro=filtro, situaciones=SITUACIONES_HISTORIAL,
+    )
+
+
 @funciones_front_bp.route("/admin/funciones/nueva", methods=["GET", "POST"])
 @api.admin_front_requerido
 def admin_nueva_funcion():

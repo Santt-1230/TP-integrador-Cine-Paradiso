@@ -1,0 +1,47 @@
+{% extends "base_admin.html" %}
+
+{% block estilos_extra %}
+    {{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/funciones.css') }}">
+{% endblock %}
+
+{% block titulo %}Historial de funciones - Cine Paradiso{% endblock %}
+
+{% block contenido_admin %}
+<section class="funciones-pagina">
+    <div class="titulo-con-accion">
+        <h1>Historial de funciones</h1>
+        <a class="boton" href="{{ url_for('funciones_front.admin_funciones') }}">Volver a funciones</a>
+    </div>
+
+    <p>
+        Ver:
+        {% if not filtro %}<strong>Todas</strong>{% else %}<a href="{{ url_for('funciones_front.admin_historial_funciones') }}">Todas</a>{% endif %}
+        {% for s in situaciones %}
+            · {% if filtro == s %}<strong>{{ s }}</strong>{% else %}<a href="{{ url_for('funciones_front.admin_historial_funciones', situacion=s) }}">{{ s }}</a>{% endif %}
+        {% endfor %}
+    </p>
+
+    {% if error %}<p class="mensaje-error">{{ error }}</p>{% endif %}
+    {% if funciones %}
+        <div class="tabla-contenedor">
+            <table>
+                <thead><tr><th>Película</th><th>Cine / sala</th><th>Inicio</th><th>Fin</th><th>Estado</th></tr></thead>
+                <tbody>
+                    {% for funcion in funciones %}
+                    <tr>
+                        <td>{{ funcion.pelicula }}</td>
+                        <td>{{ funcion.local }} / {{ funcion.numero_sala }}</td>
+                        <td>{{ (funcion.fecha_hora_inicio|string)[:16]|replace("T", " ") }}</td>
+                        <td>{{ (funcion.fecha_hora_fin|string)[:16]|replace("T", " ") }}</td>
+                        <td>{{ funcion.situacion }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% elif not error %}
+        <p>No hay funciones para mostrar.</p>
+    {% endif %}
+</section>
+{% endblock %}

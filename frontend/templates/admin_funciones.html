@@ -12,7 +12,10 @@
 <section class="funciones-pagina">
     <div class="titulo-con-accion">
         <h1>Administrar funciones</h1>
-        <a class="boton" href="{{ url_for('funciones_front.admin_nueva_funcion') }}">Crear función</a>
+        <div style="display: flex; gap: .6rem; flex-wrap: wrap;">
+            <a class="boton" href="{{ url_for('funciones_front.admin_historial_funciones') }}">Ver historial</a>
+            <a class="boton" href="{{ url_for('funciones_front.admin_nueva_funcion') }}">Crear función</a>
+        </div>
     </div>
     {% if error %}<p class="mensaje-error">{{ error }}</p>{% endif %}
     {% if funciones %}
