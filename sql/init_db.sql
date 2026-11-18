@@ -45,6 +45,7 @@ CREATE TABLE IF NOT EXISTS butacas (
 	id_sala INT NOT NULL,
 	fila CHAR(1) NOT NULL,
 	numero INT NOT NULL,
+	estado ENUM('activa', 'inactiva') NOT NULL DEFAULT 'activa',
 	FOREIGN KEY (id_sala) REFERENCES salas(id_sala),
     CONSTRAINT uq_butacas_asiento UNIQUE (id_sala, fila, numero),
     CONSTRAINT chk_butacas_numero CHECK (numero > 0)
@@ -143,7 +144,8 @@ CREATE TABLE IF NOT EXISTS productos (
 	tipo ENUM('comida', 'bebida', 'estacionamiento', 'vip') NOT NULL,
 	descripcion VARCHAR(255),
 	precio DECIMAL(10,2) NOT NULL CHECK (precio > 0),
-	activo BOOLEAN NOT NULL DEFAULT TRUE
+	activo BOOLEAN NOT NULL DEFAULT TRUE,
+	imagen_url VARCHAR(500)
 );
 
 CREATE TABLE IF NOT EXISTS promociones (
@@ -174,7 +176,7 @@ CREATE TABLE IF NOT EXISTS qr (
     id_compra_producto INT NULL UNIQUE,
     tipo ENUM('entrada', 'producto') NOT NULL,
     token VARCHAR(64) NOT NULL UNIQUE,
-	token_manual VARCHAR(12) NOT NULL UNIQUE,
+	codigo_manual VARCHAR(12) NOT NULL UNIQUE,
     fecha_generacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     fecha_uso DATETIME NULL,
     estado ENUM('valido', 'utilizado', 'expirado', 'cancelado')
@@ -248,7 +250,7 @@ INSERT  IGNORE INTO `generos` (`id_genero`, `nombre`) VALUES (2,'Ciencia ficció
 INSERT  IGNORE INTO `generos` (`id_genero`, `nombre`) VALUES (13,'Comedia');
 INSERT  IGNORE INTO `generos` (`id_genero`, `nombre`) VALUES (5,'Crimen');
 INSERT  IGNORE INTO `generos` (`id_genero`, `nombre`) VALUES (7,'Drama');
-INSERT  IGNORE INTO `generos` (`id_genero`, `nombre`) VALUES (10,'Suspense');
+INSERT  IGNORE INTO `generos` (`id_genero`, `nombre`) VALUES (10,'Suspenso');
 /*!40000 ALTER TABLE `generos` ENABLE KEYS */;
 
 /*!40000 ALTER TABLE `peliculas` DISABLE KEYS */;
