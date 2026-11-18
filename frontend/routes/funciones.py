@@ -218,10 +218,6 @@ def admin_funciones():
     estado, datos = api.pedir(
         "GET", "/api/funciones", params=filtros
     )
-    redireccion = api.verificar_estado(estado)
-    if redireccion:
-        return redireccion
-
     funciones = datos.get("funciones", []) if estado == 200 else []
     funciones = _preparar_funciones_admin(funciones)
     agregar_horarios_legibles(funciones)
@@ -336,6 +332,9 @@ def admin_editar_funcion(id_funcion):
 
         error = api.mensaje_error(respuesta)
 
+    estado, respuesta = api.pedir_api(
+        "GET", f"/api/funciones/{id_funcion}"
+    )
     estado, respuesta = api.pedir("GET", f"/api/funciones/{id_funcion}")
 
     redireccion = api.verificar_estado(estado)
@@ -372,9 +371,6 @@ def admin_cancelar_funcion(id_funcion):
     estado, respuesta = api.pedir(
         "PATCH", f"/api/funciones/{id_funcion}", datos={"estado": "cancelada"}
     )
-    redireccion = api.verificar_estado(estado)
-    if redireccion:
-        return redireccion
     if estado != 200:
         return render_template(
             "admin_funciones.html", funciones=[],
