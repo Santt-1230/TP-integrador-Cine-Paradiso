@@ -85,6 +85,8 @@ def _preparar_funciones_admin(funciones):
         if funcion.get("estado") == "cancelada":
             continue
         funcion["situacion"] = _situacion_funcion(funcion)
+        if funcion["situacion"] == "Finalizada":
+            continue
         visibles.append(funcion)
     visibles.sort(key=lambda f: (orden[f["situacion"]], str(f.get("fecha_hora_inicio"))))
     return visibles
