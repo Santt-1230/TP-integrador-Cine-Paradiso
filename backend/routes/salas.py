@@ -56,7 +56,8 @@ def crear_sala():
         respuesta = ut.construir_error_api(
             code=const.ERROR_CODE_INVALID_PARAMETER,
             message='Datos invalidos',
-            description='El formato debe ser un JSON con id_local, numero_sala, capacidad'
+            description='El formato debe ser un JSON con id_local, ' \
+            'numero_sala y filas (lista de cantidades)'
         )
         return jsonify(respuesta), 400
     try:
@@ -149,10 +150,28 @@ def desactivar_sala(id_sala):
         return jsonify(respuesta), 400
         
     except (RuntimeError, mysql.connector.Error):
-        return jsonify(ut.construir_error.db()), 500
+        return jsonify(ut.construir_error_db()), 500
 
 
+@salas_bp.route('/salas/<id_sala>/filas', methods=['GET'])
+def obtener_filas_sala(id_sala):
+    try:
+        filas = salas_services.obtener_filas_sala(id_sala)
+        if filas is None:
+            respuesta = ut.construir_error_api(
+                code=const.ERROR_CODE_SALA_NOT_FOUND,
+                message='Sala no encontrada',
+                description=f"No existe una sala con el id '{id_sala}'."
+            )
+            return jsonify(respuesta), 404
 
+        return jsonify({'filas': filas}), 200
+
+    except ValueError as error:
+        return jsonify(error.args[0]), 400
+
+    except (RuntimeError, mysql.connector.Error):
+        return jsonify(ut.construir_error_db()), 500
 
 
   
