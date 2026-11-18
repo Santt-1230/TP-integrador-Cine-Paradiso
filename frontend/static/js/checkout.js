@@ -1,3 +1,4 @@
+
 document.addEventListener("DOMContentLoaded", () => {
     const errorTemporal = document.querySelector("[data-error-temporal]");
     if (errorTemporal) {
@@ -43,6 +44,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const formularioCheckout = document.querySelector(".checkout-form");
     if (!formularioCheckout) return;
+
+    let compraEnviandose = false;
+    formularioCheckout.addEventListener("submit", (event) => {
+        if (compraEnviandose) {
+            event.preventDefault();
+            return;
+        }
+
+        compraEnviandose = true;
+        const botonCompra = formularioCheckout.querySelector('button[type="submit"]');
+        if (botonCompra) {
+            botonCompra.disabled = true;
+            botonCompra.textContent = "Procesando compra…";
+        }
+    });
 
     const totalContenedor = formularioCheckout.querySelector(".checkout-actions");
     const totalSalida = formularioCheckout.querySelector(".checkout-total-dinamico");
