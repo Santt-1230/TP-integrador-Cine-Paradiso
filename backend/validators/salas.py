@@ -6,12 +6,16 @@ from constants import (
     BUTACAS_POR_FILA)
 import string
 
-def validar_id_local(id_local)->int:
-    if id_local is None:
-        return None
-    return ut.validar_entero_positivo(
-        id_local, ENTERO_POSITIVO_MINIMO, 'id_local'
-    )
+CAMPOS_eDITABLES = ('numero', 'estado', 'letras', 'cantidades')
+def validar_id_local(valor):
+    try:
+        return int(valor)
+    except (TypeError, ValueError):
+        raise ValueError(ut.construir_error_api(
+            code=ERROR_CODE_INVALID_PARAMETER,
+            message='Parametro invalido',
+            description="id_local debe ser un numero entero."
+        ))
 
 def validar_id_sala(id_sala)->int:
     return ut.validar_entero_positivo(
@@ -46,7 +50,7 @@ def validar_estado(estado)->str:
     return estado
 
 def validar_filtro_estado(estado)->str:
-    if estado is None or estado == '':
+    if estado is None or estado == '' or estado == 'todas':
         return None
     return validar_estado(estado)
 
@@ -57,60 +61,99 @@ def error_filas(descripcion):
         description=descripcion
     ))
 
-def validar_filas(filas)->list:
+def error_datos(descripcion):
+    return ValueError(ut.construir_error_api(
+        code=ERROR_CODE_INVALID_PARAMETER,
+        message='Datos invalidos',
+        description=descripcion
+    ))
+
+
+def validar_filas(filas) -> list:
     if not isinstance(filas, list) or not filas:
         raise error_filas('Ingresa al menos una fila')
 
     resultado = []
     total = 0
-    letra_anterior = None
+    vistas = set()
 
     for item in filas:
         if not isinstance(item, dict):
             raise error_filas('Cada fila debe tener letra y cantidad')
 
         fila = item.get('fila')
-        if not isinstance(fila, str) or len(fila) != ENTERO_POSITIVO_MINIMO or fila not in string.ascii_uppercase:
-            raise error_filas('La fila debe ser una letra mayuscula de la A a la Z')
+        if isinstance(fila, str):
+            fila = fila.strip().upper()
+        if not isinstance(fila, str) or len(fila) != 1 or fila not in string.ascii_uppercase:
+            raise error_filas('La fila debe ser una letra de la A a la Z')
+        if fila in vistas:
+            raise error_filas(f"La fila '{fila}' esta repetida")
+        vistas.add(fila)
 
-        if letra_anterior is not None and ord(fila) != ord(letra_anterior) + ENTERO_POSITIVO_MINIMO:
-            raise error_filas('Las filas deben ser consecutivas, sin repetir ni saltear letras')
-        
-        cantidad = ut.validar_entero_positivo(item.get('cantidad'), ENTERO_POSITIVO_MINIMO, 'cantidad')
+        cantidad = ut.validar_entero_positivo(
+            item.get('cantidad'), ENTERO_POSITIVO_MINIMO, 'cantidad')
         if cantidad > BUTACAS_POR_FILA:
             raise error_filas(f'Cada fila puede tener hasta {BUTACAS_POR_FILA} butacas')
 
         total += cantidad
-        letra_anterior = fila
-        resultado.append({'fila':fila, 'cantidad':cantidad})
+        resultado.append({'fila': fila, 'cantidad': cantidad})
 
     if total > CAPACIDAD_MAXIMA:
         raise error_filas(f'La sala no puede superar las {CAPACIDAD_MAXIMA} butacas')
-    return resultado
 
+    return sorted(resultado, key=lambda f: f['fila'])
+
+def armar_filas(letras, cantidades)->list:
+    if not isinstance(letras, list) or not isinstance(cantidades,list) or not letras:
+        raise error_filas('Ingrese al menos una fila')
+    if len(letras) != len(cantidades):
+        raise error_filas('Cada fila debe tener letra y cantidad')
+    return [{'fila':l, 'cantidad':c} for l, c in zip(letras, cantidades)]
+
+def validar_cantidades_filas(cantidades) -> list:
+    if not isinstance(cantidades, list) or not cantidades:
+        raise error_filas('Ingresa al menos una fila')
+    if len(cantidades) > len(string.ascii_uppercase):
+        raise error_filas(f'La sala no puede tener mas de {len(string.ascii_uppercase)} filas')
+
+    filas = [
+        {'fila': string.ascii_uppercase[i],
+         'cantidad': ut.validar_entero_positivo(c, ENTERO_POSITIVO_MINIMO, 'cantidad')}
+        for i, c in enumerate(cantidades)
+    ]
+    return validar_filas(filas)
+
+def validar_creacion_sala(datos):
+    if not isinstance(datos, dict):
+        raise error_datos('Los datos de la sala son obligatorios')
+
+    for campo in ('id_local', 'numero_sala', 'letras', 'cantidades'):
+        if campo not in datos:
+            raise error_datos(f"Falta el campo '{campo}'")
+
+    return {
+        'id_local': ut.validar_entero_positivo(
+            datos['id_local'], ENTERO_POSITIVO_MINIMO, 'id_local'
+        ),
+        'numero_sala': validar_numero_sala(datos['numero_sala']),
+        'filas': validar_filas(armar_filas(datos['letras'], datos['cantidades'])),
+    }
 
 def validar_actualizacion_sala(datos):
     if not isinstance(datos, dict) or not datos:
-        raise ValueError(ut.construir_error_api(
-            code=ERROR_CODE_INVALID_PARAMETER,
-            message='Datos invalidos',
-            description="Ingresa numero_sala o estado"
-        ))
+        raise error_datos('Ingrese numero_sala, estado, letras o cantidades')
     for campo in datos:
-        if campo not in ('numero_sala', 'estado', 'capacidad'):
-            raise ValueError(ut.construir_error_api(
-                code=ERROR_CODE_INVALID_PARAMETER,
-                message='Campo no modificable',
-                description=f"No se puede modificar el campo '{campo}'"
-            ))
+        if campo not in ('numero_sala', 'estado', 'capacidad', 'filas'):
+            raise error_datos(f"No se puede modificar el campo '{campo}'")
     cambios = {}
     if 'numero_sala' in datos:
         cambios['numero_sala'] = validar_numero_sala(datos['numero_sala'])
     if 'estado' in datos:
         cambios['estado'] = validar_estado(datos['estado'])
-    if 'capacidad' in datos:
-        cambios['capacidad'] = validar_capacidad(datos['capacidad'])  
-    if 'filas' in datos:
-        cambios['filas'] = validar_filas(datos['filas'])
+    if 'letras' in datos or 'cantidades' in datos:
+        cambios['filas'] = validar_filas(armar_filas(
+            datos.get('letras'), datos.get('cantidades'))
+            )
+        
     return cambios
 
