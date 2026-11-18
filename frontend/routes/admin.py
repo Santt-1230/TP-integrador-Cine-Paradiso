@@ -39,7 +39,7 @@ def _hora_funcion(texto):
 
 
 def _proximas_funciones():
-    # id de película -> "En curso (hasta 03:36)" o la fecha de su próxima función
+    # id de película -> lista de sus funciones que no terminaron, con el cine de cada una
     estado, datos = pedir("GET", "/api/funciones", params={"incluir_canceladas": "true"})
     funciones = datos.get("funciones", []) if estado == 200 and isinstance(datos, dict) else []
     ahora = datetime.now()
