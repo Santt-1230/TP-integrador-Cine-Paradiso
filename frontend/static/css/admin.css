@@ -2143,7 +2143,22 @@ a {
 }
 
 
-.usuarios-admin__boton-actualizar,
+.usuarios-admin__boton-actualizar {
+    flex-shrink: 0;
+    min-height: 40px;
+    padding: 0 18px;
+    border: 0;
+    border-radius: 8px;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color 0.2s ease, opacity 0.2s ease;
+}
+
+
+
 .usuarios-admin__boton-cancelar,
 .usuarios-admin__boton-guardar {
     flex-shrink: 0;
@@ -2685,6 +2700,19 @@ a {
         min-height: 44px;
     }
 }
+.usuarios-admin__boton-actualizar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    height: 40px;
+    min-height: 40px;
+
+    margin: 0;
+    padding: 0 18px;
+
+    box-sizing: border-box;
+    line-height: 1;
 
 .servicios-admin__subtitulo {
     margin: 32px 0 16px;

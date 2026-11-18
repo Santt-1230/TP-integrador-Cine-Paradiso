@@ -194,6 +194,11 @@ def pagina_butacas(id_funcion):
     butacas = datos.get("butacas", []) if estado == 200 else []
     cantidad_columnas = max((sum(1 for butaca in butacas if butaca.get("fila") == fila) for fila in {butaca.get("fila") for butaca in butacas}), default=0,)
     error = None if estado == 200 else api.mensaje_error(datos)
+    cantidad_columnas = max(
+        (sum(1 for butaca in butacas if butaca.get("fila") == fila)
+         for fila in {butaca.get("fila") for butaca in butacas}),
+        default=0,
+        )
     return render_template(
         "funcion_butacas.html", id_funcion=id_funcion, butacas=butacas,
         cantidad_columnas=cantidad_columnas,
