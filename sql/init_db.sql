@@ -144,7 +144,8 @@ CREATE TABLE IF NOT EXISTS productos (
 	tipo ENUM('comida', 'bebida', 'estacionamiento', 'vip') NOT NULL,
 	descripcion VARCHAR(255),
 	precio DECIMAL(10,2) NOT NULL CHECK (precio > 0),
-	activo BOOLEAN NOT NULL DEFAULT TRUE
+	activo BOOLEAN NOT NULL DEFAULT TRUE,
+	imagen_url VARCHAR(500)
 );
 
 CREATE TABLE IF NOT EXISTS promociones (
