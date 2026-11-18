@@ -146,6 +146,8 @@ def pagina_funciones():
 
 @funciones_front_bp.route("/funciones/<int:id_funcion>/butacas", methods=["GET"])
 def pagina_butacas(id_funcion):
+    checkout_expirado = request.args.get("checkout_expirado") == "1"
+
     estado, datos = api.pedir_api(
         "GET", f"/api/funciones/{id_funcion}/butacas"
     )
@@ -155,7 +157,8 @@ def pagina_butacas(id_funcion):
     return render_template(
         "funcion_butacas.html", id_funcion=id_funcion, butacas=butacas,
         cantidad_columnas=cantidad_columnas,
-        error=error
+        error=error,
+        checkout_expirado=checkout_expirado,
     ), estado if estado >= 500 else 200
 
 

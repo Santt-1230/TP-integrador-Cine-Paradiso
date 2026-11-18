@@ -1,4 +1,12 @@
 document.addEventListener("DOMContentLoaded", () => {
+    const errorTemporal = document.querySelector("[data-error-temporal]");
+    if (errorTemporal) {
+        const url = new URL(window.location.href);
+        url.searchParams.delete("checkout_expirado");
+        window.history.replaceState({}, "", url);
+        window.setTimeout(() => errorTemporal.remove(), 5000);
+    }
+
     const formularioButacas = document.querySelector(".seleccion-butacas");
     if (formularioButacas) {
         const casillas = [...formularioButacas.querySelectorAll('input[name="butacas"]:not(:disabled)')];
@@ -62,9 +70,10 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     actualizarTotal();
 
-    const paginaCheckout = document.querySelector(".checkout-pagina[data-checkout-expira-en]");
+    const paginaCheckout = document.querySelector(".checkout-pagina[data-checkout-duracion-segundos]");
     if (paginaCheckout) {
-        const expiraEnMs = Number(paginaCheckout.dataset.checkoutExpiraEn) * 1000;
+        const duracionSegundos = Number(paginaCheckout.dataset.checkoutDuracionSegundos);
+        const expiraEnMs = Date.now() + duracionSegundos * 1000;
         const enlaceVolver = paginaCheckout.querySelector(":scope > a");
 
         const actualizarContador = () => {
