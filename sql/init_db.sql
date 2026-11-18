@@ -248,7 +248,7 @@ INSERT  IGNORE INTO `generos` (`id_genero`, `nombre`) VALUES (2,'Ciencia ficció
 INSERT  IGNORE INTO `generos` (`id_genero`, `nombre`) VALUES (13,'Comedia');
 INSERT  IGNORE INTO `generos` (`id_genero`, `nombre`) VALUES (5,'Crimen');
 INSERT  IGNORE INTO `generos` (`id_genero`, `nombre`) VALUES (7,'Drama');
-INSERT  IGNORE INTO `generos` (`id_genero`, `nombre`) VALUES (10,'Suspense');
+INSERT  IGNORE INTO `generos` (`id_genero`, `nombre`) VALUES (10,'Suspenso');
 /*!40000 ALTER TABLE `generos` ENABLE KEYS */;
 
 /*!40000 ALTER TABLE `peliculas` DISABLE KEYS */;
