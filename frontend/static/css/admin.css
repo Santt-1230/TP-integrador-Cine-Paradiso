@@ -1,3 +1,6 @@
+html{
+    overflow-y: scroll;
+}
 :root {
     --admin-rojo: #ff6268;
     --admin-rojo-oscuro: #ed4f57;
@@ -2394,6 +2397,257 @@ a {
     justify-content: flex-end;
     gap: 10px;
     margin-top: 4px;
+}
+
+
+.admin-funcion-form {
+    width: min(100% - 2rem, 880px);
+    margin-inline: auto;
+}
+
+.admin-funcion-form .migas {
+    margin: 0 0 1.25rem;
+    color: #777;
+    font-size: 0.82rem;
+}
+
+.admin-funcion-form h1 {
+    margin: 0 0 0.5rem;
+}
+
+.admin-funcion-form .introduccion {
+    margin: 0 0 1.5rem;
+    color: #555;
+}
+
+.funcion-form-card {
+    padding: 1.25rem;
+    background: #fff;
+    border: 1px solid var(--admin-borde);
+    border-radius: 12px;
+    box-shadow: var(--admin-sombra);
+}
+
+.funcion-paso {
+    min-width: 0;
+    margin: 0 0 0.8rem;
+    padding: 0.8rem 1rem 1rem;
+    border: 1px solid var(--admin-borde);
+    border-radius: 9px;
+}
+
+.funcion-paso legend {
+    padding: 0 0.35rem;
+    color: #4c5565;
+    font-size: 0.88rem;
+    font-weight: 700;
+}
+
+.funcion-campo {
+    display: grid;
+    grid-template-columns: minmax(150px, 26%) minmax(0, 1fr);
+    align-items: center;
+    gap: 0.65rem 1rem;
+}
+
+.funcion-campo label {
+    font-size: 0.88rem;
+    font-weight: 650;
+}
+
+.funcion-campo select,
+.funcion-campo input {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: 0.65rem 0.75rem;
+    border: 1px solid var(--admin-borde);
+    border-radius: 7px;
+    background: #fff;
+    color: #263142;
+    font: inherit;
+    outline: none;
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.funcion-campo select:focus,
+.funcion-campo input:focus {
+    border-color: var(--admin-rojo);
+    box-shadow: 0 0 0 3px rgba(255, 98, 104, 0.13);
+}
+
+.funcion-ayuda {
+    grid-column: 2;
+    margin: -0.3rem 0 0;
+    color: #737b89;
+    font-size: 0.78rem;
+}
+
+.funcion-horario {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+}
+
+.funcion-horario label {
+    display: grid;
+    gap: 0.4rem;
+    font-size: 0.85rem;
+    font-weight: 650;
+}
+
+.funciones-dia {
+    margin-top: 0.7rem;
+    padding: 0.7rem 0.85rem;
+    border-radius: 7px;
+    background: #f4f5f8;
+    color: #586171;
+    font-size: 0.8rem;
+}
+
+.funciones-dia strong {
+    display: block;
+    margin-bottom: 0.35rem;
+    color: #313a49;
+}
+
+.funciones-dia ul {
+    display: grid;
+    gap: 0.45rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.boton-actualizar-funciones {
+    display: grid;
+    place-items: center;
+    width: 2.65rem;
+    height: 2.65rem;
+    margin: 0.65rem auto 0;
+    padding: 0.55rem;
+    border: 1px solid var(--admin-borde);
+    border-radius: 50%;
+    background: #fff;
+    color: #39465a;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+
+.boton-actualizar-funciones:hover {
+    background: #39465a;
+    color: #fff;
+    transform: rotate(-12deg);
+}
+
+.boton-actualizar-funciones:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.boton-actualizar-funciones:focus-visible {
+    outline: 3px solid #94b8ff;
+    outline-offset: 2px;
+}
+
+.boton-actualizar-funciones svg {
+    width: 1.35rem;
+    height: 1.35rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.funcion-existente {
+    display: grid;
+    grid-template-columns: minmax(10rem, 1.4fr) minmax(10rem, 1fr) minmax(9rem, 1fr);
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.6rem 0.7rem;
+    border: 1px solid var(--admin-borde);
+    border-radius: 7px;
+    background: #fff;
+}
+
+.funcion-existente__pelicula {
+    color: #273246;
+    font-weight: 600;
+}
+
+.funcion-resumen {
+    margin: 0.9rem 0;
+    padding: 0.8rem;
+    border-left: 3px solid #ff6464;
+    border-radius: 4px;
+    background: #fafafa;
+    color: #424a57;
+    font-size: 0.84rem;
+}
+
+.funcion-acciones {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.6rem;
+    margin-top: 1rem;
+}
+
+.funcion-acciones button {
+    padding: 0.6rem 1rem;
+    border: 0;
+    border-radius: 6px;
+    background: #ff6464;
+    color: #fff;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.funcion-acciones button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.funcion-acciones .boton-cancelar {
+    padding: 0.6rem 0.9rem;
+    border-radius: 6px;
+    background: #f0f1f4;
+    color: #4e5663;
+}
+
+.funcion-bloqueada {
+    padding: 1rem;
+    border-radius: 8px;
+    background: #fff6e8;
+    color: #66420c;
+}
+
+@media (max-width: 700px) {
+    .funcion-campo {
+        grid-template-columns: 1fr;
+    }
+
+    .funcion-ayuda {
+        grid-column: 1;
+    }
+
+    .funcion-horario {
+        grid-template-columns: 1fr;
+    }
+
+    .funcion-acciones {
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 640px) {
+    .funcion-existente {
+        grid-template-columns: 1fr;
+        gap: 0.2rem;
+    }
 }
 
 

@@ -96,18 +96,3 @@ def actualizar_funcion(id_funcion):
     if funcion is None:
         return error_api("FUNCION_NO_ENCONTRADA", "Función no encontrada", "No existe ese ID de función", 404)
     return jsonify({"funcion": funcion}), 200
-
-
-# Por ahora dejo aqui
-@funciones_bp.route("/compras", methods=["POST"])
-def reservar_entradas():
-    error = cliente_requerido()
-    if error:
-        return error
-
-    compra, error = funciones_service.reservar_butacas(
-        request.get_json(silent=True), session["id_usuario"]
-    )
-    if error:
-        return error_api(error[1], error[2], error[3], error[0])
-    return jsonify({"compra": compra}), 201

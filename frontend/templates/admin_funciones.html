@@ -18,6 +18,17 @@
         </div>
     </div>
     {% if error %}<p class="mensaje-error">{{ error }}</p>{% endif %}
+    <form class="filtro-funciones-admin" method="get" action="{{ url_for('funciones_front.admin_funciones') }}">
+        <label for="filtro-local">Filtrar por cine</label>
+        <select id="filtro-local" name="local_id">
+            <option value="">Todos los cines</option>
+            {% for local in locales %}
+            <option value="{{ local.id_local }}" {% if local_id|string == local.id_local|string %}selected{% endif %}>{{ local.nombre }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit">Ver funciones</button>
+        {% if local_id %}<a href="{{ url_for('funciones_front.admin_funciones') }}">Quitar filtro</a>{% endif %}
+    </form>
     {% if funciones %}
         <div class="tabla-contenedor">
             <table>
@@ -27,21 +38,23 @@
                     <tr>
                         <td>{{ funcion.pelicula }}</td>
                         <td>{{ funcion.local }} / {{ funcion.numero_sala }}</td>
-                        <td>{{ funcion.fecha_hora_inicio }}</td>
+                        <td>{{ funcion.inicio_legible }}</td>
                         <td>{{ funcion.situacion }}</td>
                         <td>
                             <div class="acciones-tabla">
+                                {% if funcion.situacion != 'Programada' %}
+                                <span class="sin-acciones" aria-label="Sin acciones disponibles">—</span>
+                                {% else %}
                                 {% if funcion.tiene_entradas_activas %}
                                 <span>No editable: tiene entradas</span>
-                                {% elif funcion.situacion == 'Programada' %}
+                                {% else %}
                                 <a href="{{ url_for('funciones_front.admin_editar_funcion', id_funcion=funcion.id_funcion) }}">Editar</a>
                                 {% endif %}
-                                {% if funcion.situacion == 'Programada' %}
                                 <form method="post" action="{{ url_for('funciones_front.admin_cancelar_funcion', id_funcion=funcion.id_funcion) }}">
                                     <button class="boton-peligro" type="submit">Cancelar</button>
                                 </form>
                                 {% if funcion.tiene_entradas_activas %}
-                                <span>Después puedes crear una función nueva.</span>
+                                <span class="accion-no-disponible">Después podrás crear una función nueva.</span>
                                 {% endif %}
                                 {% endif %}
                             </div>
@@ -51,6 +64,8 @@
                 </tbody>
             </table>
         </div>
+    {% elif not error and local_id %}
+        <p>No hay funciones cargadas para este cine.</p>
     {% elif not error %}
         <p>Todavía no hay funciones cargadas.</p>
     {% endif %}
