@@ -145,7 +145,11 @@ CREATE TABLE IF NOT EXISTS productos (
 	descripcion VARCHAR(255),
 	precio DECIMAL(10,2) NOT NULL CHECK (precio > 0),
 	activo BOOLEAN NOT NULL DEFAULT TRUE,
+<<<<<<< HEAD
 	imagen_url VARCHAR(500)
+=======
+	imagen VARCHAR(500)
+>>>>>>> a175bb4 (Agrego pequeño cambio en sql)
 );
 
 CREATE TABLE IF NOT EXISTS promociones (

@@ -169,7 +169,11 @@ def _proximas_funciones():
     # id de película -> fecha de su función más cercana que todavía no empezó
     proximas = {}
     ahora = datetime.now()
-    for f in api.get_lista("/api/funciones", "funciones"):
+    filtros = {}
+    cine_id = api.session.get("cine_id")
+    if cine_id:
+        filtros["local_id"] = cine_id
+    for f in api.get_lista("/api/funciones", "funciones", filtros or None):
         if f.get("estado") in ("cancelada", "finalizada"):
             continue
         inicio = _fecha_funcion(f.get("fecha_hora_inicio"))
@@ -205,7 +209,9 @@ def _destacadas(peliculas):
     )
 
     destacadas = []
-    for p in con_funcion + sin_funcion:
+    # con un cine elegido, solo las películas que tienen función ahí
+    por_cine = bool(api.session.get("cine_id"))
+    for p in con_funcion + ([] if por_cine else sin_funcion):
         item = dict(p)
         inicio = proximas.get(p.get("id_pelicula"))
         item["proxima_funcion"] = inicio.strftime("%d/%m %H:%M") if inicio else None
@@ -360,10 +366,17 @@ def detalle(id_pelicula):
     # Obtener funciones disponibles.
     # Si el endpoint falla, se muestra la película igualmente.
 
+    filtros_funciones = {
+        "pelicula_id": id_pelicula
+    }
+    cine_id = api.session.get("cine_id")
+    if cine_id:
+        filtros_funciones["local_id"] = cine_id
+
     funciones = api.get_lista(
         "/api/funciones",
         "funciones",
-        {"pelicula_id": id_pelicula}
+        filtros_funciones
     )
 
     funciones = agrupar_por_dia(funciones)

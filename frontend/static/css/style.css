@@ -431,6 +431,41 @@ footer {
     margin: 0.5rem 0;
 }
 
+.contenedor-poster {
+    display: flex ;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.contenedor-poster.pastel-purpura {
+    background-color: #f3e8ff ;
+    color: #7e22ce;
+}
+
+.contenedor-poster.pastel-azul {
+    background-color: #e0f2fe ;
+    color: #0369a1;
+}
+
+.icono-placeholder {
+    font-size: 3.2rem;
+    line-height: 1;
+}
+
+.lista-combos-compra {
+    list-style: none;
+    padding-left: 0 ;
+    margin: 0.35rem 0 0;
+    font-weight: 700;
+    font-size: 0.85rem;
+    line-height: 1.35;
+}
+
+.lista-combos-compra li {
+    margin-bottom: 0.25rem;
+}
+
 .seccion-arrepentimiento {
   margin-top: 1rem;
   border-radius: 8px;
@@ -645,6 +680,11 @@ footer {
   background-color: #ffffff;
   border-radius: 8px;
   border: 1px solid #e0e0e0;
+}
+
+.enlace-cambiar{
+    text-decoration: underline;
+    color: black;
 }
 
 .contenedor-cambiar-clave h3 {
