@@ -138,6 +138,7 @@ body:has(main > .funciones-pagina:not(.checkout-pagina)) .footer-links {
 .funciones-pagina .boton-peligro {
     padding: .4rem .65rem;
     background: #7b1113;
+    white-space: nowrap;
 }
 
 .funciones-pagina .boton-eliminar {

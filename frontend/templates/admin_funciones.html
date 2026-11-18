@@ -53,9 +53,6 @@
                                 <form method="post" action="{{ url_for('funciones_front.admin_cancelar_funcion', id_funcion=funcion.id_funcion) }}">
                                     <button class="boton-peligro" type="submit">Cancelar</button>
                                 </form>
-                                {% if funcion.tiene_entradas_activas %}
-                                <span class="accion-no-disponible">Después podrás crear una función nueva.</span>
-                                {% endif %}
                                 {% endif %}
                             </div>
                         </td>
