@@ -1,3 +1,5 @@
+from datetime import date
+
 from flask import Blueprint, render_template, url_for, flash, request, redirect
 
 from api import (
@@ -9,6 +11,46 @@ from api import (
 
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
+
+
+TEXTO_ESTADO = {"vigente": "Vigente", "proxima": "Próxima"}
+
+
+def _fecha_ar(texto):
+    try:
+        return date.fromisoformat(texto).strftime("%d/%m/%Y")
+    except (TypeError, ValueError):
+        return "—"
+
+
+def _contar_funciones(id_pelicula):
+    estado, datos = pedir("GET", f"/api/peliculas/{id_pelicula}/funciones")
+    if estado != 200:
+        return "—"
+    funciones = datos.get("funciones") if isinstance(datos, dict) else datos
+    return len(funciones) if isinstance(funciones, list) else "—"
+
+
+def _novedades_inicio():
+    estado, respuesta = pedir("GET", "/api/admin/peliculas")
+    if estado != 200 or not isinstance(respuesta, dict):
+        print("Error al obtener las películas:", mensaje_error(respuesta))
+        return []
+
+    peliculas = [p for p in respuesta.get("peliculas", []) if p.get("estado_cartelera") in TEXTO_ESTADO]
+    # primero las vigentes y después las próximas, por fecha de inicio
+    peliculas.sort(key=lambda p: (p["estado_cartelera"] != "vigente", p.get("cartelera_desde") or ""))
+
+    return [
+        {
+            "nombre": p.get("nombre"),
+            "poster_url": p.get("poster_url"),
+            "fecha_estreno": _fecha_ar(p.get("cartelera_desde")),
+            "cantidad_funciones": _contar_funciones(p.get("id_pelicula")),
+            "estado": TEXTO_ESTADO[p["estado_cartelera"]],
+        }
+        for p in peliculas[:10]
+    ]
 
 
 @admin_bp.route("/")
@@ -105,11 +147,14 @@ def admin():
             mensaje_error(respuesta_funciones)
         )
 
+    novedades = _novedades_inicio()
+
     return render_template(
         "inicio_admin.html",
         cantidad_peliculas_activas=cantidad_peliculas_activas,
         ocupacion_promedio=ocupacion_promedio,
-        cantidad_funciones_programadas=cantidad_funciones_programadas
+        cantidad_funciones_programadas=cantidad_funciones_programadas,
+        novedades=novedades
     )
 
 
