@@ -1,6 +1,6 @@
 {% extends "base_admin.html" %}
 
-{% block title %}Locales y salas - Cine Paradiso{% endblock %}
+{% block titulo %}Locales y salas - Cine Paradiso{% endblock %}
 
 {% block contenido_admin %}
 
@@ -13,8 +13,25 @@
             <p>Organizá los locales y las salas</p>
         </div>
     </div>
+    {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+    {% endif %}
+    <p>
+        {% if filtro_local %}
+            {{ salas_configuradas }}
+        {% else %}
+            {{ todos_los_locales|length }} Locales · {{ salas_configuradas }}
+        {% endif %}
+        {% if filtro_estado == 'activa' %}
+            {{ 'sala activa' if salas_configuradas == 1 else 'salas activas' }}
+        {% elif filtro_estado == 'inactiva' %}
+            {{ 'sala inactiva' if salas_configuradas == 1 else 'salas inactivas' }}
+        {% else %}
+            {{ 'sala' if salas_configuradas == 1 else 'salas' }}
+        {% endif %}
+    </p>
+    
 
-    <p>{{ locales|length }} Locales · {{ salas_configuradas }} Salas configuradas</p>
     <div class="barra-filtros">
         <nav class="filtros-salas" aria-label="Filtrar salas por estado">
             <a href="{{ url_for('locales.admin_locales', estado='todas', local=filtro_local) }}"
@@ -70,17 +87,17 @@
                                     {% if sala.estado == 'activa' %}
                                         <form method="post" 
                                             action="{{ url_for('salas.desactivar_sala', id_sala=sala.id_sala) }}"
-                                            data-numero-sala="{{ sala.numero_sala }}">
-                                            <button type="submit" class="boton-tabla boton-tabla--baja">Dar de baja</button>
+                                            data-numero-sala="{{ sala.numero_sala }}" data-accion="desactivar">
+                                            <button type="submit" class="boton-tabla boton-tabla--baja">Desactivar</button>
                                             <input type="hidden" name="estado" value="{{ filtro_estado }}">
                                         </form>
                                     {% else %}        
                                         <form method="post" 
-                                            action="{{ url_for('salas.editar_sala', id_sala=sala.id_sala) }}"
-                                            data-numero-sala="{{ sala.numero_sala }}">
+                                            action="{{ url_for('salas.activar_sala', id_sala=sala.id_sala) }}"
+                                            data-numero-sala="{{ sala.numero_sala }}" data-accion="reactivar">
                                             <input type="hidden" name="nuevo_estado" value="activa">
                                             <input type="hidden" name="estado" value="{{ filtro_estado }}">
-                                            <button type="submit" class="boton boton-tabla--activar">Activar</button>
+                                            <button type="submit" class="boton-tabla boton-tabla--activar">Reactivar</button>
                                         </form>           
                                     {% endif %}      
                                 </div>

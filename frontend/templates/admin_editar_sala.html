@@ -1,55 +1,93 @@
+
 {% extends "base_admin.html" %}
 
-{% block titulo %}{% if id_sala %}Editar sala{% else %}Nueva Sala{% endif %}{% endblock %}
+{% block titulo %}{% if sala %}Editar sala{% else %}Nueva Sala{% endif %}{% endblock %}
 
 {% block contenido_admin %}
 <div class="formulario-admin">
-    <h1>{% if id_sala %}Editar sala {{ id_sala }}{% else %}Nueva Sala{% endif %}</h1>
+    <h1>{% if sala %}Editar sala {{ sala.id_sala }}{% else %}Nueva Sala{% endif %}</h1>
+
     {% if error %}
     <div class="alert alert-danger">{{ error }}</div>
     {% endif %}
-    <form method="post" action="{% if id_sala %}{{ url_for('salas.editar_sala', id_sala=id_sala) }}{% else %}
-    {{ url_for('salas.crear_sala') }}{% endif %}" class="formulario-sala" novalidate>
-        {% if not id_sala %}  
-            <input type="hidden" name="id_local" value="{{ datos.id_local }}" required>
-        {% endif %} 
+
+    <form method="post"
+        action="{% if sala %}{{ url_for('salas.editar_sala', id_sala=sala.id_sala) }}
+        {% else %}{{ url_for('salas.crear_sala', id_local=id_local) }}{% endif %}"
+        class="formulario-sala" novalidate>
+        {% if not sala %}
+            <input type="hidden" name="id_local" value="{{ id_local }}">
+        {% endif %}
         <div class="campo-formulario">
             <label for="numero_sala">Número de sala</label>
-            <input 
-            type="number" id="numero_sala" name="numero_sala"
-            min="1" step="1" value="{{ datos.numero_sala }}" required>
+            <input
+                type="number"
+                id="numero_sala"
+                name="numero_sala"
+                min="1"
+                step="1"
+                value="{{ numero_sala }}"
+                required>
             <span class="error-campo" id="error-numero_sala"></span>
         </div>
+
         <div class="campo-formulario">
-            <label for="capacidad">Capacidad</label>
-            <input type="number" id="capacidad" name="capacidad"
-                min="1" max="300" step="1" value="{{ datos.capacidad }}">
-            <span class="error-campo" id="error-capacidad"></span>
-            {% if id_sala %}
-            <small>Al bajar la capacidad se eliminan las ultimas butacas, siempre que no tengan entradas futuras</small>
-            {% endif %}
+            <label>Filas y cantidad de butacas</label>
+
+            <div id="filas-container">
+                {% for fila in filas %}
+                    <div class="fila-formulario">
+                        <div class="campo-fila">
+                        <label for="fila_{{ loop.index }}">Letra</label>
+                        <input type="text" id="fila_{{ loop.index }}" name="fila"
+                            maxlength="1" pattern="[A-Z]" value="{{ fila.fila }}" required>
+            </div>
+
+            <div class="campo-cantidad">
+                <label for="cantidad_{{ loop.index }}">Butacas</label>
+                <input type="number" id="cantidad_{{ loop.index }}" name="cantidad"
+                    min="1" step="1" value="{{ fila.cantidad }}" required>
+            </div>
+            <button type="button" class="eliminar-fila">
+                Eliminar
+            </button>
         </div>
-        {% if id_sala %}
+        {% endfor %}
+    </div>
+
+            <button type="button" id="agregar-fila" class="boton-agregar">
+                Agregar fila
+            </button>
+        </div>
+
+        {% if sala %}
         <div class="campo-formulario">
             <label for="estado">Estado</label>
             <select id="estado" name="estado">
-                <option value="activa" 
-                    {% if datos.estado == 'activa' %}selected{% endif %}>
+                <option value="activa"
+                    {% if sala.estado == 'activa' %}selected{% endif %}>
                     Activa
                 </option>
-                <option value="inactiva" {% if datos.estado == 'inactiva' %}
-                selected{% endif %}>Inactiva
+                <option value="inactiva"
+                    {% if sala.estado == 'inactiva' %}selected{% endif %}>
+                    Inactiva
                 </option>
             </select>
         </div>
         {% endif %}
+
         <div class="acciones-formulario">
-            <a class="boton-agregar" href="{{ url_for('locales.admin_locales')}}">Cancelar</a>
-            <button type="submit" class="boton-agregar">Guardar cambios</button>
+            <a class="boton-agregar" href="{{ url_for('locales.admin_locales') }}">
+                Cancelar
+            </a>
+            <button type="submit" class="boton-agregar">
+                Guardar cambios
+            </button>
         </div>
     </form>
 </div>
 {% endblock %}
+
 {% block scripts_admin %}
     <script src="{{ url_for('static', filename='js/salas.js') }}" defer></script>
 {% endblock %}
