@@ -20,20 +20,22 @@
                         <td>{{ funcion.local }} / {{ funcion.numero_sala }}</td>
                         <td>{{ funcion.fecha_hora_inicio }}</td>
                         <td>{{ funcion.estado }}</td>
-                        <td class="acciones-tabla">
-                            {% if funcion.tiene_entradas_activas %}
-                            <span>No editable: tiene entradas</span>
-                            {% elif funcion.estado != 'cancelada' and funcion.estado != 'finalizada' %}
-                            <a href="{{ url_for('funciones_front.admin_editar_funcion', id_funcion=funcion.id_funcion) }}">Editar</a>
-                            {% endif %}
-                            {% if funcion.estado == 'programada' %}
-                            <form method="post" action="{{ url_for('funciones_front.admin_cancelar_funcion', id_funcion=funcion.id_funcion) }}">
-                                <button class="boton-peligro" type="submit">Cancelar</button>
-                            </form>
-                            {% if funcion.tiene_entradas_activas %}
-                            <span>Después puedes crear una función nueva.</span>
-                            {% endif %}
-                            {% endif %}
+                        <td>
+                            <div class="acciones-tabla">
+                                {% if funcion.tiene_entradas_activas %}
+                                <span>No editable: tiene entradas</span>
+                                {% elif funcion.estado != 'cancelada' and funcion.estado != 'finalizada' %}
+                                <a href="{{ url_for('funciones_front.admin_editar_funcion', id_funcion=funcion.id_funcion) }}">Editar</a>
+                                {% endif %}
+                                {% if funcion.estado == 'programada' %}
+                                <form method="post" action="{{ url_for('funciones_front.admin_cancelar_funcion', id_funcion=funcion.id_funcion) }}">
+                                    <button class="boton-peligro" type="submit">Cancelar</button>
+                                </form>
+                                {% if funcion.tiene_entradas_activas %}
+                                <span>Después puedes crear una función nueva.</span>
+                                {% endif %}
+                                {% endif %}
+                            </div>
                         </td>
                     </tr>
                     {% endfor %}

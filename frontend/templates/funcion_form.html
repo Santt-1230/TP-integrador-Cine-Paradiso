@@ -3,7 +3,7 @@
 {% block titulo %}{% if funcion %}Editar{% else %}Nueva{% endif %} función - Cine Paradiso{% endblock %}
 
 {% block contenido %}
-<section class="funciones-pagina formulario-funcion">
+<section class="funciones-pagina formulario-funcion funcion-centrada">
     <h1>{% if funcion %}Editar función{% else %}Crear función{% endif %}</h1>
     {% if error %}<p class="mensaje-error">{{ error }}</p>{% endif %}
     {% set inicio = funcion.fecha_hora_inicio[:16] if funcion and funcion.fecha_hora_inicio else '' %}
@@ -15,9 +15,23 @@
     <a class="boton" href="{{ url_for('funciones_front.admin_nueva_funcion') }}">Crear una nueva función</a>
     <a class="boton-secundario" href="{{ url_for('funciones_front.admin_funciones') }}">Volver</a>
     {% else %}
-    <form method="post">
-        <label>ID de película
+    <form method="post" class="funcion-form">
+        <label>Película
+            {% if peliculas %}
+            <select name="id_pelicula" required>
+                <option value="">Elegí una película</option>
+                {% for p in peliculas %}
+                <option value="{{ p.id_pelicula }}" {% if funcion and funcion.id_pelicula == p.id_pelicula %}selected{% endif %}>
+                    {{ p.nombre }}{% if p.estado_cartelera == 'proxima' %} (próxima){% endif %}
+                </option>
+                {% endfor %}
+                {% if funcion and funcion.id_pelicula not in peliculas|map(attribute='id_pelicula')|list %}
+                <option value="{{ funcion.id_pelicula }}" selected>{{ funcion.pelicula or 'Película actual' }}</option>
+                {% endif %}
+            </select>
+            {% else %}
             <input type="number" name="id_pelicula" min="1" required value="{{ funcion.id_pelicula if funcion else '' }}">
+            {% endif %}
         </label>
         <label>Sala activa
             <select name="id_sala" required>
@@ -32,14 +46,23 @@
         {% if not salas %}
         <p class="mensaje-error">No hay salas activas disponibles para programar una función.</p>
         {% endif %}
-        <label>Fecha y hora de inicio
-            <input type="datetime-local" name="fecha_hora_inicio" required value="{{ inicio }}">
-        </label>
+        <div class="funcion-fecha">
+            <label>Fecha y hora de inicio
+                <input type="datetime-local" name="fecha_hora_inicio" {% if funcion %}required{% endif %} value="{{ inicio }}">
+            </label>
+            {% if not funcion %}
+            <label class="funcion-ahora">
+                <input type="checkbox" name="empieza_ahora" value="1"> Empieza ahora
+            </label>
+            {% endif %}
+        </div>
         <label>Precio de entrada
             <input type="number" name="precio_entrada" min="0" step="0.01" required value="{{ funcion.precio_entrada if funcion else '' }}">
         </label>
-        <button type="submit">Guardar</button>
-        <a class="boton-secundario" href="{{ url_for('funciones_front.admin_funciones') }}">Volver</a>
+        <div class="funcion-botones">
+            <button type="submit">Guardar</button>
+            <a class="boton-secundario" href="{{ url_for('funciones_front.admin_funciones') }}">Volver</a>
+        </div>
     </form>
     {% endif %}
 </section>
