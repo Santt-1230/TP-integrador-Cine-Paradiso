@@ -1,8 +1,14 @@
-{% extends "base_funciones.html" %}
+{% extends "base_admin.html" %}
+
+{% block estilos_extra %}
+    {{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/funciones.css') }}">
+{% endblock %}
+
 
 {% block titulo %}{% if funcion %}Editar{% else %}Nueva{% endif %} función - Cine Paradiso{% endblock %}
 
-{% block contenido %}
+{% block contenido_admin %}
 <section class="funciones-pagina formulario-funcion funcion-centrada">
     <h1>{% if funcion %}Editar función{% else %}Crear función{% endif %}</h1>
     {% if error %}<p class="mensaje-error">{{ error }}</p>{% endif %}

@@ -1,8 +1,14 @@
-{% extends "base_funciones.html" %}
+{% extends "base_admin.html" %}
+
+{% block estilos_extra %}
+    {{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/funciones.css') }}">
+{% endblock %}
+
 
 {% block titulo %}Administrar funciones - Cine Paradiso{% endblock %}
 
-{% block contenido %}
+{% block contenido_admin %}
 <section class="funciones-pagina">
     <div class="titulo-con-accion">
         <h1>Administrar funciones</h1>
