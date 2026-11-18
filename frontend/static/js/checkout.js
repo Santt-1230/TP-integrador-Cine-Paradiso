@@ -1,4 +1,13 @@
+
 document.addEventListener("DOMContentLoaded", () => {
+    const errorTemporal = document.querySelector("[data-error-temporal]");
+    if (errorTemporal) {
+        const url = new URL(window.location.href);
+        url.searchParams.delete("checkout_expirado");
+        window.history.replaceState({}, "", url);
+        window.setTimeout(() => errorTemporal.remove(), 5000);
+    }
+
     const formularioButacas = document.querySelector(".seleccion-butacas");
     if (formularioButacas) {
         const casillas = [...formularioButacas.querySelectorAll('input[name="butacas"]:not(:disabled)')];
@@ -36,6 +45,21 @@ document.addEventListener("DOMContentLoaded", () => {
     const formularioCheckout = document.querySelector(".checkout-form");
     if (!formularioCheckout) return;
 
+    let compraEnviandose = false;
+    formularioCheckout.addEventListener("submit", (event) => {
+        if (compraEnviandose) {
+            event.preventDefault();
+            return;
+        }
+
+        compraEnviandose = true;
+        const botonCompra = formularioCheckout.querySelector('button[type="submit"]');
+        if (botonCompra) {
+            botonCompra.disabled = true;
+            botonCompra.textContent = "Procesando compra…";
+        }
+    });
+
     const totalContenedor = formularioCheckout.querySelector(".checkout-actions");
     const totalSalida = formularioCheckout.querySelector(".checkout-total-dinamico");
     const baseTotal = Number(totalContenedor?.dataset.baseTotal || 0);
@@ -62,9 +86,10 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     actualizarTotal();
 
-    const paginaCheckout = document.querySelector(".checkout-pagina[data-checkout-expira-en]");
+    const paginaCheckout = document.querySelector(".checkout-pagina[data-checkout-duracion-segundos]");
     if (paginaCheckout) {
-        const expiraEnMs = Number(paginaCheckout.dataset.checkoutExpiraEn) * 1000;
+        const duracionSegundos = Number(paginaCheckout.dataset.checkoutDuracionSegundos);
+        const expiraEnMs = Date.now() + duracionSegundos * 1000;
         const enlaceVolver = paginaCheckout.querySelector(":scope > a");
 
         const actualizarContador = () => {

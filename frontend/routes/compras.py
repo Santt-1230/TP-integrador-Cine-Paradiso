@@ -1,5 +1,4 @@
 from decimal import Decimal, InvalidOperation
-import time
 
 from flask import Blueprint, Response, abort, flash, jsonify, redirect, render_template, request, session, url_for
 import requests
@@ -25,13 +24,6 @@ def checkout():
         except ValueError:
             abort(400)
 
-        momento_de_expiracion = session.get("checkout_expira_en", 0)
-        checkout_vencido = momento_de_expiracion <= time.time()
-        if checkout_vencido:
-            session.pop("checkout_expira_en", None)
-            flash("Se venció el tiempo de checkout. Elegí las butacas nuevamente.", "warning")
-            return redirect(url_for("funciones_front.pagina_butacas", id_funcion=id_funcion))
-
         cantidad_de_butacas = len(ids_butacas)
         cantidad_permitida = 1 <= cantidad_de_butacas <= 6
         hay_butacas_repetidas = len(set(ids_butacas)) != cantidad_de_butacas
@@ -39,11 +31,10 @@ def checkout():
             flash("Elegí entre una y seis butacas distintas.", "warning")
             return redirect(url_for("funciones_front.pagina_butacas", id_funcion=id_funcion))
 
-        estado_respuesta, cuerpo_respuesta = api.pedir_api(
+        estado_respuesta, cuerpo_respuesta = api.pedir(
             "POST",
             "/api/compras",
-            cookies=api.cookies_backend(),
-            json={
+            datos={
                 "id_funcion": id_funcion,
                 "id_butacas": ids_butacas,
                 "productos": productos_elegidos,
@@ -52,7 +43,6 @@ def checkout():
 
         compra_creada = estado_respuesta == 201
         if compra_creada:
-            session.pop("checkout_expira_en", None)
             return redirect(url_for("perfil.perfil_seccion"))
 
         cantidad_por_id_producto = {
@@ -80,17 +70,6 @@ def checkout():
         flash("Podés seleccionar hasta seis butacas. Volvé a elegirlas.", "warning")
         return redirect(url_for("funciones_front.pagina_butacas", id_funcion=id_funcion))
 
-    momento_de_expiracion = session.get("checkout_expira_en")
-    checkout_ya_iniciado = bool(momento_de_expiracion)
-    checkout_vencido = checkout_ya_iniciado and momento_de_expiracion <= time.time()
-    if checkout_vencido:
-        session.pop("checkout_expira_en", None)
-        flash("Se venció el tiempo de checkout. Elegí las butacas nuevamente.", "warning")
-        return redirect(url_for("funciones_front.pagina_butacas", id_funcion=id_funcion))
-
-    if not checkout_ya_iniciado:
-        session["checkout_expira_en"] = time.time() + 10 * 60
-
     return render_checkout(id_funcion, ids_butacas)
 
 def render_checkout(id_funcion, ids_butacas, error=None, productos_seleccionados=None):
@@ -103,9 +82,9 @@ def render_checkout(id_funcion, ids_butacas, error=None, productos_seleccionados
     if hay_butacas_repetidas:
         abort(400)
 
-    estado_funcion, datos_funcion = api.pedir_api("GET", f"/api/funciones/{id_funcion}")
-    estado_butacas, datos_butacas = api.pedir_api("GET", f"/api/funciones/{id_funcion}/butacas")
-    estado_servicios, datos_servicios = api.pedir_api("GET", "/api/servicios")
+    estado_funcion, datos_funcion = api.pedir("GET", f"/api/funciones/{id_funcion}")
+    estado_butacas, datos_butacas = api.pedir("GET", f"/api/funciones/{id_funcion}/butacas")
+    estado_servicios, datos_servicios = api.pedir("GET", "/api/servicios")
 
     funcion_cargada = estado_funcion == 200
     butacas_cargadas = estado_butacas == 200
@@ -165,8 +144,6 @@ def render_checkout(id_funcion, ids_butacas, error=None, productos_seleccionados
 
     total = precio_entrada * len(ids_butacas)
 
-    expiracion_checkout = session.get("checkout_expira_en", time.time() + 10 * 60)
-
     return render_template(
         "checkout.html",
         funcion=funcion,
@@ -176,9 +153,7 @@ def render_checkout(id_funcion, ids_butacas, error=None, productos_seleccionados
         productos=servicios,
         servicios_error=servicios_error,
         total=total,
-        error=error,
-        checkout_expira_en=expiracion_checkout,
-        locales=[],
+        error=error
     )
 
 
