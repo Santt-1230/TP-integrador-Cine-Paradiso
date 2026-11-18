@@ -1,49 +1,14 @@
 import io
-import requests
-from flask import Blueprint, flash, redirect, render_template, request, session, url_for
-from api import pedir, mensaje_error, verificar_estado, limpiar_sesion_front
-from flask import send_file, session, flash, redirect, url_for
-from api import BACKEND_URL, cookies_backend, verificar_estado
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
+
+import requests
+from flask import Blueprint, flash, redirect, render_template, request, send_file, session, url_for
+from api import BACKEND_URL, cookies_backend, limpiar_sesion_front, mensaje_error, pedir, verificar_estado
 
 
 perfil_bp = Blueprint('perfil', __name__)
 
-def historial_de_prueba():
-    ahora = datetime.now(ZoneInfo("America/Argentina/Buenos_Aires"))
-    formato = "%Y-%m-%d %H:%M:%S"
-    return {
-        "peliculas_vistas": [
-            {"id_pelicula": 1, "titulo": "El Padrino", "poster_url": "",
-             "duracion_min": 175, "clasificacion": "+18"},
-            {"id_pelicula": 2, "titulo": "Interstellar", "poster_url": "",
-             "duracion_min": 169, "clasificacion": "+13"},
-        ],
-        "compras": [
-            {   # función en 3 días: muestra el botón de cancelar
-                "id_compra": 101, "estado": "confirmada",
-                "fecha_hora_inicio": (ahora + timedelta(days=3)).strftime(formato),
-                "fecha_creacion": "10/11 - 21:30 HS",
-                "titulo_pelicula": "EL PADRINO", "genero": "DRAMA", "poster_url": "",
-                "servicios": [{"nombre": "COMBO 1", "imagen_url": ""}],
-            },
-            {   # función en 30 minutos: no muestra el botón
-                "id_compra": 102, "estado": "confirmada",
-                "fecha_hora_inicio": (ahora + timedelta(minutes=30)).strftime(formato),
-                "fecha_creacion": "13/11 - 20:00 HS",
-                "titulo_pelicula": "INTERSTELLAR", "genero": "CIENCIA FICCIÓN",
-                "poster_url": "", "servicios": [],
-            },
-            {   # cancelada: tiene que desaparecer de la lista
-                "id_compra": 103, "estado": "cancelada",
-                "fecha_hora_inicio": (ahora + timedelta(days=5)).strftime(formato),
-                "fecha_creacion": "09/11 - 19:00 HS",
-                "titulo_pelicula": "PELICULA CANCELADA", "genero": "ACCIÓN",
-                "poster_url": "", "servicios": [],
-            },
-        ],
-    }
 
 @perfil_bp.route('/mi-perfil', defaults={'seccion': 'mi-cuenta'})
 @perfil_bp.route('/mi-perfil/<seccion>')
@@ -72,8 +37,9 @@ def perfil_seccion(seccion):
             return redir_h
 
         if estado_h == 200:
-            if not historial.get("compras") and not historial.get("peliculas_vistas"):
-                historial = historial_de_prueba()   # PRUEBA: borrar antes de commitear
+            historial = res_hist or {}
+        else:
+            flash(mensaje_error(res_hist), "error")
 
         # Procesamos las compras dentro de historial
     if seccion == 'mis-compras':
