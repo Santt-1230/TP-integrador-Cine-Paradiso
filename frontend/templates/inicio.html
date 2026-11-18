@@ -64,7 +64,11 @@
         <div class="grilla grilla-chica">
             {% for promo in promociones %}
             <article class="promo">
-                {% if promo.imagen_url %}<img src="{{ promo.imagen_url }}" alt="{{ promo.titulo }}" loading="lazy">{% endif %}
+                {% if promo.imagen_url %}
+                    <img class="servicios-cliente__imagen"
+                         src="{{ promo.imagen_url }}"
+                         alt="{{ promo.titulo }}">
+                {% endif %}
                 <h3>{{ promo.titulo }}</h3>
                 {% if promo.descripcion %}<p>{{ promo.descripcion }}</p>{% endif %}
             </article>
@@ -75,13 +79,30 @@
 
     {% if productos %}
     <section id="productos">
-        <div class="seccion-titulo"><h2>Productos</h2></div>
+        <div class="seccion-titulo">
+            <h2>Productos</h2>
+        </div>
+
         <div class="grilla grilla-chica">
             {% for prod in productos %}
             <article class="producto">
+
+                {% if prod.imagen_url %}
+                    <img class="servicios-cliente__imagen"
+                         src="{{ prod.imagen_url }}"
+                         alt="{{ prod.nombre }}">
+                {% endif %}
+
                 <h3>{{ prod.nombre }}</h3>
-                {% if prod.descripcion %}<p>{{ prod.descripcion }}</p>{% endif %}
-                {% if prod.precio is not none %}<p class="precio">$ {{ prod.precio }}</p>{% endif %}
+                
+                {% if prod.descripcion %}
+                    <p>{{ prod.descripcion }}</p>
+                {% endif %}
+
+                {% if prod.precio is not none %}
+                    <p class="precio">$ {{ prod.precio }}</p>
+                {% endif %}
+                
             </article>
             {% endfor %}
         </div>
