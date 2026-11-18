@@ -1,5 +1,25 @@
 .checkout-pagina {
     width: min(900px, 92%);
+    margin: 2rem auto;
+    flex: 1;
+    padding-bottom: 3rem;
+}
+
+.checkout-pagina .boton,
+.checkout-pagina button,
+.checkout-pagina .boton-secundario {
+    display: inline-block;
+    border: 0;
+    border-radius: 6px;
+    padding: .65rem 1rem;
+    background: #b30000;
+    color: #fff;
+    cursor: pointer;
+    font: inherit;
+}
+
+.checkout-pagina {
+    width: min(900px, 92%);
     padding-bottom: 3rem;
 }
 

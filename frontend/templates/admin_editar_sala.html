@@ -10,21 +10,24 @@
     {% endif %}
     <form method="post" action="{% if id_sala %}{{ url_for('salas.editar_sala', id_sala=id_sala) }}{% else %}
     {{ url_for('salas.crear_sala') }}{% endif %}" class="formulario-sala" novalidate>
-        {% if not id_sala %}
-          <input type="hidden" name="id_local" value="{{ datos.id_local }}" required>
-            <div class="campo-formulario">
-                <label for="capacidad">Capacidad</label>
-                <input type="number" id="capacidad" name="capacidad"
-                min="1" step="1" value="{{ datos.capacidad }}">
-                <span class="error-campo" id="error-capacidad"></span>
-            </div>
-        {% endif %}
+        {% if not id_sala %}  
+            <input type="hidden" name="id_local" value="{{ datos.id_local }}" required>
+        {% endif %} 
         <div class="campo-formulario">
             <label for="numero_sala">Número de sala</label>
             <input 
             type="number" id="numero_sala" name="numero_sala"
             min="1" step="1" value="{{ datos.numero_sala }}" required>
             <span class="error-campo" id="error-numero_sala"></span>
+        </div>
+        <div class="campo-formulario">
+            <label for="capacidad">Capacidad</label>
+            <input type="number" id="capacidad" name="capacidad"
+                min="1" max="300" step="1" value="{{ datos.capacidad }}">
+            <span class="error-campo" id="error-capacidad"></span>
+            {% if id_sala %}
+            <small>Al bajar la capacidad se eliminan las ultimas butacas, siempre que no tengan entradas futuras</small>
+            {% endif %}
         </div>
         {% if id_sala %}
         <div class="campo-formulario">
