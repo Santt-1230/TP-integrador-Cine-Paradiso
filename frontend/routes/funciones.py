@@ -59,6 +59,37 @@ def _inicio_funcion():
 
 
 
+def _fecha_hora(texto):
+    try:
+        return datetime.fromisoformat(str(texto).replace(" ", "T")).replace(tzinfo=None)
+    except ValueError:
+        return None
+
+
+def _situacion_funcion(funcion):
+    ahora = datetime.now()
+    inicio = _fecha_hora(funcion.get("fecha_hora_inicio"))
+    fin = _fecha_hora(funcion.get("fecha_hora_fin"))
+    if funcion.get("estado") == "finalizada" or (fin and fin <= ahora):
+        return "Finalizada"
+    if inicio and inicio <= ahora:
+        return "En curso"
+    return "Programada"
+
+
+def _preparar_funciones_admin(funciones):
+    # las canceladas no se muestran; las demás van con su situación
+    orden = {"En curso": 0, "Programada": 1, "Finalizada": 2}
+    visibles = []
+    for funcion in funciones:
+        if funcion.get("estado") == "cancelada":
+            continue
+        funcion["situacion"] = _situacion_funcion(funcion)
+        visibles.append(funcion)
+    visibles.sort(key=lambda f: (orden[f["situacion"]], str(f.get("fecha_hora_inicio"))))
+    return visibles
+
+
 @funciones_front_bp.route("/funciones", methods=["GET"])
 def pagina_funciones():
     estado, datos = api.pedir_api("GET", "/api/funciones", params=request.args)
@@ -92,12 +123,13 @@ def pagina_butacas(id_funcion):
 @funciones_front_bp.route("/admin/funciones", methods=["GET"])
 @api.admin_front_requerido
 def admin_funciones():
-    estado, datos = api.pedir("GET", "/api/funciones")
+    estado, datos = api.pedir("GET", "/api/funciones", params={"incluir_canceladas": "true"})
     redireccion = api.verificar_estado(estado)
     if redireccion:
         return redireccion
 
     funciones = datos.get("funciones", []) if estado == 200 else []
+    funciones = _preparar_funciones_admin(funciones)
     error = None if estado == 200 else api.mensaje_error(datos)
     return render_template(
         "admin_funciones.html", funciones=funciones, error=error
