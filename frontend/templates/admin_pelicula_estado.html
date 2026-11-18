@@ -1,0 +1,60 @@
+{% extends "base_admin.html" %}
+
+{% block titulo %}Estado de la película · Administración{% endblock %}
+
+{% block estilos_extra %}
+    {{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin_peliculas.css') }}">
+{% endblock %}
+
+{% block contenido_admin %}
+<div class="servicios-admin">
+
+    <div class="servicios-admin__encabezado">
+        <div>
+            <p class="servicios-admin__migas">Administración / Películas / Estado</p>
+            <h1>{{ pelicula.nombre }}</h1>
+            <p class="servicios-admin__descripcion">
+                Estado actual:
+                <span class="estado-admin {% if pelicula.estado_cartelera != 'vigente' %}estado-admin--inactivo{% endif %}">{{ estados.get(pelicula.estado_cartelera, pelicula.estado_cartelera) }}</span>
+                · En cartelera
+                {{ (pelicula.cartelera_desde|fecha_ar) if pelicula.cartelera_desde else 'sin inicio' }}
+                –
+                {{ (pelicula.cartelera_hasta|fecha_ar) if pelicula.cartelera_hasta else 'sin fin' }}
+            </p>
+        </div>
+        <a class="servicios-admin__accion" href="{{ url_for('admin_peliculas.listado') }}">Volver al listado</a>
+    </div>
+
+    {% set actual = pelicula.estado_cartelera if pelicula.estado_cartelera in ('vigente', 'proxima', 'inactiva') else 'vigente' %}
+
+    <form class="estado-form" method="post" action="{{ url_for('admin_peliculas.cambiar_estado', id_pelicula=pelicula.id_pelicula) }}">
+
+        <label class="estado-form__opcion">
+            <input type="radio" name="estado" value="vigente" {% if actual == 'vigente' %}checked{% endif %}>
+            <span><strong>Vigente</strong><small>En cartelera desde ya. Se ve en la página pública.</small></span>
+        </label>
+        <label class="estado-form__opcion">
+            <input type="radio" name="estado" value="proxima" {% if actual == 'proxima' %}checked{% endif %}>
+            <span><strong>Próxima</strong><small>Empieza en una fecha futura (elegila en 'Desde').</small></span>
+        </label>
+        <label class="estado-form__opcion">
+            <input type="radio" name="estado" value="inactiva" {% if actual == 'inactiva' %}checked{% endif %}>
+            <span><strong>Inactiva</strong><small>Dada de baja: no se ve en la cartelera pública.</small></span>
+        </label>
+
+        <div class="estado-form__fechas">
+            <label>Desde
+                <input type="date" name="cartelera_desde" value="{{ pelicula.cartelera_desde or '' }}">
+            </label>
+            <label>Hasta (vacío = sin fecha de fin)
+                <input type="date" name="cartelera_hasta" value="{{ pelicula.cartelera_hasta or '' }}">
+            </label>
+        </div>
+
+        <p class="servicios-admin__aviso">Para Vigente, 'Desde' solo cuenta si ya pasó; si no, queda sin fecha de inicio. Con Inactiva las fechas no se usan. Una película pasa a Vencida sola cuando termina su período.</p>
+
+        <button type="submit" class="boton-tabla boton-tabla--agregar">Guardar estado</button>
+    </form>
+</div>
+{% endblock %}

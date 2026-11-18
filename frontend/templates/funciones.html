@@ -6,13 +6,23 @@
 <section class="funciones-pagina">
     <h1>Funciones disponibles</h1>
     <form class="filtros-funciones" method="get" action="{{ url_for('funciones_front.pagina_funciones') }}">
-        <label>Película (ID)
-            <input type="number" min="1" name="pelicula_id" value="{{ filtros.get('pelicula_id', '') }}">
+        <label for="filtro-pelicula">Película
+            <select id="filtro-pelicula" name="pelicula_id">
+                <option value="">Todas las películas</option>
+                {% for pelicula in peliculas %}
+                <option value="{{ pelicula.id_pelicula }}" {% if filtros.pelicula_id|string == pelicula.id_pelicula|string %}selected{% endif %}>{{ pelicula.nombre }}</option>
+                {% endfor %}
+            </select>
         </label>
-        <label>Cine (ID)
-            <input type="number" min="1" name="local_id" value="{{ filtros.get('local_id', '') }}">
+        <label for="filtro-cine">Cine
+            <select id="filtro-cine" name="local_id">
+                <option value="">Todos los cines</option>
+                {% for local in locales %}
+                <option value="{{ local.id_local }}" {% if filtros.local_id|string == local.id_local|string %}selected{% endif %}>{{ local.nombre }}</option>
+                {% endfor %}
+            </select>
         </label>
-        <label>Fecha
+        <label for="filtro-fecha">Fecha
             <input type="date" name="fecha" value="{{ filtros.get('fecha', '') }}">
         </label>
         <button type="submit">Buscar</button>
@@ -26,7 +36,7 @@
             <article class="tarjeta-funcion">
                 <h2>{{ funcion.pelicula }}</h2>
                 <p>{{ funcion.local }} · Sala {{ funcion.numero_sala }}</p>
-                <p>{{ funcion.fecha_hora_inicio }} · ${{ funcion.precio_entrada }}</p>
+                <p>{{ funcion.inicio_legible }} · ${{ funcion.precio_entrada }}</p>
                 <a class="boton" href="{{ url_for('funciones_front.pagina_butacas', id_funcion=funcion.id_funcion) }}">Ver butacas</a>
             </article>
             {% endfor %}

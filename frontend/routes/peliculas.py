@@ -155,6 +155,67 @@ def obtener_peliculas(params=None):
 # PÁGINA DE INICIO
 # ====================================
 
+CANTIDAD_CARRUSEL = 4
+
+
+def _fecha_funcion(texto):
+    try:
+        return datetime.fromisoformat(str(texto).replace(" ", "T"))
+    except ValueError:
+        return None
+
+
+def _proximas_funciones():
+    # id de película -> fecha de su función más cercana que todavía no empezó
+    proximas = {}
+    ahora = datetime.now()
+    for f in api.get_lista("/api/funciones", "funciones"):
+        if f.get("estado") in ("cancelada", "finalizada"):
+            continue
+        inicio = _fecha_funcion(f.get("fecha_hora_inicio"))
+        if not inicio or inicio < ahora:
+            continue
+        id_pelicula = f.get("id_pelicula")
+        if id_pelicula not in proximas or inicio < proximas[id_pelicula]:
+            proximas[id_pelicula] = inicio
+    return proximas
+
+
+def _generos_texto(generos):
+    if isinstance(generos, str):
+        return generos
+    nombres = [g.get("nombre") if isinstance(g, dict) else g for g in generos or []]
+    return ", ".join(n for n in nombres if n)
+
+
+def _destacadas(peliculas):
+    # primero las que tienen función (la más cercana primero), después las de estreno más reciente
+    todas, _ = obtener_peliculas({"limite": 50})
+    candidatas = todas or peliculas
+    proximas = _proximas_funciones()
+
+    con_funcion = sorted(
+        (p for p in candidatas if p.get("id_pelicula") in proximas),
+        key=lambda p: proximas[p["id_pelicula"]],
+    )
+    sin_funcion = sorted(
+        (p for p in candidatas if p.get("id_pelicula") not in proximas),
+        key=lambda p: p.get("cartelera_desde") or "",
+        reverse=True,
+    )
+
+    destacadas = []
+    for p in con_funcion + sin_funcion:
+        item = dict(p)
+        inicio = proximas.get(p.get("id_pelicula"))
+        item["proxima_funcion"] = inicio.strftime("%d/%m %H:%M") if inicio else None
+        item["generos_txt"] = _generos_texto(p.get("generos"))
+        sinopsis = (p.get("sinopsis") or "").strip()
+        item["sinopsis_corta"] = sinopsis if len(sinopsis) <= 230 else sinopsis[:230].rsplit(" ", 1)[0] + "…"
+        destacadas.append(item)
+    return destacadas[:CANTIDAD_CARRUSEL]
+
+
 @peliculas_front_bp.get("/")
 def inicio():
 
@@ -164,6 +225,8 @@ def inicio():
 
     if error:
         return error
+
+    destacadas = _destacadas(peliculas)
 
     # Si los endpoints de promociones o servicios fallan,
     # las secciones simplemente se muestran vacías.
@@ -181,6 +244,7 @@ def inicio():
     return render_template(
         "inicio.html",
         peliculas=peliculas,
+        destacadas=destacadas,
         promociones=promociones,
         productos=productos
     )
