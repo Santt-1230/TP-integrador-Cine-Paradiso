@@ -3,19 +3,26 @@ import mysql.connector
 import utils as ut
 import constants as const
 from services import salas as salas_services
+import logging
 
+logger = logging.getLogger(__name__)
 salas_bp = Blueprint('salas', __name__, url_prefix='/api')
 
 @salas_bp.route('/salas' , methods= ['GET'])
 @ut.admin_requerido
 def obtener_salas():
     id_local = request.args.get('id_local')
+    estado = request.args.get('estado')
     try: 
-        salas = salas_services.listar_salas(id_local)
-        return jsonify({'salas':salas}), 200
+        resultado = salas_services.listar_salas(id_local, estado)
+        return jsonify(resultado), 200
 
     except ValueError as error:
-        return jsonify(error.args[0]), 400
+        respuesta = error.args[0]
+        codigo = respuesta['errors'][0]['code']
+        if codigo == const.ERROR_CODE_LOCAL_NOT_FOUND:
+            return jsonify(respuesta), 404
+        return jsonify(respuesta), 400
     
     except (RuntimeError, mysql.connector.Error):
         return jsonify(ut.construir_error_db()), 500
@@ -119,6 +126,7 @@ def actualizar_sala(id_sala):
         return jsonify(respuesta), 400
 
     except (RuntimeError, mysql.connector.Error):
+        logger.exception('Error al actualizar la sala %s', id_sala)
         return jsonify(ut.construir_error_db()), 500
     
     

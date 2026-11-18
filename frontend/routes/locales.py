@@ -84,29 +84,29 @@ def admin_locales():
         locales = datos_respuesta.get('locales', [])
         todos_los_locales = locales
 
-        estado, datos_respuesta = api.get('/api/salas')
+        params = {}
+        if filtro_estado != 'todas':
+            params['estado'] = filtro_estado
+        if filtro_local is not None:
+            params['id_local'] = filtro_local
+
+        estado, datos_respuesta = api.get('/api/salas', params=params)
         estado_respuesta = api.verificar_estado(estado)
         if estado_respuesta:
             return estado_respuesta
         if estado != 200:
+            error = api.mensaje_error(datos_respuesta)
             locales = []
         else:
             salas = datos_respuesta.get('salas', [])
-            for sala in salas:
-                if filtro_local is None or sala['id_local'] == filtro_local:
-                    salas_configuradas += 1
-
-            if filtro_estado != 'todas':
-                salas = [s for s in salas if s['estado'] == filtro_estado]
-
+            salas_configuradas = len(salas)
+            butacas_por_local = datos_respuesta.get('butacas_por_local', {})
             for local in locales:
-                local['salas'] = [
-                    sala for sala in salas
-                    if sala['id_local'] == local['id_local']
-                ]
-                local['total_butacas'] = sum(
-                    sala['capacidad'] for sala in local['salas']
-                )
+                local['salas'] = []
+                for sala in salas:
+                    if sala['id_local'] == local['id_local']:
+                        local['salas'].append(sala)
+                    local['total_butacas'] = butacas_por_local.get(str(local['id_local']), 0)
 
             if filtro_local is not None:
                 locales = [l for l in locales if l['id_local'] == filtro_local]

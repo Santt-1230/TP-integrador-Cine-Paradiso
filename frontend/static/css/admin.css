@@ -1,3 +1,6 @@
+html{
+    overflow-y: scroll;
+}
 :root {
     --admin-rojo: #ff6268;
     --admin-rojo-oscuro: #ed4f57;
