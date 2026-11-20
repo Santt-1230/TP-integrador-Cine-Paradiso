@@ -72,6 +72,12 @@ def registrar_compras():
             message="Butaca inexistente",
             description="Alguna butaca no existe o no pertenece a la sala de esta funcion"
         )), 404
+    if error == "BUTACA_INACTIVA":
+        return jsonify(construir_error_api(
+            code="BUTACA_INACTIVA",
+            message="Butaca inactiva",
+            description="Alguna butaca seleccionada está inactiva. Volvé al mapa y elegí otras.",
+        )), 409
     if error == "BUTACA_NO_DISPONIBLE":
         return jsonify(construir_error_api(
             code="BUTACA_NO_DISPONIBLE",
