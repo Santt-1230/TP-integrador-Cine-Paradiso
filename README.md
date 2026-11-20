@@ -4,7 +4,7 @@ Sistema de gestión de un cine desarrollado como proyecto integrador.
 
 ## Tecnologías utilizadas
 
-- **Frontend:** Flask, Jinja y CSS.
+- **Frontend:** Flask, Jinja, HTML, CSS y JavaScript.
 - **Backend:** Flask (API REST).
 - **Base de datos:** MySQL 8.
 - **Contenedores:** Docker y Docker Compose.
