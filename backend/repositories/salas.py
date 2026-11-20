@@ -3,7 +3,6 @@ from db import (
     ejecutar_mutacion,
     transaccion
 )
-import constants as const
 
 def listar_filas_sala(id_sala: int) -> list[dict]:
     sql = ("SELECT fila, COUNT(*) AS cantidad FROM butacas "

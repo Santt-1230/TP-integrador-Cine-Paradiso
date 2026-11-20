@@ -2,12 +2,12 @@ from repositories import salas as salas_repository
 from repositories import locales as locales_repository
 from validators import salas as salas_validator
 from services  import funciones as services_funciones
-import utils as ut
+from utils import construir_error_api
 import constants as const
 def validar_programacion_sala(id_sala):
     funciones = services_funciones.listar_funciones_por_sala(id_sala)
     if funciones:
-        raise ValueError(ut.construir_error_api(
+        raise ValueError(construir_error_api(
             code=const.ERROR_CODE_SALA_CONFLICT,
             message='Sala reservada',
             description=f"La sala '{id_sala}' tiene {len(funciones)} funciones programadas"
@@ -34,7 +34,7 @@ def listar_salas(id_local=None, estado=None):
             locales_a_mostrar.append(local)
 
     if id_local is not None and not locales_a_mostrar:
-        raise ValueError(ut.construir_error_api(
+        raise ValueError(construir_error_api(
             code=const.ERROR_CODE_LOCAL_NOT_FOUND,
             message='Local no encontrado',
             description=f"No existe un Local con el id '{id_local}'"
@@ -73,19 +73,19 @@ def crear_sala(datos):
     sala = salas_validator.validar_creacion_sala(datos)
     local = locales_repository.obtener_local_id(sala['id_local'])
     if local is None:
-        raise ValueError(ut.construir_error_api(
+        raise ValueError(construir_error_api(
             code=const.ERROR_CODE_LOCAL_NOT_FOUND,
             message='Local no encontrado',
             description=f"No existe un local con el ID '{sala['id_local']}'."
         ))
     if not local['activo']:
-        raise ValueError(ut.construir_error_api(
+        raise ValueError(construir_error_api(
             code=const.ERROR_CODE_LOCAL_INACTIVE,
             message='Local inactivo',
             description=f"No se puede crear una sala en el local '{sala['id_local']}'"
         ))
     if salas_repository.existe_sala_crear(sala['id_local'], sala['numero_sala']):
-        raise ValueError(ut.construir_error_api(
+        raise ValueError(construir_error_api(
             code=const.ERROR_CODE_SALA_CONFLICT,
             message='Numero de sala ocupado',
             description=f"Ya existe una sala con el numero '{sala['numero_sala']}' en el local '{sala['id_local']}'"
@@ -106,7 +106,7 @@ def actualizar_sala(id_sala, datos):
     sala = salas_repository.listar_sala_por_id(id_sala)
     cambios = salas_validator.validar_actualizacion_sala(datos)
     if sala is None:
-        raise ValueError(ut.construir_error_api(
+        raise ValueError(construir_error_api(
             code=const.ERROR_CODE_SALA_NOT_FOUND,
             message='Sala no encontrada',
             description=f"No existe una sala con el ID '{id_sala}'."
@@ -115,7 +115,7 @@ def actualizar_sala(id_sala, datos):
         if campo != 'filas' and sala[campo] == cambios[campo]:
             del cambios[campo]
     if not cambios:
-        raise ValueError(ut.construir_error_api(
+        raise ValueError(construir_error_api(
             code=const.ERROR_CODE_INVALID_PARAMETER,
             message='Sin cambios',
             description='Debes modificar al menos un campo de la sala'
@@ -126,7 +126,7 @@ def actualizar_sala(id_sala, datos):
     if 'numero_sala' in cambios:
         numero_nuevo = cambios['numero_sala']
         if salas_repository.existe_sala_editar(sala['id_local'], numero_nuevo, id_sala):
-            raise ValueError(ut.construir_error_api(
+            raise ValueError(construir_error_api(
                 code=const.ERROR_CODE_SALA_CONFLICT,
                 message='Numero de sala ocupado',
                 description=f"Ya existe una sala con el numero {numero_nuevo} en el local {sala['id_local']}."
@@ -134,7 +134,7 @@ def actualizar_sala(id_sala, datos):
     sala_editada = salas_repository.actualizar_sala(id_sala, cambios)
 
     if sala_editada is None:
-        raise ValueError(ut.construir_error_api(
+        raise ValueError(construir_error_api(
             code = const.ERROR_CODE_SALA_CONFLICT,
             message='Butacas con entrada activa',
             description='No se pueden quitar butacas con entradas futuras activas'
@@ -146,7 +146,7 @@ def desactivar_sala(id_sala):
     id_sala = salas_validator.validar_id_sala(id_sala)
     sala = salas_repository.listar_sala_por_id(id_sala)
     if sala is None:
-        raise ValueError(ut.construir_error_api(
+        raise ValueError(construir_error_api(
             code=const.ERROR_CODE_SALA_NOT_FOUND,
             message='Sala no encontrada',
             description=f"No existe una sala con el ID '{id_sala}'"
@@ -160,7 +160,7 @@ def listar_salas_activas(id_local):
     local = locales_repository.obtener_local_id(id_local)
 
     if local is None or not local['activo']:
-        raise ValueError(ut.construir_error_api(
+        raise ValueError(construir_error_api(
             code=const.ERROR_CODE_LOCAL_NOT_FOUND,
             message='Local no encontrado',
             description=f"No existe un local activo con el ID '{id_local}'"
