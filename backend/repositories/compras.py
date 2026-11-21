@@ -88,27 +88,49 @@ def butacas_disponibles(id_funcion, id_butacas):
 
     butacas = tuple(dict.fromkeys(int(butaca) for butaca in id_butacas))
     marcadores = ", ".join(["%s"] * len(butacas))
-    sql = (
-        "SELECT COUNT(DISTINCT b.id_butaca) AS butacas_validas, "
-        "COUNT(DISTINCT CASE WHEN c.id_compra IS NOT NULL "
-        "THEN b.id_butaca END) AS butacas_ocupadas "
-        "FROM funciones f "
-        "INNER JOIN butacas b ON b.id_sala = f.id_sala "
-        "LEFT JOIN entradas e ON e.id_funcion = f.id_funcion "
-        "AND e.id_butaca = b.id_butaca "
-        "AND e.estado IN ('reservada', 'confirmada', 'utilizada') "
-        "LEFT JOIN compras c ON c.id_compra = e.id_compra "
-        "AND (c.estado = 'confirmada' OR "
-        "(c.estado = 'pendiente' AND c.expira_en > NOW())) "
-        f"WHERE f.id_funcion = %s AND b.id_butaca IN ({marcadores})"
-    )
+
+    sql = f"""
+        SELECT
+            COUNT(DISTINCT b.id_butaca) AS butacas_existentes,
+            COUNT(DISTINCT CASE
+                WHEN b.estado = 'activa' THEN b.id_butaca
+            END) AS butacas_activas,
+            COUNT(DISTINCT CASE
+                WHEN c.id_compra IS NOT NULL THEN b.id_butaca
+            END) AS butacas_ocupadas
+        FROM funciones f
+        INNER JOIN butacas b
+            ON b.id_sala = f.id_sala
+        LEFT JOIN entradas e
+            ON e.id_funcion = f.id_funcion
+            AND e.id_butaca = b.id_butaca
+            AND e.estado IN ('confirmada', 'utilizada')
+        LEFT JOIN compras c
+            ON c.id_compra = e.id_compra
+            AND (
+                c.estado = 'confirmada'
+                OR (c.estado = 'pendiente' AND c.expira_en > NOW())
+            )
+        WHERE f.id_funcion = %s
+            AND b.id_butaca IN ({marcadores})
+    """
+
     resultado = ejecutar_consulta(sql, (id_funcion, *butacas))
     if not resultado:
         return False
-    return (
-        resultado[0]["butacas_validas"] == len(butacas)
-        and resultado[0]["butacas_ocupadas"] == 0
-    )
+
+    estado = resultado[0]
+
+    if estado["butacas_existentes"] != len(butacas):
+        return "inexistentes"
+
+    if estado["butacas_activas"] != len(butacas):
+        return "inactivas"
+
+    if estado["butacas_ocupadas"]:
+        return "ocupadas"
+
+    return "disponibles"
 
 def obtener_funcion_precio(id_funcion):
     sql = "SELECT precio_entrada from funciones WHERE id_funcion = %s"

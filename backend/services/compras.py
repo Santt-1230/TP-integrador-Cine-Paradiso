@@ -79,8 +79,14 @@ def registrar_compra(id_usuario, datos):
         return None,"FUNCION_INEXISTENTE"
     if funcion["estado"] != "programada":
         return None, "FUNCION_NO_DISPONIBLE"
-    butacas_libres = compras_repositories.butacas_disponibles(funcion["id_funcion"], datos["butacas"])
-    if not butacas_libres:
+    estado_butacas = compras_repositories.butacas_disponibles(
+        funcion["id_funcion"], datos["butacas"]
+    )
+    if estado_butacas == "inexistentes":
+        return None, "BUTACA_INEXISTENTE"
+    if estado_butacas == "inactivas":
+        return None, "BUTACA_INACTIVA"
+    if estado_butacas != "disponibles":
         return None, "BUTACA_NO_DISPONIBLE"
 
     productos = []
