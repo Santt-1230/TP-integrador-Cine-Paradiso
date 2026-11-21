@@ -7,15 +7,12 @@ FILAS_INICIALES = [{'fila': 'A', 'cantidad': 10}]
 
 
 def datos_sala_desde_form(request_form):
-    """Extrae y formatea los datos del formulario de salas, 
-    reconstruyendo las filas por si falla y hay que repintarlas."""
     id_local = request_form.get("id_local", type=int)
     numero_sala = request_form.get("numero_sala", "").strip()
     
     letras = request_form.getlist("fila")
     cantidades = request_form.getlist("cantidad")
     
-    # Reconstruimos la estructura para que el template las mantenga si hay error
     filas_form = [{'fila': l, 'cantidad': c} for l, c in zip(letras, cantidades)] if letras else FILAS_INICIALES
 
     return {
@@ -30,6 +27,8 @@ def datos_sala_desde_form(request_form):
 @api.admin_front_requerido
 def crear_sala():
     id_local = request.args.get("id_local", type=int) or request.form.get("id_local", type=int)
+    filtro_estado = request.values.get("filtro_estado", "todas")
+    filtro_local = request.values.get("filtro_local", type=int)
 
     if request.method == "GET":
         return render_template(
@@ -38,6 +37,8 @@ def crear_sala():
             id_local=id_local,
             numero_sala="",
             filas=FILAS_INICIALES,
+            filtro_estado=filtro_estado,
+            filtro_local=filtro_local,
             error=None
         )
 
@@ -56,17 +57,21 @@ def crear_sala():
             sala=None,
             id_local=id_local,
             numero_sala=datos["numero_sala"],
-            filas=filas_form, # Mantiene lo que el usuario escribió
+            filas=filas_form,
+            filtro_estado=filtro_estado,
+            filtro_local=filtro_local, 
             error=api.mensaje_error(datos_respuesta)
         )
 
     api.flash("Sala creada correctamente.", "success")
-    return redirect(url_for("locales.admin_locales", local=id_local))
+    return redirect(url_for("locales.admin_locales", estado=filtro_estado, local=filtro_local))
 
 
 @salas_bp.route('/admin/salas/<int:id_sala>/editar', methods=['GET', 'POST'])
 @api.admin_front_requerido
 def editar_sala(id_sala):
+    filtro_estado = request.values.get('filtro_estado', 'todas')
+    filtro_local = request.values.get('filtro_local', type=int)
     if request.method == 'GET':
         estado, resp = api.pedir('GET', f'/api/salas/{id_sala}')
         estado_respuesta = api.verificar_estado(estado)
@@ -74,21 +79,29 @@ def editar_sala(id_sala):
             return estado_respuesta
         if estado != 200:
             api.flash(api.mensaje_error(resp), 'error')
-            return redirect(url_for('locales.admin_locales'))
+            return redirect(url_for('locales.admin_locales', 
+                    estado=filtro_estado, local=filtro_local))
         
         sala = resp['sala']
-        id_local = sala.get('id_local')
-
-        # Obtenemos las filas actuales de la sala
+        
         estado_filas, resp_filas = api.pedir('GET', f'/api/salas/{id_sala}/filas')
-        filas_sala = resp_filas.get('filas', FILAS_INICIALES) if estado_filas == 200 else FILAS_INICIALES
+        estado_respuesta = api.verificar_estado(estado_filas)
+        if estado_respuesta:
+            return estado_respuesta
+        if estado_filas != 200:
+            api.flash(api.mensaje_error(resp_filas), 'error')
+            return redirect(url_for('locales.admin_locales',
+                estado=filtro_estado, local=filtro_local))
+        filas_sala = resp_filas['filas'] or FILAS_INICIALES
 
         return render_template(
             'admin_editar_sala.html',
             sala=sala,
-            id_local=id_local,
+            id_local=sala.get('id_local'),
             numero_sala=sala['numero_sala'],
             filas=filas_sala,
+            filtro_estado=filtro_estado,
+            filtro_local = filtro_local,
             error=None
         )
 
@@ -104,17 +117,14 @@ def editar_sala(id_sala):
         id_local = request.form.get("id_local", type=int)
         sala = {'id_sala': id_sala, 'numero_sala': datos['numero_sala']}
         
-        return render_template(
-            'admin_editar_sala.html',
-            sala=sala,
-            id_local=id_local,
-            numero_sala=datos['numero_sala'],
-            filas=filas_form, # Mantiene lo tipeado si falla
-            error=api.mensaje_error(resp)
+        return render_template('admin_editar_sala.html', sala=sala, id_local=id_local,
+            numero_sala=datos['numero_sala'], filas=filas_form, filtro_estado=filtro_estado, 
+            filtro_local=filtro_local, error=api.mensaje_error(resp)
         )
 
     api.flash('La sala se actualizó correctamente', 'success')
-    return redirect(url_for('locales.admin_locales'))
+    return redirect(url_for('locales.admin_locales', 
+        estado=filtro_estado, local=filtro_local))
 
 
 @salas_bp.route('/admin/salas/<int:id_sala>/dar_baja', methods=['POST'])

@@ -11,4 +11,6 @@ COPY . .
 
 EXPOSE 5000
 
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
+CMD ["gunicorn", "--workers", "3", "--threads", "2", "--timeout", "60", \
+     "--access-logfile", "-", "--access-logformat", "%(r)s %(s)s %(L)ss", \
+     "-b", "0.0.0.0:5000", "app:app"]
