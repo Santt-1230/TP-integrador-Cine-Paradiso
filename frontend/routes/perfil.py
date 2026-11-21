@@ -57,17 +57,24 @@ def perfil_seccion(seccion):
         else:
             flash(mensaje_error(res_hist), "error")
 
+        if seccion == "mis-compras":
+            estado_c, res_c = pedir("GET", "/api/historial")
+            if estado_c == 200:
+                extra = {c["id_compra"]: c for c in res_c}
+                for compra in historial.get("compras", []):
+                    for clave, valor in extra.get(compra["id_compra"], {}).items():
+                        compra.setdefault(clave, valor)
+
     # 3. Completar datos de película, póster, total y fecha de compra
     if seccion == 'mis-compras':
         zona_ar = ZoneInfo("America/Argentina/Buenos_Aires")
         ahora = datetime.now(zona_ar)
-        compras_activas = []
+        compras_procesadas = []
         cache_funciones = {}
         cache_peliculas = {}
 
         for compra in (historial.get("compras") or []):
-            if compra.get("estado") == "cancelada":
-                continue
+            es_cancelada = compra.get("estado") == "cancelada"
 
             # Buscar datos de la función
             id_funcion = compra.get("id_funcion")
@@ -84,14 +91,16 @@ def perfil_seccion(seccion):
             local = funcion.get("local") if isinstance(funcion.get("local"), dict) else {}
 
             titulo = (
-                pelicula.get("titulo")
+                compra.get("titulo_pelicula")
+                or pelicula.get("titulo")
                 or funcion.get("titulo_pelicula")
                 or funcion.get("titulo")
                 or (funcion.get("pelicula") if isinstance(funcion.get("pelicula"), str) else None)
                 or "Película"
             )
             poster_url = (
-                pelicula.get("poster_url")
+                compra.get("poster_url")
+                or pelicula.get("poster_url")
                 or pelicula.get("imagen_url")
                 or pelicula.get("portada")
                 or funcion.get("poster_url")
@@ -125,19 +134,22 @@ def perfil_seccion(seccion):
             compra["poster_url"] = poster_url
             compra["genero"] = genero
 
-            # Local, sala y butacas armadas desde 'entradas'
-            compra["local"] = local.get("nombre") or funcion.get("local_nombre") or funcion.get("local") or ""
-            compra["numero_sala"] = sala.get("numero_sala") or sala.get("numero") or funcion.get("numero_sala") or ""
+            # Local, sala y butacas (conserva las de /api/historial si 'entradas' viene vacía)
+            compra["local"] = compra.get("local") or local.get("nombre") or funcion.get("local_nombre") or funcion.get("local") or ""
+            compra["numero_sala"] = compra.get("numero_sala") or sala.get("numero_sala") or sala.get("numero") or funcion.get("numero_sala") or ""
 
             entradas = compra.get("entradas") or []
-            butacas_ordenadas = sorted(entradas, key=lambda e: (str(e.get("fila", "")), int(e.get("numero", 0))))
-            compra["butacas"] = ", ".join(f"{e.get('fila', '')}{e.get('numero', '')}" for e in butacas_ordenadas)
+            if entradas:
+                butacas_ordenadas = sorted(entradas, key=lambda e: (str(e.get("fila", "")), int(e.get("numero", 0))))
+                compra["butacas"] = ", ".join(f"{e.get('fila', '')}{e.get('numero', '')}" for e in butacas_ordenadas)
+            else:
+                compra.setdefault("butacas", "")
 
-            # Formatear precio total (ej: $33.000,00)
+            # Formatear precio total
             total_num = float(compra.get("total") or 0)
             compra["total_formateado"] = f"${total_num:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
 
-            # Fecha de COMPRA (para mostrar en el encabezado de la tarjeta)
+            # Fecha de COMPRA
             fecha_compra_raw = compra.get("fecha_hora") or compra.get("fecha_creacion")
             if fecha_compra_raw:
                 try:
@@ -152,8 +164,8 @@ def perfil_seccion(seccion):
             else:
                 compra["fecha_formateada"] = ""
 
-            # Fecha de FUNCIÓN (solo para habilitar o bloquear la cancelación)
-            fecha_funcion_raw = funcion.get("fecha_hora_inicio")
+            # Fecha de FUNCIÓN y permiso de cancelación
+            fecha_funcion_raw = compra.get("fecha_hora_inicio") or funcion.get("fecha_hora_inicio")
             if fecha_funcion_raw:
                 try:
                     inicio_funcion = datetime.fromisoformat(str(fecha_funcion_raw).replace("Z", "+00:00"))
@@ -162,16 +174,17 @@ def perfil_seccion(seccion):
                     else:
                         inicio_funcion = inicio_funcion.astimezone(zona_ar)
 
-                    compra["puede_cancelar"] = ahora < (inicio_funcion - timedelta(hours=1))
+                    compra["puede_cancelar"] = (not es_cancelada) and (ahora < (inicio_funcion - timedelta(hours=1)))
                     compra["fecha_hora_inicio"] = inicio_funcion.isoformat()
+                    compra["fecha_formateada_funcion"] = inicio_funcion.strftime("%d/%m/%Y - %H:%M HS")
                 except ValueError:
                     compra["puede_cancelar"] = False
             else:
                 compra["puede_cancelar"] = False
 
-            compras_activas.append(compra)
+            compras_procesadas.append(compra)
 
-        historial["compras"] = compras_activas
+        historial["compras"] = compras_procesadas
 
     return render_template("perfil.html", perfil=datos, historial=historial, seccion=seccion)
 
@@ -290,7 +303,7 @@ def descargar_pdf_compra(id_compra):
 
     try:
         respuesta = requests.get(
-            f"{BACKEND_URL}/api/compras/{id_compra}/pdf",
+            f"{BACKEND_URL}/api/compras/{id_compra}/qr",
             cookies=cookies_backend(),
             timeout=15,
         )
@@ -303,12 +316,53 @@ def descargar_pdf_compra(id_compra):
         return redir
 
     if respuesta.status_code != 200:
-        flash("No se pudo descargar el comprobante.", "error")
+        try:
+            data = respuesta.json()
+            mensaje = data.get("description") or data.get("message") or "No se pudieron descargar las entradas."
+        except ValueError:
+            mensaje = "No se pudieron descargar las entradas."
+        flash(mensaje, "error")
         return redirect(url_for("perfil.perfil_seccion", seccion="mis-compras"))
 
     return send_file(
         io.BytesIO(respuesta.content),
         mimetype='application/pdf',
         as_attachment=True,
-        download_name=f'factura_compra_{id_compra}.pdf',
+        download_name=f'entradas_compra_{id_compra}.pdf',
+    )
+
+
+@perfil_bp.route('/mi-perfil/mis-compras/<int:id_compra>/reembolso/pdf')
+def descargar_pdf_reembolso(id_compra):
+    if "cookie_backend" not in session:
+        return redirect(url_for("usuarios.login"))
+
+    try:
+        respuesta = requests.get(
+            f"{BACKEND_URL}/api/compras/{id_compra}/reembolso",
+            cookies=cookies_backend(),
+            timeout=15,
+        )
+    except requests.RequestException:
+        flash("No se pudo conectar con el servidor.", "error")
+        return redirect(url_for("perfil.perfil_seccion", seccion="mis-compras"))
+
+    redir = verificar_estado(respuesta.status_code)
+    if redir:
+        return redir
+
+    if respuesta.status_code != 200:
+        try:
+            data = respuesta.json()
+            mensaje = data.get("description") or data.get("message") or "No se pudo descargar el comprobante de reembolso."
+        except ValueError:
+            mensaje = "No se pudo descargar el comprobante de reembolso."
+        flash(mensaje, "error")
+        return redirect(url_for("perfil.perfil_seccion", seccion="mis-compras"))
+
+    return send_file(
+        io.BytesIO(respuesta.content),
+        mimetype='application/pdf',
+        as_attachment=True,
+        download_name=f'reembolso_compra_{id_compra}.pdf',
     )
