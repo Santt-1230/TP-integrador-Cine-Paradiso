@@ -1060,6 +1060,18 @@ a {
     margin: 0;
 }
 
+.estado-admin--vencido {
+    background-color: #f8d7da;
+    color: #842029;
+}
+
+.estado-admin--pendiente {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.servicios-admin__acciones { display: flex; align-items: center; gap: 6px; }
+.servicios-admin__acciones form { margin: 0; }
 .servicios-admin__accion {
     display: inline-flex;
     align-items: center;
@@ -2878,3 +2890,18 @@ a {
         font-size: 9px;
     }
 }
+
+.servicios-admin__seccion .servicios-admin__subtitulo { margin: 0; }
+
+.servicios-admin .formulario-admin input[type="date"] {
+    width: 100%;
+    min-height: 40px;
+    padding: 0 12px;
+    border: 1px solid var(--admin-borde);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--admin-texto);
+    font: inherit;
+    font-size: 13px;
+}
+

@@ -54,15 +54,46 @@ def datos_del_formulario():
 
 def datos_de_promocion():
     descripcion = request.form.get("descripcion", "").strip()
+    imagen_url = request.form.get("imagen_url", "").strip()
+    tipo = request.form.get("tipo", "")
+    cantidad_comprar = request.form.get("cantidad_comprar", "").strip()
+    cantidad_pagar = request.form.get("cantidad_pagar", "").strip()
+    porcentaje = request.form.get("porcentaje", "").strip()
+    monto_descuento = request.form.get("monto_descuento", "").strip()
+
+    try:
+        cantidad_comprar = int(cantidad_comprar) if cantidad_comprar else None
+    except ValueError:
+        pass
+
+    try:
+        cantidad_pagar = int(cantidad_pagar) if cantidad_pagar else None
+    except ValueError:
+        pass
+
+    try:
+        porcentaje = float(porcentaje) if porcentaje else None
+    except ValueError:
+        pass
+
+    try:
+        monto_descuento = float(monto_descuento) if monto_descuento else None
+    except ValueError:
+        pass
+
     return {
         "nombre": request.form.get("nombre", "").strip(),
         "descripcion": descripcion or None,
-        "imagen_url": request.form.get("imagen_url", "").strip(),
+        "imagen_url": imagen_url or None,
         "vigente_desde": request.form.get("vigente_desde", ""),
         "vigente_hasta": request.form.get("vigente_hasta", ""),
         "activa": "activa" in request.form,
+        "tipo": tipo,
+        "cantidad_comprar": cantidad_comprar,
+        "cantidad_pagar": cantidad_pagar,
+        "porcentaje": porcentaje,
+        "monto_descuento": monto_descuento,
     }
-
 
 
 @servicios_bp.route("/servicios")
