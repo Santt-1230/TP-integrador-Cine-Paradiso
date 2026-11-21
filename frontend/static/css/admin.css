@@ -1072,6 +1072,16 @@ a {
 
 .estado-admin--inactivo { background: #eef0f3; color: #7b7f8a; }
 
+.estado-admin--vencido {
+    background-color: #f8d7da;
+    color: #842029;
+}
+
+.estado-admin--pendiente {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
 .servicios-admin__acciones { display: flex; align-items: center; gap: 6px; }
 .servicios-admin__acciones form { margin: 0; }
 .servicios-admin__accion {
@@ -2709,3 +2719,4 @@ a {
     font: inherit;
     font-size: 13px;
 }
+
