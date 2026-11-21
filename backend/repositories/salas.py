@@ -14,7 +14,7 @@ def validar_disponibilidad_futura(cursor, ids_butacas):
     valores = ', '.join(['%s'] * len(ids_butacas))
 
     sql = "SELECT COUNT(*) AS cantidad FROM entradas e JOIN funciones f ON f.id_funcion = e.id_funcion " \
-    f'WHERE e.id_butaca IN ({valores})' "AND f.fecha_hora_inicio > NOW() " \
+    f'WHERE e.id_butaca IN ({valores})' " AND f.fecha_hora_inicio > NOW() " \
     " AND f.estado = 'programada' AND e.estado IN ('reservada', 'confirmada')"
     cursor.execute(sql, tuple(ids_butacas))
 
