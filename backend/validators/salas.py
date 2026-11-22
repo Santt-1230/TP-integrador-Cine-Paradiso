@@ -90,6 +90,9 @@ def validar_letras(letras) -> list:
         if letra in vistas:
             raise error_filas(f"La fila '{letra}' esta repetida")
 
+        if letras_validas and letra < letras_validas[-1]:
+            raise error_filas('Las filas deben estar ordenadas alfabeticamente')
+
         vistas.add(letra)
         letras_validas.append(letra)
 
@@ -110,7 +113,7 @@ def validar_cantidades_filas(cantidades) -> list:
 
     for cantidad in cantidades:
         cantidad = ut.validar_entero_positivo(
-            cantidad, ENTERO_POSITIVO_MINIMO, 'cantidad'
+            cantidad, ENTERO_POSITIVO_MINIMO, 'butacas'
         )
 
         if cantidad > BUTACAS_POR_FILA:

@@ -2,10 +2,9 @@ from repositories import salas as salas_repository
 from repositories import locales as locales_repository
 from validators import salas as salas_validator
 from services  import funciones as services_funciones
-from services import locales as locales_services
 from utils import construir_error_api
 from constants import (ERROR_CODE_SALA_CONFLICT, ERROR_CODE_LOCAL_NOT_FOUND, 
-    ERROR_CODE_INVALID_PARAMETER, ERROR_CODE_SALA_NOT_FOUND)
+    ERROR_CODE_INVALID_PARAMETER, ERROR_CODE_SALA_NOT_FOUND, ERROR_CODE_LOCAL_INACTIVE)
 
 def obtener_sala_existente(id_sala):
     id_sala = salas_validator.validar_id_sala(id_sala)
@@ -35,41 +34,29 @@ def obtener_filas_sala(id_sala):
     return salas_repository.listar_filas_sala(id_sala)
 
 def listar_salas(id_local=None, estado=None):
-    if id_local == '':
-        id_local = None
-    if id_local is not None:
-        id_local = salas_validator.validar_id_local(id_local)
     estado = salas_validator.validar_filtro_estado(estado)
+    return salas_repository.listar_salas_por_local(id_local, estado)
 
-    locales_activos = locales_repository.listar_locales_activos()
-
-    locales_a_mostrar = []
-    for local in locales_activos:
-        if id_local is None or local['id_local'] == id_local:
-            locales_a_mostrar.append(local)
-
-    if id_local is not None and not locales_a_mostrar:
-        raise ValueError(construir_error_api(
-            code=ERROR_CODE_LOCAL_NOT_FOUND,
-            message='Local no encontrado',
-            description=f"No existe un Local con el id '{id_local}'"
-        ))
-
-    salas = salas_repository.listar_salas_por_local(id_local, estado)
-
-    return {
-        'locales': locales_services.armar_locales_con_salas(locales_a_mostrar, salas),
-        'todos_los_locales': locales_services.armar_desplegable(locales_activos),
-        'salas_configuradas': len(salas),
-        'filtros': {'estado': estado or 'todas', 'id_local': id_local},
-    }
+                                                   
 def listar_sala_id(id_sala):
     id_sala = salas_validator.validar_id_sala(id_sala)
     return salas_repository.listar_sala_por_id(id_sala)
 
 def crear_sala(datos):
     sala = salas_validator.validar_creacion_sala(datos)
-    locales_services.obtener_local_activo(sala['id_local'])
+    local = locales_repository.obtener_local_id(sala['id_local'])
+    if local is None:
+        raise ValueError(construir_error_api(
+            code=ERROR_CODE_LOCAL_NOT_FOUND,
+            message='Local no encontrado',
+            description=f"No existe un local con el ID '{sala['id_local']}'."
+        ))
+    if not local['activo']:
+        raise ValueError(construir_error_api(
+            code=ERROR_CODE_LOCAL_INACTIVE,
+            message='Local inactivo',
+            description=f"No se puede crear una sala en el local '{sala['id_local']}'"
+        ))
 
     if salas_repository.existe_sala_crear(sala['id_local'], sala['numero_sala']):
         raise ValueError(construir_error_api(
@@ -80,13 +67,6 @@ def crear_sala(datos):
 
     return salas_repository.crear_sala(
         sala['id_local'], sala['numero_sala'], sala['filas'])
-
-def obtener_butacas_sala(id_sala):
-    id_sala = salas_validator.validar_id_sala(id_sala)
-    sala = salas_repository.listar_sala_por_id(id_sala)
-    if sala is None:
-        return None
-    return salas_repository.obtener_butacas(id_sala)
 
 
 
@@ -134,22 +114,11 @@ def actualizar_sala(id_sala, datos):
     return sala_editada
 
 
-
 def desactivar_sala(id_sala):
     sala = obtener_sala_existente(id_sala)
     
     validar_programacion_sala(sala['id_sala'])
     return salas_repository.desactivar_sala(sala['id_sala'])
 
-def listar_salas_activas(id_local):
-    id_local = salas_validator.validar_id_local(id_local)
-    local = locales_repository.obtener_local_id(id_local)
 
-    if local is None or not local['activo']:
-        raise ValueError(construir_error_api(
-            code=ERROR_CODE_LOCAL_NOT_FOUND,
-            message='Local no encontrado',
-            description=f"No existe un local activo con el ID '{id_local}'"
-        ))
-    return salas_repository.listar_salas_activas(id_local)
 
