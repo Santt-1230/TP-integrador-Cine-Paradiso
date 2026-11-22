@@ -305,3 +305,22 @@ VALUES
 ('2x1 los martes', 'Entradas 2x1', '2026-01-01', '2027-12-31'),
 ('Combo pareja', 'Pochoclo + 2 gaseosas', '2026-01-01', '2027-12-31'),
 ('Descuento en entradas', 'Promoción especial', '2026-01-01', '2027-12-31');
+
+INSERT INTO qr (
+    id_compra,
+    id_entrada,
+    id_compra_producto,
+    tipo,
+    token,
+    codigo_manual,
+    estado
+)
+VALUES (
+    1,
+    1,
+    NULL,
+    'entrada',
+    'a3f91c7e2b4d6085f1a9c3e7b2d4068f9a1c5e3b7d2f6084c9a1e5b3d7f2068c',
+    'CPQR26A8B9C2',
+    'valido'
+);
