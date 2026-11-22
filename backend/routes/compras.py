@@ -223,3 +223,32 @@ def obtener_qr(id):
         BytesIO(pdf), mimetype="application/pdf", as_attachment=True,
         download_name=f"entradas-{numero}.pdf",
     )
+
+@compras_bp.route('/compras/<int:id>/reembolso', methods=['GET'])
+@login_requerido
+def obtener_reembolso(id):
+    if session["rol"] == "administrador":
+        factura, error = compras_services.obtener_factura(id)
+    else:
+        factura, error = compras_services.obtener_factura(id, session["id_usuario"])
+
+    if error == "COMPRA_INEXISTENTE":
+        return jsonify(construir_error_api(
+            code="COMPRA_INEXISTENTE",
+            message="COMPRA NO ENCONTRADA",
+            description=f"La compra de ID: {id} no existe o no le pertenece"
+        )), 404
+
+    if factura["factura"].get("estado") != "cancelada":
+        return jsonify(construir_error_api(
+            code="COMPRA_NO_CANCELADA",
+            message="COMPRA NO CANCELADA",
+            description="Solo las compras canceladas tienen comprobante de reembolso"
+        )), 409
+
+    pdf = pdf_services.generar_pdf_reembolso(factura)
+    numero = factura["factura"].get("numero") or f"compra-{id}"
+    return send_file(
+        BytesIO(pdf), mimetype="application/pdf", as_attachment=True,
+        download_name=f"reembolso-{numero}.pdf",
+    )

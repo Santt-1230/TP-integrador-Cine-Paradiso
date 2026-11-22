@@ -115,100 +115,129 @@
                 {% endif %}
             {% endwith %}
 
-            <div class="contenedor-lista-compras">
+           <div class="contenedor-lista-compras">
                 {% for compra in historial.compras %}
-                    {% if compra.estado != 'cancelada' %}
-                    <div class="tarjeta-compra-layout">
-    
-                    <div class="header-fecha">
-                        <h3>{{ compra.fecha_formateada }}</h3>
-                    </div>
+                    {% set es_cancelada = (compra.estado == 'cancelada') %}
+                    <div class="tarjeta-compra-layout {% if es_cancelada %}compra-cancelada{% endif %}">
 
-                    <div class="cuerpo-compra-grid">
-                        
-                        <!-- 1. Película y función -->
-                        <div class="columna-item">
-                            <div class="contenedor-poster pastel-purpura">
-                                {% if compra.poster_url %}
-                                    <img src="{{ compra.poster_url }}" alt="{{ compra.titulo_pelicula }}" class="poster-img">
-                                {% else %}
-                                    <i class="bi bi-film icono-placeholder"></i>
-                                {% endif %}
-                            </div>
-                            <span class="etiqueta-categoria">{{ compra.genero | upper }}</span>
-                            <h4 class="titulo-item">{{ compra.titulo_pelicula | upper }}</h4>
-                            {% if compra.local %}
-                                <p class="detalle-funcion">{{ compra.local }} · Sala {{ compra.numero_sala }}</p>
-                            {% endif %}
-                            {% if compra.butacas %}
-                                <p class="detalle-funcion"><strong>Butacas:</strong> {{ compra.butacas }}</p>
+                        <div class="header-fecha">
+                            <h3>{{ compra.fecha_formateada }}</h3>
+                            {% if es_cancelada %}
+                                <span class="badge-cancelada">Compra cancelada</span>
+                            {% else %}
+                             <span class="badge-cancelada" id="compra-confirmada">Compra confirmada</span>
                             {% endif %}
                         </div>
 
-                        <!-- 2. Combos / Servicios -->
-                        <div class="columna-item">
-                            {% if compra.servicios %}
-                                {% set primer_servicio = compra.servicios[0] %}
-                                <div class="contenedor-poster pastel-azul">
-                                    {% if primer_servicio.imagen_url %}
-                                        <img src="{{ primer_servicio.imagen_url }}" alt="{{ primer_servicio.nombre }}" class="poster-img">
+                        <div class="cuerpo-compra-grid">
+                            
+                            <!-- 1. Película y función -->
+                            <div class="columna-item">
+                                <div class="contenedor-poster pastel-purpura">
+                                    {% if compra.poster_url %}
+                                        <img src="{{ compra.poster_url }}" alt="{{ compra.titulo_pelicula }}" class="poster-img">
                                     {% else %}
-                                        <i class="bi bi-cup-straw icono-placeholder"></i>
+                                        <i class="bi bi-film icono-placeholder"></i>
                                     {% endif %}
                                 </div>
-                                <span class="etiqueta-categoria">COMBOS</span>
-                                <ul class="lista-combos-compra">
-                                    {% for servicio in compra.servicios %}
-                                        <li>
-                                            {{ servicio.nombre | upper }}
-                                            {% if servicio.cantidad and servicio.cantidad > 1 %}
-                                                (x{{ servicio.cantidad }})
-                                            {% endif %}
-                                        </li>
-                                    {% endfor %}
-                                </ul>
-                            {% else %}
-                                <div class="contenedor-poster pastel-azul">
-                                    <i class="bi bi-cup-straw icono-placeholder"></i>
+                                <span class="etiqueta-categoria">{{ compra.genero | upper }}</span>
+                                <h4 class="titulo-item">{{ compra.titulo_pelicula | upper }} <br> {{ compra.fecha_formateada_funcion }}</h4>
+                                {% if compra.local %}
+                                    <p class="detalle-funcion">{{ compra.local }} · Sala {{ compra.numero_sala }}</p>
+                                {% endif %}
+                                {% if compra.butacas %}
+                                    <p class="detalle-funcion"><strong>Butacas:</strong> {{ compra.butacas }}</p>
+                                {% endif %}
+                            </div>
+
+                            <!-- 2. Combos / Servicios -->
+                            <div class="columna-item">
+                                {% if compra.servicios %}
+                                    {% set primer_servicio = compra.servicios[0] %}
+                                    <div class="contenedor-poster pastel-azul">
+                                        {% if primer_servicio.imagen_url %}
+                                            <img src="{{ primer_servicio.imagen_url }}" alt="{{ primer_servicio.nombre }}" class="poster-img">
+                                        {% else %}
+                                            <i class="bi bi-cup-straw icono-placeholder"></i>
+                                        {% endif %}
+                                    </div>
+                                    <span class="etiqueta-categoria">SERVICIOS</span>
+                                    <ul class="lista-combos-compra">
+                                        {% for servicio in compra.servicios %}
+                                            <li>
+                                                {{ servicio.nombre | upper }}
+                                                {% if servicio.cantidad and servicio.cantidad > 1 %}
+                                                    (x{{ servicio.cantidad }})
+                                                {% endif %}
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+
+                            <!-- 3. Factura y Entradas -->
+                            <div class="columna-qr">
+                                <h4 class="titulo-qr">TU FACTURA</h4>
+                                <div class="contenedor-qr-box">
+                                    <a href="{{ url_for('compras_bp.descargar_factura', id_compra=compra.id_compra) }}" class="btn-descargar-pdf">
+                                        <i class="bi bi-file-earmark-pdf"></i> Descargar factura
+                                    </a> 
                                 </div>
-                                <span class="etiqueta-categoria">COMBO</span>
-                                <h4 class="titulo-item">SIN COMBO</h4>
+                                <p class="instruccion-qr">DATOS DE COMPRA</p>
+
+                               <h4 class="titulo-qr">TUS ENTRADAS</h4>
+                                {% if es_cancelada %}
+                                    <div class="contenedor-qr-box qr-inactivo-box">
+                                        <span class="estado-qr-inactivo">
+                                            <i class="bi bi-x-circle"></i> QR inactivo
+                                        </span>
+                                    </div>
+                                    <div class="contenedor-qr-box">
+                                        <a href="{{ url_for('perfil.descargar_pdf_reembolso', id_compra=compra.id_compra) }}" class="btn-descargar-pdf">
+                                            <i class="bi bi-file-earmark-pdf"></i> Descargar reembolso
+                                        </a>
+                                    </div>
+                                    <p class="instruccion-qr">
+                                        ENTRADAS ANULADAS<br>COMPROBANTE DE REEMBOLSO DISPONIBLE
+                                    </p>
+                                {% else %}
+                                    <div class="contenedor-qr-box">
+                                        <a href="{{ url_for('perfil.descargar_pdf_compra', id_compra=compra.id_compra) }}" class="btn-descargar-pdf">
+                                            <i class="bi bi-file-earmark-pdf"></i> Descargar entradas
+                                        </a> 
+                                    </div>
+                                    <p class="instruccion-qr">
+                                        PRESENTÁ TUS QR EN LA ENTRADA<br>A LAS SALAS DE TU CINE
+                                    </p>
+                                {% endif %}
+                            </div>
+
+                        </div>
+
+                        <div class="header-fecha">
+                            {% if compra.total is defined %}
+                                <h3 class="detalle-funcion">
+                                    <strong>Total:</strong> ${{ "%.2f"|format(compra.total|float) }}
+                                    {% if es_cancelada %}
+                                        <span class="texto-reembolsado">(Reembolsado)</span>
+                                    {% endif %}
+                                </h3>
                             {% endif %}
                         </div>
 
-                        <!-- 3. Factura y Entradas -->
-                        <div class="columna-qr">
-                            <h4 class="titulo-qr">TU FACTURA</h4>
-                            <div class="contenedor-qr-box">
-                                <a href="{{ url_for('compras_bp.descargar_factura', id_compra=compra.id_compra) }}" class="btn-descargar-pdf">
-                                    <i class="bi bi-file-earmark-pdf"></i> Descargar factura
-                                </a> 
-                            </div>
-                            <p class="instruccion-qr">DATOS DE COMPRA</p>
-
-                            <h4 class="titulo-qr">TUS ENTRADAS</h4>
-                            <div class="contenedor-qr-box">
-                                <a href="{{ url_for('perfil.descargar_pdf_compra', id_compra=compra.id_compra) }}" class="btn-descargar-pdf">
-                                    <i class="bi bi-file-earmark-pdf"></i> Descargar entradas
-                                </a> 
-                            </div>
-                            <p class="instruccion-qr">
-                                PRESENTÁ TUS QR EN LA ENTRADA<br>A LAS SALAS DE TU CINE
-                            </p>
+                        <!-- 4. Acción de Cancelación -->
+                        <div class="acciones-compra">
+                            {% if not es_cancelada and compra.puede_cancelar %}
+                                <form class="form-cancelar" data-inicio="{{ compra.fecha_hora_inicio }}" method="post" action="{{ url_for('perfil.cancelar_compra') }}" onsubmit="return confirm('¿Confirmás que querés cancelar esta compra?');">
+                                    <input type="hidden" name="id_compra" value="{{ compra.id_compra }}">
+                                    <button type="submit" class="btn-cancelar">Cancelar compra</button>
+                                </form>
+                            {% endif %}
                         </div>
-
                     </div>
 
-                    <!-- 4. Acción de Cancelación -->
-                    <div class="acciones-compra">
-                        {% if compra.estado != 'cancelada' and compra.puede_cancelar %}
-                            <form class="form-cancelar" data-inicio="{{ compra.fecha_hora_inicio }}" method="post" action="{{ url_for('perfil.cancelar_compra') }}" onsubmit="return confirm('¿Confirmás que querés cancelar esta compra?');">
-                                <input type="hidden" name="id_compra" value="{{ compra.id_compra }}">
-                                <button type="submit" class="btn-cancelar">Cancelar compra</button>
-                            </form>
-                        {% endif %}
-                    </div>
-                </div>
+                    {% if not loop.last %}
+                        <hr class="divisor-compra">
                     {% endif %}
                 {% else %}
                     <p class="sin-compras">No se encontraron compras registradas en tu historial.</p>
