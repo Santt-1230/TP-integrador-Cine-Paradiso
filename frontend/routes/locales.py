@@ -40,14 +40,10 @@ def elegir_cine(id_local):
 @api.admin_front_requerido
 def admin_locales():
     params = {
-        'estado': request.args.get('estado'),
-        'local': request.args.get('local'),
+        'estado': request.args.get('estado'),'local': request.args.get('local'),
     }
 
-    estado, datos_respuesta = api.get(
-        '/api/locales/resumen-salas',
-        params=params
-    )
+    estado, datos_respuesta = api.get('/api/locales/resumen-salas',params=params)
 
     estado_respuesta = api.verificar_estado(estado)
     if estado_respuesta:
