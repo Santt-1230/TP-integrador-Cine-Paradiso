@@ -90,6 +90,12 @@ def registrar_compras():
             message="Producto no disponible",
             description="Uno de los productos no existe o está inactivo",
         )), 404
+    if error == "PROMOCION_NO_DISPONIBLE":
+        return jsonify(construir_error_api(
+            code=error,
+            message="Promoción no disponible",
+            description="La promoción seleccionada no está vigente o ya no es válida para entradas. Actualizá el checkout e intentá de nuevo.",
+        )), 409
     if error is not None:
         return jsonify(error), 400
 

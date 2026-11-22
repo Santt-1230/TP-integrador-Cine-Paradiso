@@ -73,6 +73,20 @@ def validar_datos(compra):
         productos_ids.add(producto["id_producto"])
     compra["productos"] = productos
 
+    id_promocion = compra.get("id_promocion")
+    if id_promocion not in (None, ""):
+        try:
+            validar_entero_positivo(id_promocion, const.ENTERO_POSITIVO_MINIMO, "id_promocion")
+            compra["id_promocion"] = int(id_promocion)
+        except ValueError:
+            return construir_error_api(
+                code="PROMOCION_INVALIDA",
+                message="Promoción inválida",
+                description="id_promocion debe ser un entero positivo",
+            )
+    else:
+        compra["id_promocion"] = None
+
     return None
 
 def validar_datos_servicio(datos):

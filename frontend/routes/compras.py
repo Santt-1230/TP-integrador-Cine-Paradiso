@@ -38,6 +38,7 @@ def checkout():
                 "id_funcion": id_funcion,
                 "id_butacas": ids_butacas,
                 "productos": productos_elegidos,
+                "id_promocion": request.form.get("id_promocion") or None,
             },
         )
 
@@ -54,6 +55,7 @@ def checkout():
             ids_butacas,
             error=api.mensaje_error(cuerpo_respuesta),
             productos_seleccionados=cantidad_por_id_producto,
+            id_promocion_seleccionada=request.form.get("id_promocion") or "",
         )
 
     try:
@@ -72,7 +74,7 @@ def checkout():
 
     return render_checkout(id_funcion, ids_butacas)
 
-def render_checkout(id_funcion, ids_butacas, error=None, productos_seleccionados=None):
+def render_checkout(id_funcion, ids_butacas, error=None, productos_seleccionados=None, id_promocion_seleccionada=""):
     id_funcion_invalido = id_funcion < 1
     cantidad_butacas_invalida = not 1 <= len(ids_butacas) <= 6
     hay_id_butaca_invalido = any(id_butaca < 1 for id_butaca in ids_butacas)
@@ -85,6 +87,7 @@ def render_checkout(id_funcion, ids_butacas, error=None, productos_seleccionados
     estado_funcion, datos_funcion = api.pedir("GET", f"/api/funciones/{id_funcion}")
     estado_butacas, datos_butacas = api.pedir("GET", f"/api/funciones/{id_funcion}/butacas")
     estado_servicios, datos_servicios = api.pedir("GET", "/api/servicios")
+    estado_promociones, datos_promociones = api.pedir("GET", "/api/promociones")
 
     funcion_cargada = estado_funcion == 200
     butacas_cargadas = estado_butacas == 200
@@ -126,6 +129,9 @@ def render_checkout(id_funcion, ids_butacas, error=None, productos_seleccionados
     else:
         servicios_error = api.mensaje_error(datos_servicios)
 
+    promociones = datos_promociones if estado_promociones == 200 and isinstance(datos_promociones, list) else []
+    promociones = [promo for promo in promociones if promo.get("estado") == "Activa"]
+
     try:
         precio_entrada = Decimal(str(funcion["precio_entrada"])) if funcion else Decimal("0")
     except (InvalidOperation, KeyError):
@@ -151,6 +157,8 @@ def render_checkout(id_funcion, ids_butacas, error=None, productos_seleccionados
         butacas=butacas,
         ids_butacas=ids_butacas,
         productos=servicios,
+        promociones=promociones,
+        id_promocion_seleccionada=id_promocion_seleccionada,
         servicios_error=servicios_error,
         total=total,
         error=error

@@ -84,11 +84,12 @@ def generar_pdf_factura(factura):
     contenido.append(Table([
         ["Subtotal entradas", f"$ {totales['subtotal_entradas']:.2f}"],
         ["Subtotal productos", f"$ {totales['subtotal_productos']:.2f}"],
+        ["Descuento promociones", f"- $ {totales['descuento']:.2f}"],
         ["Total (ARS)", f"$ {totales['total']:.2f}"],
     ], colWidths=[137 * mm, 32 * mm], hAlign="RIGHT", style=TableStyle([
         ("ALIGN", (1, 0), (1, -1), "RIGHT"),
-        ("LINEABOVE", (0, 2), (-1, 2), 1, colors.HexColor("#26364a")),
-        ("FONTNAME", (0, 2), (-1, 2), "Helvetica-Bold"),
+        ("LINEABOVE", (0, 3), (-1, 3), 1, colors.HexColor("#26364a")),
+        ("FONTNAME", (0, 3), (-1, 3), "Helvetica-Bold"),
         ("TOPPADDING", (0, 0), (-1, -1), 5),
     ])))
     documento.build(contenido)

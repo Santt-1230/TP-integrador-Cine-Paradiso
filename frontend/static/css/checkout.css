@@ -72,6 +72,35 @@
     margin-bottom: 1.1rem;
 }
 
+.promociones-checkout {
+    display: grid;
+    gap: .55rem;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: #fffafa;
+    border: 1px solid #eadada;
+    border-radius: 10px;
+}
+
+.promociones-checkout h2,
+.promociones-checkout p {
+    margin: 0;
+}
+
+.promociones-checkout select {
+    width: 100%;
+    padding: .7rem;
+    border: 1px solid #c9c9c9;
+    border-radius: 6px;
+    background: #fff;
+    font: inherit;
+}
+
+.promocion-ayuda {
+    color: #666;
+    font-size: .9rem;
+}
+
 
 .resumen-checkout p {
     margin: .55rem 0;

@@ -62,7 +62,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const totalContenedor = formularioCheckout.querySelector(".checkout-actions");
     const totalSalida = formularioCheckout.querySelector(".checkout-total-dinamico");
-    const baseTotal = Number(totalContenedor?.dataset.baseTotal || 0);
+    const subtotalEntradasSalida = document.querySelector(".checkout-subtotal-entradas");
+    const descuentoSalida = formularioCheckout.querySelector(".checkout-descuento-dinamico");
+    const lineaDescuento = formularioCheckout.querySelector(".checkout-descuento-linea");
+    const selectorPromocion = formularioCheckout.querySelector('[name="id_promocion"]');
+    const baseTotalCentavos = Math.round(Number(totalContenedor?.dataset.baseTotal || 0) * 100);
+    const precioEntradaCentavos = Math.round(Number(totalContenedor?.dataset.precioEntrada || 0) * 100);
+    const cantidadEntradas = formularioCheckout.querySelectorAll('input[name="butacas"]').length;
     const formatoMoneda = new Intl.NumberFormat("es-AR", {
         style: "currency",
         currency: "ARS",
@@ -70,17 +76,46 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     const actualizarTotal = () => {
-        let total = baseTotal;
+        let subtotalServiciosCentavos = 0;
+        let descuentoCentavos = 0;
         formularioCheckout.querySelectorAll('.servicio-checkout input[type="checkbox"]').forEach((casilla) => {
             if (!casilla.checked) return;
             const cantidadInput = formularioCheckout.querySelector(`[name="cantidad_${casilla.value}"]`);
             const cantidad = Math.max(1, Number(cantidadInput?.value || 1));
-            total += Number(casilla.dataset.precio || 0) * cantidad;
+            subtotalServiciosCentavos += Math.round(Number(casilla.dataset.precio || 0) * 100) * cantidad;
         });
-        if (totalSalida) totalSalida.textContent = formatoMoneda.format(total);
+        const subtotalCompraCentavos = baseTotalCentavos + subtotalServiciosCentavos;
+        const promocion = selectorPromocion?.selectedOptions[0];
+        const tipoPromocion = promocion?.dataset.tipo;
+        if (tipoPromocion === "nxm") {
+            const cantidadComprar = Number(promocion.dataset.comprar || 0);
+            const cantidadPagar = Number(promocion.dataset.pagar || 0);
+            if (cantidadComprar > 0 && cantidadPagar >= 0 && cantidadPagar <= cantidadComprar) {
+                const gruposCompletos = Math.floor(cantidadEntradas / cantidadComprar);
+                const entradasBonificadas = gruposCompletos * (cantidadComprar - cantidadPagar);
+                descuentoCentavos = precioEntradaCentavos * entradasBonificadas;
+            }
+        } else if (tipoPromocion === "porcentaje") {
+            const porcentaje = Number(promocion.dataset.porcentaje || 0);
+            descuentoCentavos = Math.round(subtotalCompraCentavos * porcentaje / 100);
+        } else if (tipoPromocion === "monto_fijo") {
+            const montoCentavos = Math.round(Number(promocion.dataset.montoDescuento || 0) * 100);
+            descuentoCentavos = Math.min(subtotalCompraCentavos, montoCentavos);
+        }
+        descuentoCentavos = Math.min(subtotalCompraCentavos, descuentoCentavos);
+        const totalCentavos = subtotalCompraCentavos - descuentoCentavos;
+        if (totalSalida) totalSalida.textContent = formatoMoneda.format(totalCentavos / 100);
+        if (subtotalEntradasSalida) {
+            const descuentoSoloEntradas = tipoPromocion === "nxm" ? descuentoCentavos : 0;
+            subtotalEntradasSalida.textContent = formatoMoneda.format((baseTotalCentavos - descuentoSoloEntradas) / 100);
+        }
+        if (descuentoSalida) descuentoSalida.textContent = formatoMoneda.format(descuentoCentavos / 100);
+        if (lineaDescuento) lineaDescuento.hidden = descuentoCentavos <= 0;
     };
 
     formularioCheckout.addEventListener("change", actualizarTotal);
+    selectorPromocion?.addEventListener("change", actualizarTotal);
+    selectorPromocion?.addEventListener("input", actualizarTotal);
     formularioCheckout.addEventListener("input", (event) => {
         if (event.target.matches('input[type="number"]')) actualizarTotal();
     });
