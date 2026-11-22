@@ -20,7 +20,7 @@ def obtener_compra_id(id_compra, id_usuario):
     compra = ejecutar_consulta(sql, parametros)
     return  compra[0] if compra else None
 
-#validar que la butaca este activa, o libre, y agregar datos a la base de butacas
+
 def generar_numero_factura(id_compra):
     anio = datetime.now().year
     return f"FAC-{anio}-{id_compra:06d}"
@@ -155,12 +155,7 @@ def obtener_funcion_precio(id_funcion):
     return precio_unitario[0] if precio_unitario else None
 
 
-def cancelacion_de_compra(id_compra, id_usuario):
-    sql = "UPDATE compras SET estado = 'cancelada', fecha_cancelacion = NOW()  WHERE id_compra = %s AND id_usuario = %s AND (estado = 'confirmada' OR estado = 'pendiente')"
-    parametros = [id_compra, id_usuario]
-    print (parametros)
-    cambiar = ejecutar_mutacion(sql, parametros)
-    return cambiar["filas"] > 0
+
 
 def obtener_entradas(id_compra):
     sql = "SELECT * FROM entradas WHERE id_compra = %s"

@@ -1,143 +1,208 @@
+const MAX_BUTACAS = 6;
+const MIN_BUTACAS = 1;
+const DURACION_MENSAJE_MS = 5000;
+
+const formatoMoneda = new Intl.NumberFormat("es-AR", {
+    style: "currency",
+    currency: "ARS",
+    maximumFractionDigits: 2,
+});
+
+const aCentavos = (valor) => Math.round(Number(valor || 0) * 100);
+const formatearCentavos = (centavos) => formatoMoneda.format(centavos / 100);
+
+function iniciarErrorTemporal() {
+    const error = document.querySelector("[data-error-temporal]");
+    if (!error) return;
+
+    const url = new URL(window.location.href);
+    url.searchParams.delete("checkout_expirado");
+    window.history.replaceState({}, "", url);
+
+    window.setTimeout(() => error.remove(), DURACION_MENSAJE_MS);
+}
+
+function iniciarSeleccionButacas() {
+    const formulario = document.querySelector(".seleccion-butacas");
+    if (!formulario) return;
+
+    const casillas = [...formulario.querySelectorAll('input[name="butacas"]:not(:disabled)')];
+    const aviso = document.querySelector("#aviso-seleccion-butacas");
+    const contador = document.querySelector("#contador");
+
+    const contarElegidas = () => casillas.filter((casilla) => casilla.checked).length;
+
+    const mostrarAviso = (mensaje) => {
+        if (!aviso) return;
+        aviso.textContent = mensaje;
+        aviso.hidden = !mensaje;
+    };
+
+    const actualizarContador = () => {
+        if (contador) contador.textContent = contarElegidas();
+    };
+
+    casillas.forEach((casilla) => {
+        casilla.addEventListener("change", () => {
+            if (contarElegidas() > MAX_BUTACAS) {
+                casilla.checked = false;
+                actualizarContador();
+                mostrarAviso("Podés elegir hasta seis butacas.");
+                return;
+            }
+
+            actualizarContador();
+            mostrarAviso("");
+        });
+    });
+
+    formulario.addEventListener("submit", (event) => {
+        const elegidas = contarElegidas();
+        if (elegidas < MIN_BUTACAS || elegidas > MAX_BUTACAS) {
+            event.preventDefault();
+            mostrarAviso("Elegí entre una y seis butacas para continuar.");
+        }
+    });
+}
+
+function evitarDobleEnvio(formulario) {
+    let enviando = false;
+
+    formulario.addEventListener("submit", (event) => {
+        if (enviando) {
+            event.preventDefault();
+            return;
+        }
+        enviando = true;
+
+        const boton = formulario.querySelector('button[type="submit"]');
+        if (!boton) return;
+
+        const esPasoServicios = formulario.querySelector("[data-continue-to-services]");
+        boton.disabled = true;
+        boton.textContent = esPasoServicios ? "Cargando servicios…" : "Procesando compra…";
+    });
+}
+
+function calcularSubtotalServicios(formulario) {
+    const casillas = formulario.querySelectorAll('.servicio-checkout input[type="checkbox"]');
+    let subtotal = 0;
+
+    casillas.forEach((casilla) => {
+        if (!casilla.checked) return;
+
+        const inputCantidad = formulario.querySelector(`[name="cantidad_${casilla.value}"]`);
+        const cantidad = Math.max(1, Number(inputCantidad?.value || 1));
+        subtotal += aCentavos(casilla.dataset.precio) * cantidad;
+    });
+
+    return subtotal;
+}
+
+function calcularDescuento({ promocion, subtotalCompra, precioEntrada, cantidadEntradas }) {
+    const tipo = promocion?.dataset.tipo;
+    let descuento = 0;
+
+    if (tipo === "nxm") {
+        const comprar = Number(promocion.dataset.comprar || 0);
+        const pagar = Number(promocion.dataset.pagar || 0);
+        const configuracionValida = comprar > 0 && pagar >= 0 && pagar <= comprar;
+
+        if (configuracionValida) {
+            const gruposCompletos = Math.floor(cantidadEntradas / comprar);
+            const entradasBonificadas = gruposCompletos * (comprar - pagar);
+            descuento = precioEntrada * entradasBonificadas;
+        }
+    } else if (tipo === "porcentaje") {
+        const porcentaje = Number(promocion.dataset.porcentaje || 0);
+        descuento = Math.round((subtotalCompra * porcentaje) / 100);
+    } else if (tipo === "monto_fijo") {
+        descuento = aCentavos(promocion.dataset.montoDescuento);
+    }
+
+    return Math.min(subtotalCompra, descuento);
+}
+
+function iniciarCalculoTotal(formulario) {
+    const acciones = formulario.querySelector(".checkout-actions");
+    const salidaTotal = formulario.querySelector(".checkout-total-dinamico");
+    const salidaSubtotalEntradas = document.querySelector(".checkout-subtotal-entradas");
+    const salidaDescuento = formulario.querySelector(".checkout-descuento-dinamico");
+    const lineaDescuento = formulario.querySelector(".checkout-descuento-linea");
+    const selectorPromocion =
+        formulario.querySelector(".promocion-preview") ||
+        formulario.querySelector('select[name="id_promocion"]');
+
+    const baseEntradas = aCentavos(acciones?.dataset.baseTotal);
+    const precioEntrada = aCentavos(acciones?.dataset.precioEntrada);
+    const cantidadEntradas = formulario.querySelectorAll('input[name="butacas"]').length;
+
+    const actualizarTotal = () => {
+        const subtotalCompra = baseEntradas + calcularSubtotalServicios(formulario);
+        const promocion = selectorPromocion?.selectedOptions[0];
+
+        const descuento = calcularDescuento({
+            promocion,
+            subtotalCompra,
+            precioEntrada,
+            cantidadEntradas,
+        });
+
+        if (salidaTotal) {
+            salidaTotal.textContent = formatearCentavos(subtotalCompra - descuento);
+        }
+
+        if (salidaSubtotalEntradas) {
+            const descuentoEnEntradas = promocion?.dataset.tipo === "nxm" ? descuento : 0;
+            salidaSubtotalEntradas.textContent = formatearCentavos(baseEntradas - descuentoEnEntradas);
+        }
+
+        if (salidaDescuento) salidaDescuento.textContent = formatearCentavos(descuento);
+        if (lineaDescuento) lineaDescuento.hidden = descuento <= 0;
+    };
+
+    formulario.addEventListener("change", actualizarTotal);
+    formulario.addEventListener("input", (event) => {
+        if (event.target.matches('input[type="number"]')) actualizarTotal();
+    });
+    selectorPromocion?.addEventListener("change", actualizarTotal);
+    selectorPromocion?.addEventListener("input", actualizarTotal);
+
+    actualizarTotal();
+}
+
+function iniciarContadorExpiracion() {
+    const pagina = document.querySelector(".checkout-pagina[data-checkout-duracion-segundos]");
+    if (!pagina) return;
+
+    const duracionMs = Number(pagina.dataset.checkoutDuracionSegundos) * 1000;
+    const expiraEn = Date.now() + duracionMs;
+    const enlaceVolver = pagina.querySelector(":scope > a");
+
+    const verificarExpiracion = () => {
+        const segundosRestantes = Math.max(0, Math.ceil((expiraEn - Date.now()) / 1000));
+
+        if (segundosRestantes === 0) {
+            const destino = new URL(enlaceVolver.href, window.location.href);
+            destino.searchParams.set("checkout_expirado", "1");
+            window.location.replace(destino.toString());
+            return;
+        }
+
+        window.setTimeout(verificarExpiracion, 1000);
+    };
+
+    verificarExpiracion();
+}
 
 document.addEventListener("DOMContentLoaded", () => {
-    const errorTemporal = document.querySelector("[data-error-temporal]");
-    if (errorTemporal) {
-        const url = new URL(window.location.href);
-        url.searchParams.delete("checkout_expirado");
-        window.history.replaceState({}, "", url);
-        window.setTimeout(() => errorTemporal.remove(), 5000);
-    }
-
-    const formularioButacas = document.querySelector(".seleccion-butacas");
-    if (formularioButacas) {
-        const casillas = [...formularioButacas.querySelectorAll('input[name="butacas"]:not(:disabled)')];
-        const aviso = document.querySelector("#aviso-seleccion-butacas");
-        const contador = document.querySelector("#contador");
-        const mostrarAviso = (mensaje) => {
-            if (!aviso) return;
-            aviso.textContent = mensaje;
-            aviso.hidden = !mensaje;
-        };
-
-        casillas.forEach((casilla) => {
-            casilla.addEventListener("change", () => {
-                const elegidas = casillas.filter((item) => item.checked).length;
-                if (contador) contador.textContent = elegidas;
-                if (elegidas > 6) {
-                    casilla.checked = false;
-                    if (contador) contador.textContent = elegidas - 1;
-                    mostrarAviso("Podés elegir hasta seis butacas.");
-                    return;
-                }
-                mostrarAviso("");
-            });
-        });
-
-        formularioButacas.addEventListener("submit", (event) => {
-            const elegidas = casillas.filter((casilla) => casilla.checked).length;
-            if (elegidas < 1 || elegidas > 6) {
-                event.preventDefault();
-                mostrarAviso("Elegí entre una y seis butacas para continuar.");
-            }
-        });
-    }
+    iniciarErrorTemporal();
+    iniciarSeleccionButacas();
 
     const formularioCheckout = document.querySelector(".checkout-form");
     if (!formularioCheckout) return;
 
-    let compraEnviandose = false;
-    formularioCheckout.addEventListener("submit", (event) => {
-        if (compraEnviandose) {
-            event.preventDefault();
-            return;
-        }
-
-        compraEnviandose = true;
-        const botonCompra = formularioCheckout.querySelector('button[type="submit"]');
-        if (botonCompra) {
-            botonCompra.disabled = true;
-            botonCompra.textContent = "Procesando compra…";
-        }
-    });
-
-    const totalContenedor = formularioCheckout.querySelector(".checkout-actions");
-    const totalSalida = formularioCheckout.querySelector(".checkout-total-dinamico");
-    const subtotalEntradasSalida = document.querySelector(".checkout-subtotal-entradas");
-    const descuentoSalida = formularioCheckout.querySelector(".checkout-descuento-dinamico");
-    const lineaDescuento = formularioCheckout.querySelector(".checkout-descuento-linea");
-    const selectorPromocion = formularioCheckout.querySelector('[name="id_promocion"]');
-    const baseTotalCentavos = Math.round(Number(totalContenedor?.dataset.baseTotal || 0) * 100);
-    const precioEntradaCentavos = Math.round(Number(totalContenedor?.dataset.precioEntrada || 0) * 100);
-    const cantidadEntradas = formularioCheckout.querySelectorAll('input[name="butacas"]').length;
-    const formatoMoneda = new Intl.NumberFormat("es-AR", {
-        style: "currency",
-        currency: "ARS",
-        maximumFractionDigits: 2,
-    });
-
-    const actualizarTotal = () => {
-        let subtotalServiciosCentavos = 0;
-        let descuentoCentavos = 0;
-        formularioCheckout.querySelectorAll('.servicio-checkout input[type="checkbox"]').forEach((casilla) => {
-            if (!casilla.checked) return;
-            const cantidadInput = formularioCheckout.querySelector(`[name="cantidad_${casilla.value}"]`);
-            const cantidad = Math.max(1, Number(cantidadInput?.value || 1));
-            subtotalServiciosCentavos += Math.round(Number(casilla.dataset.precio || 0) * 100) * cantidad;
-        });
-        const subtotalCompraCentavos = baseTotalCentavos + subtotalServiciosCentavos;
-        const promocion = selectorPromocion?.selectedOptions[0];
-        const tipoPromocion = promocion?.dataset.tipo;
-        if (tipoPromocion === "nxm") {
-            const cantidadComprar = Number(promocion.dataset.comprar || 0);
-            const cantidadPagar = Number(promocion.dataset.pagar || 0);
-            if (cantidadComprar > 0 && cantidadPagar >= 0 && cantidadPagar <= cantidadComprar) {
-                const gruposCompletos = Math.floor(cantidadEntradas / cantidadComprar);
-                const entradasBonificadas = gruposCompletos * (cantidadComprar - cantidadPagar);
-                descuentoCentavos = precioEntradaCentavos * entradasBonificadas;
-            }
-        } else if (tipoPromocion === "porcentaje") {
-            const porcentaje = Number(promocion.dataset.porcentaje || 0);
-            descuentoCentavos = Math.round(subtotalCompraCentavos * porcentaje / 100);
-        } else if (tipoPromocion === "monto_fijo") {
-            const montoCentavos = Math.round(Number(promocion.dataset.montoDescuento || 0) * 100);
-            descuentoCentavos = Math.min(subtotalCompraCentavos, montoCentavos);
-        }
-        descuentoCentavos = Math.min(subtotalCompraCentavos, descuentoCentavos);
-        const totalCentavos = subtotalCompraCentavos - descuentoCentavos;
-        if (totalSalida) totalSalida.textContent = formatoMoneda.format(totalCentavos / 100);
-        if (subtotalEntradasSalida) {
-            const descuentoSoloEntradas = tipoPromocion === "nxm" ? descuentoCentavos : 0;
-            subtotalEntradasSalida.textContent = formatoMoneda.format((baseTotalCentavos - descuentoSoloEntradas) / 100);
-        }
-        if (descuentoSalida) descuentoSalida.textContent = formatoMoneda.format(descuentoCentavos / 100);
-        if (lineaDescuento) lineaDescuento.hidden = descuentoCentavos <= 0;
-    };
-
-    formularioCheckout.addEventListener("change", actualizarTotal);
-    selectorPromocion?.addEventListener("change", actualizarTotal);
-    selectorPromocion?.addEventListener("input", actualizarTotal);
-    formularioCheckout.addEventListener("input", (event) => {
-        if (event.target.matches('input[type="number"]')) actualizarTotal();
-    });
-    actualizarTotal();
-
-    const paginaCheckout = document.querySelector(".checkout-pagina[data-checkout-duracion-segundos]");
-    if (paginaCheckout) {
-        const duracionSegundos = Number(paginaCheckout.dataset.checkoutDuracionSegundos);
-        const expiraEnMs = Date.now() + duracionSegundos * 1000;
-        const enlaceVolver = paginaCheckout.querySelector(":scope > a");
-
-        const actualizarContador = () => {
-            const segundos = Math.max(0, Math.ceil((expiraEnMs - Date.now()) / 1000));
-            if (segundos === 0) {
-                const destino = new URL(enlaceVolver.href, window.location.href);
-                destino.searchParams.set("checkout_expirado", "1");
-                window.location.replace(destino.toString());
-                return;
-            }
-            window.setTimeout(actualizarContador, 1000);
-        };
-
-        actualizarContador();
-    }
+    evitarDobleEnvio(formularioCheckout);
+    iniciarCalculoTotal(formularioCheckout);
+    iniciarContadorExpiracion();
 });

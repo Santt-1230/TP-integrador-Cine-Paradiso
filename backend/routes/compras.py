@@ -6,8 +6,7 @@ from services import pdf as pdf_services
 from validators import compras as compras_validators
 from services import mailer
 compras_bp = Blueprint('compras', __name__, url_prefix='/api')
-def usuario_registrado():
-    return {'id': 1, 'acceso': "admin"}
+
 
 @compras_bp.route('/compras', methods=['GET'])
 @login_requerido
@@ -125,24 +124,6 @@ def registrar_compras():
     )
     return jsonify({"message": "Compra registrada"}), 201
     
-@compras_bp.route('/compras/<int:id>/cancelacion', methods=['PATCH'])
-@login_requerido
-def cancelar_compra(id):
-    error = compras_services.cancelar_compra(id, session["id_usuario"])
- 
-    if error == "COMPRA_INEXISTENTE":
-        return jsonify(construir_error_api(
-            code="COMPRA_INEXISTENTE",
-            message="COMPRA NO ENCONTRADA",
-            description=f"La compra de ID: {id} no existe o no le pertenece"
-        )), 404
-    if error == "ERROR_CANCELACION":
-        return jsonify(construir_error_api(
-            code="ERROR_CANCELACION",
-            message="CANCELACION RECHAZADA",
-            description=f"No se pudo cancelar la compra con ID: {id}"
-        )), 409
-    return jsonify({"message": "Compra cancelada con exito"}), 200
 
     
 
