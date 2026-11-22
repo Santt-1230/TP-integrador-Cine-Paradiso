@@ -34,14 +34,20 @@ def verificar_estado(estado):
     return None
 
 
-def datos_del_formulario():
-    precio = request.form.get("precio", "").strip()
+def convertir_numero(valor, tipo=float):
+    if not valor:
+        return None
     try:
-        precio = float(precio)
+        return tipo(valor)
     except ValueError:
-        pass
+        return valor
+
+
+def datos_de_servicio():
+    precio = convertir_numero(request.form.get("precio", "").strip())
     descripcion = request.form.get("descripcion", "").strip()
     imagen_url = request.form.get("imagen_url", "").strip()
+
     return {
         "nombre": request.form.get("nombre", "").strip(),
         "tipo": request.form.get("tipo", ""),
@@ -53,46 +59,26 @@ def datos_del_formulario():
 
 
 def datos_de_promocion():
-    descripcion = request.form.get("descripcion", "").strip()
-    imagen_url = request.form.get("imagen_url", "").strip()
-    tipo = request.form.get("tipo", "")
-    cantidad_comprar = request.form.get("cantidad_comprar", "").strip()
-    cantidad_pagar = request.form.get("cantidad_pagar", "").strip()
-    porcentaje = request.form.get("porcentaje", "").strip()
-    monto_descuento = request.form.get("monto_descuento", "").strip()
-
-    try:
-        cantidad_comprar = int(cantidad_comprar) if cantidad_comprar else None
-    except ValueError:
-        pass
-
-    try:
-        cantidad_pagar = int(cantidad_pagar) if cantidad_pagar else None
-    except ValueError:
-        pass
-
-    try:
-        porcentaje = float(porcentaje) if porcentaje else None
-    except ValueError:
-        pass
-
-    try:
-        monto_descuento = float(monto_descuento) if monto_descuento else None
-    except ValueError:
-        pass
-
     return {
         "nombre": request.form.get("nombre", "").strip(),
-        "descripcion": descripcion or None,
-        "imagen_url": imagen_url or None,
+        "descripcion": request.form.get("descripcion", "").strip() or None,
+        "imagen_url": request.form.get("imagen_url", "").strip() or None,
         "vigente_desde": request.form.get("vigente_desde", ""),
         "vigente_hasta": request.form.get("vigente_hasta", ""),
         "activa": "activa" in request.form,
-        "tipo": tipo,
-        "cantidad_comprar": cantidad_comprar,
-        "cantidad_pagar": cantidad_pagar,
-        "porcentaje": porcentaje,
-        "monto_descuento": monto_descuento,
+        "tipo": request.form.get("tipo", ""),
+        "cantidad_comprar": convertir_numero(
+            request.form.get("cantidad_comprar", "").strip(), int
+        ),
+        "cantidad_pagar": convertir_numero(
+            request.form.get("cantidad_pagar", "").strip(), int
+        ),
+        "porcentaje": convertir_numero(
+            request.form.get("porcentaje", "").strip()
+        ),
+        "monto_descuento": convertir_numero(
+            request.form.get("monto_descuento", "").strip()
+        ),
     }
 
 
@@ -168,7 +154,7 @@ def admin_servicio_nuevo():
         return respuesta
     if request.method == "GET":
         return render_template("admin_servicio_form.html", servicio={}, tipos=TIPOS)
-    datos = datos_del_formulario()
+    datos = datos_de_servicio()
     estado, datos_respuesta = api.pedir("POST", "/api/servicios", datos)
     respuesta = verificar_estado(estado)
     if respuesta:
@@ -193,7 +179,7 @@ def admin_servicio_editar(id_producto):
             flash(api.mensaje_error(datos_respuesta), "error")
             return redirigir_al_listado()
         return render_template("admin_servicio_form.html", servicio=datos_respuesta, tipos=TIPOS)
-    datos = datos_del_formulario()
+    datos = datos_de_servicio()
     estado, datos_respuesta = api.pedir("PATCH", f"/api/servicios/{id_producto}", datos)
     respuesta = verificar_estado(estado)
     if respuesta:
