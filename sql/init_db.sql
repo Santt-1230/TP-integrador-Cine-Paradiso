@@ -207,6 +207,17 @@ CREATE TABLE IF NOT EXISTS qr (
         )
 );
 
+CREATE TABLE opiniones (
+    id_opinion INT NOT NULL AUTO_INCREMENT,
+    id_usuario INT NOT NULL,
+    texto VARCHAR(1000) NOT NULL,
+    fecha_creacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    puntuacion TINYINT NOT NULL DEFAULT 5,
+    categoria VARCHAR(50) DEFAULT NULL,
+    PRIMARY KEY (id_opinion),
+    KEY id_usuario (id_usuario),
+    CONSTRAINT opiniones_ibfk_1 FOREIGN KEY (id_usuario) REFERENCES usuarios (id_usuario)
+);
 
 
 INSERT INTO usuarios (nombre, apellido, email, fecha_nacimiento, contrasena_hash, rol, email_verificado) VALUES (
@@ -223,11 +234,15 @@ INSERT INTO salas (id_local, numero_sala, capacidad) VALUES
     (2, 1, 200),
 	(3, 1, 150);
 
-INSERT INTO butacas (id_sala, fila, numero) VALUES
-    (1, 'A', 1), (1, 'A', 2), (1, 'A', 3),
-    (1, 'B', 1), (1, 'B', 2), (1, 'B', 3),
-    (2, 'A', 1), (2, 'A', 2), (2, 'A', 3),
-    (2, 'B', 1), (2, 'B', 2), (2, 'B', 3);
+INSERT INTO butacas (id_sala, fila, numero)
+WITH RECURSIVE n AS (
+    SELECT 1 AS i UNION ALL SELECT i + 1 FROM n WHERE i < 300
+)
+SELECT s.id_sala,
+       CHAR(65 + FLOOR((n.i - 1) / 10)),
+       ((n.i - 1) MOD 10) + 1
+FROM salas s
+JOIN n ON n.i <= s.capacidad;
 
 
 -- Datos de ejemplo: peliculas, generos y relaciones
