@@ -1,61 +1,79 @@
-from repositories.estadisticas import (obtener_ventas_totales, 
-obtener_ventas_entradas, 
-obtener_ventas_productos,
-obtener_ventas_por_genero, 
-obtener_cancelaciones, obtener_entradas_vendidas_por_franja,
-obtener_ocupacion_por_funcion, 
-obtener_ocupacion_por_pelicula)
+from datetime import datetime, timedelta
+from repositories import estadisticas as estadisticas_repositories
 from validators.estadisticas import validar_periodo_estadisticas
 
 
-def obtener_dashboard_estadisticas(periodo):
+
+
+def obtener_fecha_inicio(periodo=30):
+
+    if periodo is None:
+        periodo = 30
 
     periodo = validar_periodo_estadisticas(periodo)
 
-    ocupacion_por_funcion = obtener_ocupacion_por_funcion(periodo=periodo)
-    
+    return datetime.now() - timedelta(days=int(periodo))
 
+
+def obtener_dashboard_estadisticas(periodo=30):
+
+    periodo = validar_periodo_estadisticas(periodo)
+
+    # Obtener ocupación por función
+    ocupacion_por_funcion = (
+        estadisticas_repositories.obtener_ocupacion_por_funcion(
+            periodo=periodo
+        )
+    )
+
+    # Calcular capacidad total
     capacidad_total = sum(
         int(funcion["capacidad_total"] or 0)
         for funcion in ocupacion_por_funcion
     )
 
+    # Calcular entradas ocupadas
     entradas_ocupadas = sum(
         int(funcion["entradas_ocupadas"] or 0)
         for funcion in ocupacion_por_funcion
     )
 
+    # Calcular ocupación promedio
     ocupacion_promedio = (
         round(entradas_ocupadas * 100 / capacidad_total, 2)
         if capacidad_total > 0 else 0
     )
 
+    # Reunir todas las estadísticas
     estadisticas = {
+
         "periodo": periodo,
 
         "ventas_totales":
-            obtener_ventas_totales(periodo),
+            estadisticas_repositories.obtener_ventas_totales(periodo),
 
         "ventas_entradas":
-            obtener_ventas_entradas(periodo),
+            estadisticas_repositories.obtener_ventas_entradas(periodo),
 
         "ventas_productos":
-            obtener_ventas_productos(periodo),
+            estadisticas_repositories.obtener_ventas_productos(periodo),
 
         "cancelaciones":
-            obtener_cancelaciones(periodo),
+            estadisticas_repositories.obtener_cancelaciones(periodo),
 
         "ventas_por_genero":
-            obtener_ventas_por_genero(periodo),
+            estadisticas_repositories.obtener_ventas_por_genero(periodo),
 
         "entradas_por_franja":
-            obtener_entradas_vendidas_por_franja(periodo),
+            estadisticas_repositories.obtener_entradas_vendidas_por_franja(
+                periodo
+            ),
 
         "ocupacion_por_funcion":
             ocupacion_por_funcion,
 
         "ocupacion_por_pelicula":
-            obtener_ocupacion_por_pelicula(
+            estadisticas_repositories.obtener_ocupacion_por_pelicula(
                 periodo=periodo
             ),
 

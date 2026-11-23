@@ -80,13 +80,8 @@
             return;
         }
 
-        if (!iframeRespuesta.name) {
-            iframeRespuesta.name = "qr-respuesta";
-        }
-
         formularioManual.action = urlValidar;
-        formularioManual.method = "POST";
-        formularioManual.target = iframeRespuesta.name;
+
 
 
         let lector = null;
@@ -371,34 +366,6 @@
         }
 
 
-        function prepararTokenCSRF() {
-
-            const metaCsrf = document.querySelector(
-                'meta[name="csrf-token"]'
-            );
-
-            if (!metaCsrf || !metaCsrf.content) {
-                return;
-            }
-
-            let campoCsrf = formularioManual.querySelector(
-                'input[name="csrf_token"]'
-            );
-
-            if (!campoCsrf) {
-
-                campoCsrf = document.createElement("input");
-
-                campoCsrf.type = "hidden";
-                campoCsrf.name = "csrf_token";
-
-                formularioManual.appendChild(campoCsrf);
-            }
-
-            campoCsrf.value = metaCsrf.content;
-        }
-
-
         async function enviarFormulario() {
 
             if (validacionEnCurso || envioEnCurso) {
@@ -449,8 +416,6 @@
                 tipoSeleccionado === "producto"
                     ? categoriaSeleccionada
                     : "";
-
-            prepararTokenCSRF();
 
             validacionEnCurso = true;
             codigoProcesado = true;
