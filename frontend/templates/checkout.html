@@ -20,34 +20,54 @@
             <p>Precio por entrada: <strong>{{ funcion.precio_entrada|precio_ar if funcion.precio_entrada is defined else '$0' }}</strong></p>
         {% endif %}
         <p>Butacas: <strong>{% for butaca in butacas %}{{ butaca.fila }}{{ butaca.numero }}{% if not loop.last %}, {% endif %}{% endfor %}</strong></p>
-        <p>Subtotal entradas: <strong>{{ total|precio_ar }}</strong></p>
+        <p>Subtotal original de entradas: <strong>{{ total|precio_ar }}</strong></p>
     </div>
 
-    {% if servicios_error %}<p class="mensaje-error">No se pudieron cargar los productos: {{ servicios_error }}</p>{% endif %}
     <form class="checkout-form" method="post" action="{{ url_for('compras_bp.checkout') }}">
         <input type="hidden" name="id_funcion" value="{{ id_funcion }}">
         {% for id_butaca in ids_butacas %}<input type="hidden" name="butacas" value="{{ id_butaca }}">{% endfor %}
 
-        <h2>Productos y servicios</h2>
-        {% if productos %}
-            <div class="lista-servicios-checkout">
-            {% for producto in productos %}
-                <label class="servicio-checkout">
-                    <input type="checkbox" name="productos" value="{{ producto.id_producto }}" data-precio="{{ producto.precio }}" {% if producto.cantidad_seleccionada %}checked{% endif %}>
-                    <span><strong>{{ producto.nombre }}</strong>{% if producto.descripcion %}<small>{{ producto.descripcion }}</small>{% endif %}</span>
-                    <span>{{ producto.precio|precio_ar }}</span>
-                    <span>Cantidad <input type="number" name="cantidad_{{ producto.id_producto }}" min="1" max="20" value="{{ producto.cantidad_seleccionada or 1 }}"></span>
-                </label>
-            {% endfor %}
-            </div>
-        {% elif not servicios_error %}
-            <p>No hay productos disponibles para agregar.</p>
-        {% endif %}
-        <div class="checkout-actions" data-base-total="{{ total }}">
+        <section class="promociones-checkout" aria-labelledby="titulo-promociones">
+            <h2 id="titulo-promociones">Promociones</h2>
+            <fieldset class="promociones-grupo">
+                <legend>Promoción para entradas</legend>
+                {% set promociones_entradas = promociones|selectattr('tipo', 'equalto', 'nxm')|list %}
+                {% if promociones_entradas %}
+                    {% for promocion in promociones_entradas %}
+                    <label class="promocion-opcion">
+                        <input type="checkbox" name="id_promociones" value="{{ promocion.id_promocion }}"
+                            data-tipo="{{ promocion.tipo }}" data-comprar="{{ promocion.cantidad_comprar }}"
+                            data-pagar="{{ promocion.cantidad_pagar }}" data-porcentaje="{{ promocion.porcentaje }}"
+                            data-monto-descuento="{{ promocion.monto_descuento }}"
+                            {% if promocion.id_promocion in ids_promociones_seleccionadas %}checked{% endif %}>
+                        <span><strong>{{ promocion.nombre }} ({{ promocion.cantidad_comprar }}×{{ promocion.cantidad_pagar }})</strong>{% if promocion.descripcion %}<small>{{ promocion.descripcion }}</small>{% endif %}</span>
+                    </label>
+                    {% endfor %}
+                {% else %}<p>No hay promociones N×M vigentes.</p>{% endif %}
+            </fieldset>
+            <fieldset class="promociones-grupo">
+                <legend>Descuentos sobre el total</legend>
+                {% set promociones_total = promociones|rejectattr('tipo', 'equalto', 'nxm')|list %}
+                {% if promociones_total %}
+                    {% for promocion in promociones_total %}
+                    <label class="promocion-opcion">
+                        <input type="checkbox" name="id_promociones" value="{{ promocion.id_promocion }}"
+                            data-tipo="{{ promocion.tipo }}" data-comprar="{{ promocion.cantidad_comprar }}"
+                            data-pagar="{{ promocion.cantidad_pagar }}" data-porcentaje="{{ promocion.porcentaje }}"
+                            data-monto-descuento="{{ promocion.monto_descuento }}"
+                            {% if promocion.id_promocion in ids_promociones_seleccionadas %}checked{% endif %}>
+                        <span><strong>{{ promocion.nombre }}{% if promocion.tipo == 'porcentaje' %} ({{ promocion.porcentaje }}%){% elif promocion.tipo == 'monto_fijo' %} (${{ promocion.monto_descuento }}){% endif %}</strong>{% if promocion.descripcion %}<small>{{ promocion.descripcion }}</small>{% endif %}</span>
+                    </label>
+                    {% endfor %}
+                {% else %}<p>No hay descuentos vigentes para el total.</p>{% endif %}
+            </fieldset>
+        </section>
+        <div class="checkout-actions" data-base-total="{{ total }}" data-precio-entrada="{{ funcion.precio_entrada if funcion else 0 }}">
+            <p class="checkout-descuento-linea" hidden>Descuento promocional: <strong class="checkout-descuento-dinamico">$0</strong></p>
             <p>Total: <strong class="checkout-total-dinamico">{{ total|precio_ar }}</strong></p>
-            <button class="boton" type="submit">Realizar compra</button>
+            <button class="boton" type="submit" data-continue-to-services>Continuar a servicios</button>
         </div>
     </form>
 </section>
-<script src="{{ url_for('static', filename='js/checkout.js') }}" defer></script>
+<script src="{{ url_for('static', filename='js/checkout.js', v=9) }}" defer></script>
 {% endblock %}

@@ -6,8 +6,7 @@ from services import pdf as pdf_services
 from validators import compras as compras_validators
 from services import mailer
 compras_bp = Blueprint('compras', __name__, url_prefix='/api')
-def usuario_registrado():
-    return {'id': 1, 'acceso': "admin"}
+
 
 @compras_bp.route('/compras', methods=['GET'])
 @login_requerido
@@ -90,6 +89,18 @@ def registrar_compras():
             message="Producto no disponible",
             description="Uno de los productos no existe o está inactivo",
         )), 404
+    if error == "PROMOCION_NO_DISPONIBLE":
+        return jsonify(construir_error_api(
+            code=error,
+            message="Promoción no disponible",
+            description="Una de las promociones seleccionadas no está vigente o ya no es válida. Actualizá el checkout e intentá de nuevo.",
+        )), 409
+    if error == "PROMOCIONES_CATEGORIA_DUPLICADA":
+        return jsonify(construir_error_api(
+            code=error,
+            message="Hay demasiadas promociones seleccionadas",
+            description="Elegí como máximo una promoción N×M y un descuento sobre el total.",
+        )), 400
     if error is not None:
         return jsonify(error), 400
 
@@ -119,24 +130,6 @@ def registrar_compras():
     )
     return jsonify({"message": "Compra registrada"}), 201
     
-@compras_bp.route('/compras/<int:id>/cancelacion', methods=['PATCH'])
-@login_requerido
-def cancelar_compra(id):
-    error = compras_services.cancelar_compra(id, session["id_usuario"])
- 
-    if error == "COMPRA_INEXISTENTE":
-        return jsonify(construir_error_api(
-            code="COMPRA_INEXISTENTE",
-            message="COMPRA NO ENCONTRADA",
-            description=f"La compra de ID: {id} no existe o no le pertenece"
-        )), 404
-    if error == "ERROR_CANCELACION":
-        return jsonify(construir_error_api(
-            code="ERROR_CANCELACION",
-            message="CANCELACION RECHAZADA",
-            description=f"No se pudo cancelar la compra con ID: {id}"
-        )), 409
-    return jsonify({"message": "Compra cancelada con exito"}), 200
 
     
 
@@ -216,33 +209,4 @@ def obtener_qr(id):
     return send_file(
         BytesIO(pdf), mimetype="application/pdf", as_attachment=True,
         download_name=f"entradas-{numero}.pdf",
-    )
-
-@compras_bp.route('/compras/<int:id>/reembolso', methods=['GET'])
-@login_requerido
-def obtener_reembolso(id):
-    if session["rol"] == "administrador":
-        factura, error = compras_services.obtener_factura(id)
-    else:
-        factura, error = compras_services.obtener_factura(id, session["id_usuario"])
-
-    if error == "COMPRA_INEXISTENTE":
-        return jsonify(construir_error_api(
-            code="COMPRA_INEXISTENTE",
-            message="COMPRA NO ENCONTRADA",
-            description=f"La compra de ID: {id} no existe o no le pertenece"
-        )), 404
-
-    if factura["factura"].get("estado") != "cancelada":
-        return jsonify(construir_error_api(
-            code="COMPRA_NO_CANCELADA",
-            message="COMPRA NO CANCELADA",
-            description="Solo las compras canceladas tienen comprobante de reembolso"
-        )), 409
-
-    pdf = pdf_services.generar_pdf_reembolso(factura)
-    numero = factura["factura"].get("numero") or f"compra-{id}"
-    return send_file(
-        BytesIO(pdf), mimetype="application/pdf", as_attachment=True,
-        download_name=f"reembolso-{numero}.pdf",
     )

@@ -56,13 +56,22 @@ document.addEventListener("DOMContentLoaded", () => {
         const botonCompra = formularioCheckout.querySelector('button[type="submit"]');
         if (botonCompra) {
             botonCompra.disabled = true;
-            botonCompra.textContent = "Procesando compra…";
+            botonCompra.textContent = formularioCheckout.querySelector("[data-continue-to-services]")
+                ? "Cargando servicios…"
+                : "Procesando compra…";
         }
     });
 
     const totalContenedor = formularioCheckout.querySelector(".checkout-actions");
     const totalSalida = formularioCheckout.querySelector(".checkout-total-dinamico");
-    const baseTotal = Number(totalContenedor?.dataset.baseTotal || 0);
+    const descuentoSalida = formularioCheckout.querySelector(".checkout-descuento-dinamico");
+    const lineaDescuento = formularioCheckout.querySelector(".checkout-descuento-linea");
+    const promocionesSeleccionables = formularioCheckout.querySelectorAll(
+        'input[type="checkbox"][name="id_promociones"]'
+    );
+    const baseTotalCentavos = Math.round(Number(totalContenedor?.dataset.baseTotal || 0) * 100);
+    const precioEntradaCentavos = Math.round(Number(totalContenedor?.dataset.precioEntrada || 0) * 100);
+    const cantidadEntradas = formularioCheckout.querySelectorAll('input[name="butacas"]').length;
     const formatoMoneda = new Intl.NumberFormat("es-AR", {
         style: "currency",
         currency: "ARS",
@@ -70,17 +79,59 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     const actualizarTotal = () => {
-        let total = baseTotal;
+        let subtotalServiciosCentavos = 0;
+        let descuentoEntradasCentavos = 0;
         formularioCheckout.querySelectorAll('.servicio-checkout input[type="checkbox"]').forEach((casilla) => {
             if (!casilla.checked) return;
             const cantidadInput = formularioCheckout.querySelector(`[name="cantidad_${casilla.value}"]`);
             const cantidad = Math.max(1, Number(cantidadInput?.value || 1));
-            total += Number(casilla.dataset.precio || 0) * cantidad;
+            subtotalServiciosCentavos += Math.round(Number(casilla.dataset.precio || 0) * 100) * cantidad;
         });
-        if (totalSalida) totalSalida.textContent = formatoMoneda.format(total);
+        const subtotalCompraCentavos = baseTotalCentavos + subtotalServiciosCentavos;
+        const promocionesSeleccionadas = [...promocionesSeleccionables].filter((promo) => promo.checked);
+        for (const promocion of promocionesSeleccionadas) {
+            if (promocion.dataset.tipo !== "nxm") continue;
+            const cantidadComprar = Number(promocion.dataset.comprar || 0);
+            const cantidadPagar = Number(promocion.dataset.pagar || 0);
+            if (cantidadComprar > 0 && cantidadPagar >= 0 && cantidadPagar <= cantidadComprar) {
+                const gruposCompletos = Math.floor(cantidadEntradas / cantidadComprar);
+                const entradasBonificadas = gruposCompletos * (cantidadComprar - cantidadPagar);
+                descuentoEntradasCentavos += precioEntradaCentavos * entradasBonificadas;
+            }
+        }
+        descuentoEntradasCentavos = Math.min(baseTotalCentavos, descuentoEntradasCentavos);
+        let totalRestanteCentavos = subtotalCompraCentavos - descuentoEntradasCentavos;
+        let descuentoCentavos = descuentoEntradasCentavos;
+        for (const promocion of promocionesSeleccionadas) {
+            if (promocion.dataset.tipo === "nxm") continue;
+            let descuento = 0;
+            if (promocion.dataset.tipo === "porcentaje") {
+                const porcentaje = Number(promocion.dataset.porcentaje || 0);
+                descuento = Math.round(totalRestanteCentavos * porcentaje / 100);
+            } else if (promocion.dataset.tipo === "monto_fijo") {
+                descuento = Math.round(Number(promocion.dataset.montoDescuento || 0) * 100);
+            }
+            descuento = Math.min(totalRestanteCentavos, descuento);
+            descuentoCentavos += descuento;
+            totalRestanteCentavos -= descuento;
+        }
+        const totalCentavos = totalRestanteCentavos;
+        if (totalSalida) totalSalida.textContent = formatoMoneda.format(totalCentavos / 100);
+        if (descuentoSalida) descuentoSalida.textContent = formatoMoneda.format(descuentoCentavos / 100);
+        if (lineaDescuento) lineaDescuento.hidden = descuentoCentavos <= 0;
     };
 
     formularioCheckout.addEventListener("change", actualizarTotal);
+    promocionesSeleccionables.forEach((promocion) => {
+        promocion.addEventListener("change", () => {
+            if (!promocion.checked) return;
+            const grupo = promocion.closest(".promociones-grupo");
+            grupo?.querySelectorAll('input[type="checkbox"][name="id_promociones"]').forEach((otra) => {
+                if (otra !== promocion) otra.checked = false;
+            });
+            actualizarTotal();
+        });
+    });
     formularioCheckout.addEventListener("input", (event) => {
         if (event.target.matches('input[type="number"]')) actualizarTotal();
     });

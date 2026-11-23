@@ -2,18 +2,6 @@ from db import ejecutar_consulta, ejecutar_mutacion
 from datetime import datetime, timedelta
 
 
-# =========================================================
-# FECHAS
-# =========================================================
-
-def _marcar_funciones_finalizadas():
-    # las estadísticas cuentan solo las finalizadas, y nada las marca al terminar
-    ejecutar_mutacion(
-        "UPDATE funciones SET estado = 'finalizada' "
-        "WHERE estado = 'programada' AND fecha_hora_fin < NOW()",
-        (),
-    )
-
 
 def obtener_fecha_inicio(periodo=30):
 
@@ -32,10 +20,6 @@ def obtener_fecha_inicio(periodo=30):
 
     return datetime.now() - timedelta(days=dias)
 
-
-# =========================================================
-# VENTAS TOTALES
-# =========================================================
 
 def obtener_ventas_totales(periodo=30):
 
@@ -56,10 +40,6 @@ def obtener_ventas_totales(periodo=30):
 
     return resultado[0]["ventas_totales"] if resultado else 0
 
-
-# =========================================================
-# VENTAS DE ENTRADAS
-# =========================================================
 
 def obtener_ventas_entradas(periodo=30):
 
@@ -84,10 +64,6 @@ def obtener_ventas_entradas(periodo=30):
 
     return resultado[0]["ventas_entradas"] if resultado else 0
 
-
-# =========================================================
-# VENTAS DE PRODUCTOS
-# =========================================================
 
 def obtener_ventas_productos(periodo=30):
 
@@ -114,10 +90,6 @@ def obtener_ventas_productos(periodo=30):
 
     return resultado[0]["ventas_productos"] if resultado else 0
 
-
-# =========================================================
-# VENTAS POR GÉNERO
-# =========================================================
 
 def obtener_ventas_por_genero(periodo=30):
 
@@ -161,10 +133,6 @@ def obtener_ventas_por_genero(periodo=30):
     return ejecutar_consulta(consulta, (fecha_desde,))
 
 
-# =========================================================
-# CANCELACIONES
-# =========================================================
-
 def obtener_cancelaciones(periodo=30):
 
     fecha_desde = obtener_fecha_inicio(periodo)
@@ -185,10 +153,6 @@ def obtener_cancelaciones(periodo=30):
 
     return resultado[0]["cancelaciones"] if resultado else 0
 
-
-# =========================================================
-# ENTRADAS VENDIDAS POR FRANJA HORARIA
-# =========================================================
 
 def obtener_entradas_vendidas_por_franja(periodo=30):
 
@@ -229,13 +193,7 @@ def obtener_entradas_vendidas_por_franja(periodo=30):
     return ejecutar_consulta(consulta, (fecha_desde,))
 
 
-# =========================================================
-# OCUPACIÓN POR FUNCIÓN
-# =========================================================
-
 def obtener_ocupacion_por_funcion(id_funcion=None, periodo=30):
-    _marcar_funciones_finalizadas()
-
     fecha_desde = obtener_fecha_inicio(periodo)
 
     filtro = ""
@@ -305,13 +263,7 @@ def obtener_ocupacion_por_funcion(id_funcion=None, periodo=30):
     return ejecutar_consulta(consulta, tuple(parametros))
 
 
-# =========================================================
-# OCUPACIÓN POR PELÍCULA
-# =========================================================
-
 def obtener_ocupacion_por_pelicula(id_pelicula=None, periodo=30):
-    _marcar_funciones_finalizadas()
-
     fecha_desde = obtener_fecha_inicio(periodo)
 
     filtro = ""
