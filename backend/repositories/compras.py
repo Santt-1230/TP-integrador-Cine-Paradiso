@@ -1,5 +1,7 @@
 from db import ejecutar_consulta, ejecutar_mutacion, transaccion
 from datetime import datetime
+from repositories import qr as qr_repositories
+
 
 def obtener_compras(id):
     sql = "SELECT * FROM compras WHERE id_usuario = %s;"
@@ -22,53 +24,98 @@ def generar_numero_factura(id_compra):
     anio = datetime.now().year
     return f"FAC-{anio}-{id_compra:06d}"
 
+
 def registrar_compra(id_usuario, datos, productos):
     with transaccion() as cursor:
+
+        # Obtener el precio de las entradas
         cursor.execute(
             "SELECT precio_entrada FROM funciones WHERE id_funcion = %s",
             (datos["id_funcion"],),
         )
+
         funcion = cursor.fetchone()
+
         if not funcion:
             raise ValueError("La función dejó de existir al registrar la compra")
 
         precio_entrada = funcion["precio_entrada"]
         total = precio_entrada * len(datos["butacas"])
+
+        # Registrar la compra
         cursor.execute(
             "INSERT INTO compras "
             "(id_usuario, id_funcion, estado, total, expira_en, fecha_confirmacion) "
             "VALUES (%s, %s, 'confirmada', %s, NOW(), NOW())",
             (id_usuario, datos["id_funcion"], total),
         )
+
         id_compra = cursor.lastrowid
 
+        # Registrar las entradas
         for id_butaca in datos["butacas"]:
+
             cursor.execute(
                 "INSERT INTO entradas "
                 "(id_compra, id_funcion, id_butaca, precio_unitario, estado) "
                 "VALUES (%s, %s, %s, %s, 'confirmada')",
                 (id_compra, datos["id_funcion"], id_butaca, precio_entrada),
             )
+
             if cursor.rowcount != 1:
                 raise RuntimeError("No se pudo registrar una entrada")
 
-        for producto, cantidad in productos:
+        # Registrar productos y generar un QR por cada producto
+        for item in productos:
+
+            producto = item["producto"]
+            cantidad = item["cantidad"]
+
+            # Registrar el producto con su cantidad total
             cursor.execute(
                 "INSERT INTO compra_productos "
                 "(id_compra, id_producto, cantidad, precio_unitario) "
                 "VALUES (%s, %s, %s, %s)",
-                (id_compra, producto["id_producto"], cantidad, producto["precio"]),
+                (
+                    id_compra,
+                    producto["id_producto"],
+                    cantidad,
+                    producto["precio"]
+                ),
             )
+
             if cursor.rowcount != 1:
                 raise RuntimeError("No se pudo agregar un producto a la compra")
+
+            # Obtener el identificador del producto comprado
+            id_compra_producto = cursor.lastrowid
+
+            # Registrar el QR del producto
+            qr_registrado = False
+
+            for token, codigo in item["qrs"]:
+
+                if not qr_registrado:
+                    qr_registrado = qr_repositories.registrar_qr_producto(
+                        cursor,
+                        id_compra,
+                        id_compra_producto,
+                        token,
+                        codigo
+                    )
+
+            if not qr_registrado:
+                raise RuntimeError("No se pudo generar el QR del producto")
+
+            # Actualizar el total
             cursor.execute(
                 "UPDATE compras SET total = total + %s WHERE id_compra = %s",
                 (producto["precio"] * cantidad, id_compra),
             )
+
             if cursor.rowcount != 1:
                 raise RuntimeError("No se pudo actualizar el total de la compra")
-
-            
+        # Generar el número de factura
         numero_factura = generar_numero_factura(id_compra)
 
         cursor.execute(
@@ -79,7 +126,6 @@ def registrar_compra(id_usuario, datos, productos):
         if cursor.rowcount != 1:
             raise RuntimeError("No se pudo asignar el número de factura")
 
-        
         return id_compra
 
 def butacas_disponibles(id_funcion, id_butacas):
@@ -197,3 +243,4 @@ def butacas_id(id_butaca):
         (id_butaca,)
     )
     return butaca[0] if butaca else None
+

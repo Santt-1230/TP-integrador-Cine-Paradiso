@@ -224,3 +224,254 @@ def generar_pdf_entradas(factura, qrs):
     documento.build(contenido)
     salida.seek(0)
     return salida.getvalue()
+def generar_pdf_productos(qrs):
+    """Genera un PDF con un producto por página y su QR escaneable."""
+
+    salida = BytesIO()
+
+    documento = SimpleDocTemplate(
+        salida,
+        pagesize=A4,
+        rightMargin=25 * mm,
+        leftMargin=25 * mm,
+        topMargin=25 * mm,
+        bottomMargin=25 * mm,
+        title="QR de productos",
+    )
+
+    estilos = getSampleStyleSheet()
+
+    # Colores de Cine Paradiso
+    color_marca = colors.HexColor("#172B4D")
+    color_acento = colors.HexColor("#E5A93D")
+    color_fondo = colors.HexColor("#F3F6FA")
+
+    # Estilos
+    estilo_marca = ParagraphStyle(
+        "MarcaProducto",
+        parent=estilos["Heading2"],
+        fontName="Helvetica-Bold",
+        fontSize=15,
+        leading=18,
+        textColor=colors.white,
+        spaceAfter=0,
+    )
+
+    estilo_etiqueta = ParagraphStyle(
+        "EtiquetaProducto",
+        parent=estilos["BodyText"],
+        fontName="Helvetica-Bold",
+        fontSize=8,
+        leading=10,
+        textColor=colors.HexColor("#64748B"),
+    )
+
+    estilo_dato = ParagraphStyle(
+        "DatoProducto",
+        parent=estilos["BodyText"],
+        fontName="Helvetica-Bold",
+        fontSize=11,
+        leading=15,
+        textColor=color_marca,
+    )
+
+    estilo_producto = ParagraphStyle(
+        "NombreProducto",
+        parent=estilos["Title"],
+        fontName="Helvetica-Bold",
+        fontSize=21,
+        leading=25,
+        textColor=color_marca,
+        alignment=1,
+    )
+
+    estilo_numero = ParagraphStyle(
+        "NumeroProducto",
+        parent=estilos["Heading2"],
+        fontName="Helvetica-Bold",
+        fontSize=13,
+        leading=16,
+        textColor=color_marca,
+        alignment=1,
+    )
+
+    estilo_instruccion = ParagraphStyle(
+        "InstruccionProducto",
+        parent=estilos["BodyText"],
+        fontSize=9,
+        leading=13,
+        textColor=colors.HexColor("#475569"),
+        alignment=1,
+    )
+
+    estilo_codigo_manual = ParagraphStyle(
+        "CodigoManualProducto",
+        parent=estilos["Heading2"],
+        fontName="Courier-Bold",
+        fontSize=15,
+        leading=20,
+        textColor=color_marca,
+        alignment=1,
+    )
+
+    contenido = []
+
+    for indice, qr in enumerate(qrs):
+
+        # Encabezado
+        encabezado = Table(
+            [[
+                Paragraph("CINE PARADISO", estilo_marca),
+                Paragraph("PRODUCTO DIGITAL", estilo_marca)
+            ]],
+            colWidths=[85 * mm, 75 * mm],
+        )
+
+        encabezado.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (-1, -1), color_marca),
+            ("TEXTCOLOR", (0, 0), (-1, -1), colors.white),
+            ("ALIGN", (0, 0), (-1, -1), "LEFT"),
+            ("ALIGN", (1, 0), (1, 0), "RIGHT"),
+            ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+            ("LEFTPADDING", (0, 0), (-1, -1), 12),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 12),
+            ("TOPPADDING", (0, 0), (-1, -1), 12),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 12),
+            ("LINEBELOW", (0, -1), (-1, -1), 3, color_acento),
+        ]))
+
+        # Información del producto
+        datos_producto = Table([
+            [
+                Paragraph("CATEGORÍA", estilo_etiqueta),
+                Paragraph("CANTIDAD", estilo_etiqueta)
+            ],
+            [
+                Paragraph(
+                    escape(str(qr.get("categoria") or "—")),
+                    estilo_dato
+                ),
+                Paragraph(
+                    f"{qr.get('cantidad', 0)} unidad/es",
+                    estilo_dato
+                )
+            ],
+            [
+                Paragraph("PRECIO UNITARIO", estilo_etiqueta),
+                Paragraph("SUBTOTAL", estilo_etiqueta)
+            ],
+            [
+                Paragraph(
+                    f"$ {float(qr.get('precio_unitario') or 0):.2f}",
+                    estilo_dato
+                ),
+                Paragraph(
+                    f"$ {float(qr.get('subtotal') or 0):.2f}",
+                    estilo_dato
+                )
+            ],
+        ], colWidths=[80 * mm, 80 * mm])
+
+        datos_producto.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (-1, -1), color_fondo),
+            ("BOX", (0, 0), (-1, -1), 0.7, colors.HexColor("#D9E1EC")),
+            ("INNERGRID", (0, 0), (-1, -1), 0.4, colors.white),
+            ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+            ("LEFTPADDING", (0, 0), (-1, -1), 10),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 10),
+            ("TOPPADDING", (0, 0), (-1, -1), 7),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 7),
+        ]))
+
+        # Construir contenido de la página
+        contenido.extend([
+            encabezado,
+            Spacer(1, 12 * mm),
+
+            Paragraph(
+                escape(str(qr.get("producto") or "Producto")),
+                estilo_producto
+            ),
+
+            Spacer(1, 4 * mm),
+
+            Paragraph(
+                f"PRODUCTO N.º {escape(str(qr['id_compra_producto']))}",
+                estilo_numero
+            ),
+
+            Spacer(1, 8 * mm),
+
+            datos_producto,
+
+            Spacer(1, 10 * mm),
+        ])
+
+        # Generar imagen QR
+        imagen_qr = qrcode.make(qr["token"])
+
+        buffer_qr = BytesIO()
+        imagen_qr.save(buffer_qr, format="PNG")
+        buffer_qr.seek(0)
+
+        imagen = Image(
+            buffer_qr,
+            width=68 * mm,
+            height=68 * mm,
+            hAlign="CENTER"
+        )
+
+        # Enmarcar QR
+        tarjeta_qr = Table(
+            [[imagen]],
+            colWidths=[82 * mm],
+            rowHeights=[82 * mm],
+            hAlign="CENTER"
+        )
+
+        tarjeta_qr.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (-1, -1), colors.white),
+            ("BOX", (0, 0), (-1, -1), 0.8, colors.HexColor("#D9E1EC")),
+            ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+            ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+        ]))
+
+        contenido.extend([
+            tarjeta_qr,
+            Spacer(1, 5 * mm),
+
+            Paragraph("CÓDIGO MANUAL", estilo_etiqueta),
+
+            Spacer(1, 1 * mm),
+
+            Paragraph(
+                escape(str(qr.get("codigo_manual") or "—")),
+                estilo_codigo_manual
+            ),
+
+            Spacer(1, 3 * mm),
+
+            Paragraph(
+                "Presentá este código para retirar tu producto. "
+                "Cada QR permite un único retiro de la cantidad indicada.",
+                estilo_instruccion
+            ),
+
+            Spacer(1, 8 * mm),
+
+            Paragraph(
+                f"Compra {escape(str(qr['id_compra']))}"
+                " &nbsp;·&nbsp; Cine Paradiso",
+                estilo_etiqueta
+            ),
+        ])
+
+        # Una página por producto
+        if indice < len(qrs) - 1:
+            contenido.append(PageBreak())
+
+    documento.build(contenido)
+
+    salida.seek(0)
+
+    return salida.getvalue()

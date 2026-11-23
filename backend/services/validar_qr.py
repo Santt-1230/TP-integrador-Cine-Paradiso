@@ -186,7 +186,7 @@ def procesar_validacion(
     }
 
     if tipo == "entrada":
-
+        
         respuesta["mensaje"] = "Entrada validada correctamente. Puede ingresar."
         respuesta["entrada"] = qr_actualizado
 

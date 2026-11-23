@@ -67,37 +67,58 @@ def compra_id(id_compra, id_usuario=None):
     return construir_compra(compra,pelicula,entradas,productos), None
 
 def registrar_compra(id_usuario, datos):
-    # El validador ya devuelve el error armado (o None si todo esta bien)
+    #El validador ya devuelve el error armado (o None si todo esta bien)
     error = compras_validators.validar_datos(datos)
     if error is not None:
-        return None, error 
+        return None, error
 
     funcion = compras_repositories.obtener_funcion(datos["id_funcion"])
 
-
     if not funcion:
-        return None,"FUNCION_INEXISTENTE"
+        return None, "FUNCION_INEXISTENTE"
+
     if funcion["estado"] != "programada":
         return None, "FUNCION_NO_DISPONIBLE"
-    butacas_libres = compras_repositories.butacas_disponibles(funcion["id_funcion"], datos["butacas"])
+
+    butacas_libres = compras_repositories.butacas_disponibles(
+        funcion["id_funcion"],
+        datos["butacas"]
+    )
+
     if not butacas_libres:
         return None, "BUTACA_NO_DISPONIBLE"
 
+    # Preparar los productos y sus futuros QR
     productos = []
+
     for item in datos.get("productos", []):
-        producto = compras_repositories.obtener_producto_activo(item["id_producto"])
+
+        producto = compras_repositories.obtener_producto_activo(
+            item["id_producto"]
+        )
+
         if not producto:
             return None, "PRODUCTO_NO_DISPONIBLE"
-        productos.append((producto, item["cantidad"]))
-    
+
+        productos.append({
+        "producto": producto,
+        "cantidad": item["cantidad"],
+        "qrs": [
+            (generar_token(), generar_codigo_manual())
+            for _ in range(const.MAX_INTENTOS_QR)
+        ]
+    })
+
     try:
-        id_compra = compras_repositories.registrar_compra(id_usuario, datos, productos)
+        id_compra = compras_repositories.registrar_compra(id_usuario,datos,productos)
+
     except Exception:
         return None, "ERROR_COMPRA"
+
     if not id_compra:
         return None, "ERROR_COMPRA"
-    return id_compra , None
 
+    return id_compra, None
 
 
 def cancelar_compra(id_compra, id_usuario):
@@ -231,3 +252,20 @@ def obtener_qr(id_compra, id_usuario=None):
             "token": qr["token"]
         })
     return resultado, None
+
+def obtener_qr_productos(id_compra, id_usuario=None):
+
+    compra = compras_repositories.obtener_compra_id(
+        id_compra,
+        id_usuario
+    )
+
+    if not compra:
+        return None, "COMPRA_INEXISTENTE"
+
+    if compra["estado"] != "confirmada":
+        return None, "COMPRA_NO_CONFIRMADA"
+
+    qrs = qr_repositories.obtener_qrs_productos_compra(id_compra)
+
+    return qrs, None

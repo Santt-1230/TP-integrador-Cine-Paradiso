@@ -1,10 +1,9 @@
-from flask import Blueprint, jsonify,request, session, current_app
+from flask import Blueprint, jsonify,request, session
 from validators.validar_qr import validar_token, validar_categoria
 from services.validar_qr import procesar_validacion
 from utils import admin_requerido
 
 validar_qr_bp = Blueprint('qr_api', __name__, url_prefix='/api/qr')
-
 
 
 def validar_qr_por_tipo(tipo: str):
@@ -15,27 +14,21 @@ def validar_qr_por_tipo(tipo: str):
 
         token = str(datos.get("token") or "").strip()
         categoria = str(datos.get("categoria") or "").strip()
-
     else:
-
         token = request.form.get("token", "").strip()
         categoria = request.form.get("categoria", "").strip()
 
     if not validar_token(token):
-
         resultado = {
             "valido": False,
             "mensaje": "El token tiene un formato inválido."
         }
         codigo_http = 400
-
     elif tipo not in ("entrada", "producto"):
-
         resultado = {
             "valido": False,
             "mensaje": "Tipo de QR inválido."
         }
-
         codigo_http = 400
 
     elif tipo == "producto" and not validar_categoria(categoria):
@@ -48,7 +41,6 @@ def validar_qr_por_tipo(tipo: str):
         codigo_http = 400
 
     else:
-
         try:
 
             if tipo == "entrada":
@@ -69,11 +61,6 @@ def validar_qr_por_tipo(tipo: str):
                 )
 
         except Exception:
-
-            current_app.logger.exception(
-                "Error al validar el QR de %s.",
-                tipo
-            )
 
             resultado = {
                 "valido": False,
