@@ -137,8 +137,10 @@ def compra_id(id_compra, id_usuario=None):
     return construir_compra(compra,pelicula,entradas,productos), None
 
 def registrar_compra(id_usuario, datos):
-    #El validador ya devuelve el error armado (o None si todo esta bien)
+
+    # Validar los datos recibidos
     error = compras_validators.validar_datos(datos)
+
     if error is not None:
         return None, error
 
@@ -149,17 +151,23 @@ def registrar_compra(id_usuario, datos):
 
     if funcion["estado"] != "programada":
         return None, "FUNCION_NO_DISPONIBLE"
+
+    # Comprobar disponibilidad de butacas
     estado_butacas = compras_repositories.butacas_disponibles(
-        funcion["id_funcion"], datos["butacas"]
+        funcion["id_funcion"],
+        datos["butacas"]
     )
+
     if estado_butacas == "inexistentes":
         return None, "BUTACA_INEXISTENTE"
+
     if estado_butacas == "inactivas":
         return None, "BUTACA_INACTIVA"
+
     if estado_butacas != "disponibles":
         return None, "BUTACA_NO_DISPONIBLE"
 
-    # Preparar los productos y sus futuros QR
+    # Preparar productos y sus futuros QR
     productos = []
 
     for item in datos.get("productos", []):
@@ -170,30 +178,60 @@ def registrar_compra(id_usuario, datos):
 
         if not producto:
             return None, "PRODUCTO_NO_DISPONIBLE"
-        
-        productos.append({
-        "producto": producto,
-        "cantidad": item["cantidad"],
-        "qrs": [
-            (generar_token(), generar_codigo_manual())
-            for _ in range(const.MAX_INTENTOS_QR)
-        ]
-    })
 
-    subtotal_entradas = Decimal(str(funcion["precio_entrada"])) * len(datos["butacas"])
+        productos.append({
+            "producto": producto,
+            "cantidad": item["cantidad"],
+            "qrs": [
+                (generar_token(), generar_codigo_manual())
+                for _ in range(const.MAX_INTENTOS_QR)
+            ]
+        })
+
+    # Calcular subtotal de entradas
+    precio_entrada = Decimal(
+        str(funcion["precio_entrada"])
+    ).quantize(CENTAVO, rounding=ROUND_HALF_UP)
+
+    subtotal_entradas = (
+        precio_entrada * len(datos["butacas"])
+    ).quantize(CENTAVO, rounding=ROUND_HALF_UP)
+
+    # Calcular subtotal de productos
     subtotal_productos = sum(
-        (Decimal(str(producto["precio"])) * cantidad for producto, cantidad in productos),
-        Decimal("0.00"),
-    )
-    subtotal_compra = (subtotal_entradas + subtotal_productos).quantize(CENTAVO, rounding=ROUND_HALF_UP)
+        (
+            Decimal(str(item["producto"]["precio"]))
+            * item["cantidad"]
+            for item in productos
+        ),
+        Decimal("0.00")
+    ).quantize(CENTAVO, rounding=ROUND_HALF_UP)
+
+    # Calcular subtotal general
+    subtotal_compra = (
+        subtotal_entradas + subtotal_productos
+    ).quantize(CENTAVO, rounding=ROUND_HALF_UP)
+
+    # Calcular descuentos de promociones
     descuento, error_promocion = calcular_descuentos_compra(
-        datos.get("id_promociones", []), len(datos["butacas"]), funcion["precio_entrada"], subtotal_compra
+        datos.get("id_promociones", []),
+        len(datos["butacas"]),
+        precio_entrada,
+        subtotal_compra
     )
+
     if error_promocion:
         return None, error_promocion
-    
+
+    # Registrar la compra
     try:
-        id_compra = compras_repositories.registrar_compra(id_usuario, datos, productos, descuento)
+        id_compra = compras_repositories.registrar_compra(
+            id_usuario,
+            datos,
+            productos,
+            descuento
+        )
+
     except Exception:
         return None, "ERROR_COMPRA"
 
