@@ -11,7 +11,8 @@
     {% with mensajes = get_flashed_messages() %}
         {% for mensaje in mensajes %}<p class="mensaje-error" role="status">{{ mensaje }}</p>{% endfor %}
     {% endwith %}
-    {% if error %}<p class="mensaje-error">{{ error }}</p>{% endif %}
+    {% if checkout_expirado %}<p class="mensaje-error" data-error-temporal role="alert">El checkout venció. Elegí las butacas nuevamente.</p>
+    {% elif error %}<p class="mensaje-error">{{ error }}</p>{% endif %}
     {% if butacas %}
         <form method="get" action="{{ url_for('compras_bp.checkout') }}" class="seleccion-butacas">
             <input type="hidden" name="id_funcion" value="{{ id_funcion }}">
@@ -45,9 +46,9 @@
                 <button type="submit" id="boton-continuar">Continuar</button>
             </div>
         </form>
-        <script src="{{ url_for('static', filename='js/checkout.js') }}" defer></script>
     {% elif not error %}
         <p>Esta sala todavía no tiene butacas cargadas.</p>
     {% endif %}
 </section>
+<script src="{{ url_for('static', filename='js/checkout.js') }}" defer></script>
 {% endblock %}

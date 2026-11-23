@@ -10,21 +10,51 @@
       href="{{ url_for('static', filename='css/admin.css') }}">
 {% endblock %}
 
-
 {% block encabezado %}
+
 <header class="admin-header">
 
-    <a href="/admin" class="logo">
+    <a href="/" class="logo">
         CINE PARADISO
     </a>
 
-    <span>ADMIN</span>
+    <span></span>
 
-    <span>PANEL DE ADMINISTRACIÓN</span>
+    <details class="menu-usuario">
+
+        <summary class="usuario">
+            <span class="nombre-usuario">
+                {{ session.get('nombre') }} {{ session.get('apellido') }}
+            </span>
+            <i class="bi bi-person-fill"></i>
+        </summary>
+
+        <div class="panel-usuario usuario-iniciado" id="usuario-admin">
+
+            <a class="mi-perfil" id="boton-admin" href="{{ url_for('admin.admin') }}">
+                Admin
+            </a>
+
+            <a class="mi-perfil" href="{{ url_for('perfil.perfil_seccion') }}">
+                Mi perfil
+            </a>
+
+            <form method="post" class="form-cerrar" id="cerrar-admin"
+                  action="{{ url_for('usuarios.logout') }}">
+
+                <button type="submit" class="boton-texto">
+                    Cerrar sesión
+                </button>
+
+            </form>
+
+        </div>
+
+    </details>
 
 </header>
-{% endblock %}
 
+{% endblock %}
 
 {% block contenido %}
 
@@ -67,6 +97,11 @@
             <a href="/admin/usuarios">
                 <i class="bi bi-people"></i>
                 Usuarios
+            </a>
+
+            <a href="/admin/opiniones">
+                <i class="bi bi-pen"></i>
+                Opiniones
             </a>
 
             <a href="/admin/validar_qr">

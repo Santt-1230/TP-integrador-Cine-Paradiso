@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 import mysql.connector
-import utils as ut
+from utils import (admin_requerido, construir_error_api, construir_error_db)
 import constants as const
 from services import salas as salas_services
 import logging
@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 salas_bp = Blueprint('salas', __name__, url_prefix='/api')
 
 @salas_bp.route('/salas' , methods= ['GET'])
-@ut.admin_requerido
+@admin_requerido
 def obtener_salas():
     id_local = request.args.get('id_local')
     estado = request.args.get('estado')
@@ -25,7 +25,7 @@ def obtener_salas():
         return jsonify(respuesta), 400
     
     except (RuntimeError, mysql.connector.Error):
-        return jsonify(ut.construir_error_db()), 500
+        return jsonify(construir_error_db()), 500
 
 @salas_bp.route('/salas/<id_sala>', methods=['GET'])
 def obtener_sala_id(id_sala):
@@ -33,7 +33,7 @@ def obtener_sala_id(id_sala):
         sala = salas_services.listar_sala_id(id_sala)
 
         if sala is None:
-            error = ut.construir_error_api(
+            error = construir_error_api(
                 code=const.ERROR_CODE_SALA_NOT_FOUND,
                 message='Sala no encontrada',
                 description=f"No existe una sala registrada con el ID '{id_sala}'."
@@ -46,17 +46,18 @@ def obtener_sala_id(id_sala):
         return jsonify(error.args[0]), 400
     
     except (RuntimeError, mysql.connector.Error):
-        return jsonify(ut.construir_error_db()), 500
+        return jsonify(construir_error_db()), 500
 
 @salas_bp.route('/salas', methods = ['POST'])
-@ut.admin_requerido
+@admin_requerido
 def crear_sala():
     datos = request.get_json(silent=True)
     if not isinstance(datos, dict):
-        respuesta = ut.construir_error_api(
+        respuesta = construir_error_api(
             code=const.ERROR_CODE_INVALID_PARAMETER,
             message='Datos invalidos',
-            description='El formato debe ser un JSON con id_local, numero_sala, capacidad'
+            description='El formato debe ser un JSON con id_local, ' \
+            'numero_sala y filas (lista de cantidades)'
         )
         return jsonify(respuesta), 400
     try:
@@ -75,35 +76,15 @@ def crear_sala():
         return jsonify(respuesta), 400
 
     except (RuntimeError, mysql.connector.Error):
-        return jsonify(ut.construir_error_db()), 500
-
-@salas_bp.route('/salas/<id_sala>/butacas', methods= ['GET'])
-def obtener_butacas_sala(id_sala):
-    try:
-        butacas = salas_services.obtener_butacas_sala(id_sala)
-        if butacas is None:
-            respuesta = ut.construir_error_api(
-                code=const.ERROR_CODE_SALA_NOT_FOUND,
-                message='Sala no encontrada',
-                description=f"No existe una sala con el id '{id_sala}'."
-            )
-            return jsonify(respuesta), 404
-        
-        return jsonify({'butacas':butacas}), 200
-
-    except ValueError as error:
-        return jsonify(error.args[0]), 400
-
-    except (RuntimeError, mysql.connector.Error):
-        return jsonify(ut.construir_error_db()), 500
+        return jsonify(construir_error_db()), 500
 
 
 @salas_bp.route('/salas/<id_sala>', methods = ['PATCH'])
-@ut.admin_requerido
+@admin_requerido
 def actualizar_sala(id_sala):
     datos = request.get_json(silent=True)
     if not isinstance(datos, dict):
-        respuesta = ut.construir_error_api(
+        respuesta = construir_error_api(
             code=const.ERROR_CODE_INVALID_PARAMETER,
             message='Datos invalidos',
             description='Envia un JSON con los campos que desees modificar'
@@ -127,11 +108,11 @@ def actualizar_sala(id_sala):
 
     except (RuntimeError, mysql.connector.Error):
         logger.exception('Error al actualizar la sala %s', id_sala)
-        return jsonify(ut.construir_error_db()), 500
+        return jsonify(construir_error_db()), 500
     
     
 @salas_bp.route('/salas/<id_sala>', methods = ['DELETE'])
-@ut.admin_requerido
+@admin_requerido
 def desactivar_sala(id_sala):
     try:
         sala = salas_services.desactivar_sala(id_sala)
@@ -149,10 +130,29 @@ def desactivar_sala(id_sala):
         return jsonify(respuesta), 400
         
     except (RuntimeError, mysql.connector.Error):
-        return jsonify(ut.construir_error.db()), 500
+        return jsonify(construir_error_db()), 500
 
 
+@salas_bp.route('/salas/<id_sala>/filas', methods=['GET'])
+@admin_requerido
+def obtener_filas_sala(id_sala):
+    try:
+        filas = salas_services.obtener_filas_sala(id_sala)
+        if filas is None:
+            respuesta = construir_error_api(
+                code=const.ERROR_CODE_SALA_NOT_FOUND,
+                message='Sala no encontrada',
+                description=f"No existe una sala con el id '{id_sala}'."
+            )
+            return jsonify(respuesta), 404
 
+        return jsonify({'filas': filas}), 200
+
+    except ValueError as error:
+        return jsonify(error.args[0]), 400
+
+    except (RuntimeError, mysql.connector.Error):
+        return jsonify(construir_error_db()), 500
 
 
   

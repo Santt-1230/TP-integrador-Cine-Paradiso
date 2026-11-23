@@ -1,70 +1,48 @@
 import io
-import requests
-from flask import Blueprint, flash, redirect, render_template, request, session, url_for
-from api import pedir, mensaje_error, verificar_estado, limpiar_sesion_front
-from flask import send_file, session, flash, redirect, url_for
-from api import BACKEND_URL, cookies_backend, verificar_estado
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
+
+import requests
+from flask import Blueprint, flash, redirect, render_template, request, send_file, session, url_for
+from api import BACKEND_URL, cookies_backend, limpiar_sesion_front, mensaje_error, pedir, verificar_estado
 
 
 perfil_bp = Blueprint('perfil', __name__)
 
-def historial_de_prueba():
-    ahora = datetime.now(ZoneInfo("America/Argentina/Buenos_Aires"))
-    formato = "%Y-%m-%d %H:%M:%S"
-    return {
-        "peliculas_vistas": [
-            {"id_pelicula": 1, "titulo": "El Padrino", "poster_url": "",
-             "duracion_min": 175, "clasificacion": "+18"},
-            {"id_pelicula": 2, "titulo": "Interstellar", "poster_url": "",
-             "duracion_min": 169, "clasificacion": "+13"},
-        ],
-        "compras": [
-            {   # función en 3 días: muestra el botón de cancelar
-                "id_compra": 101, "estado": "confirmada",
-                "fecha_hora_inicio": (ahora + timedelta(days=3)).strftime(formato),
-                "fecha_creacion": "10/11 - 21:30 HS",
-                "titulo_pelicula": "EL PADRINO", "genero": "DRAMA", "poster_url": "",
-                "servicios": [{"nombre": "COMBO 1", "imagen_url": ""}],
-            },
-            {   # función en 30 minutos: no muestra el botón
-                "id_compra": 102, "estado": "confirmada",
-                "fecha_hora_inicio": (ahora + timedelta(minutes=30)).strftime(formato),
-                "fecha_creacion": "13/11 - 20:00 HS",
-                "titulo_pelicula": "INTERSTELLAR", "genero": "CIENCIA FICCIÓN",
-                "poster_url": "", "servicios": [],
-            },
-            {   # cancelada: tiene que desaparecer de la lista
-                "id_compra": 103, "estado": "cancelada",
-                "fecha_hora_inicio": (ahora + timedelta(days=5)).strftime(formato),
-                "fecha_creacion": "09/11 - 19:00 HS",
-                "titulo_pelicula": "PELICULA CANCELADA", "genero": "ACCIÓN",
-                "poster_url": "", "servicios": [],
-            },
-        ],
-    }
 
 @perfil_bp.route('/mi-perfil', defaults={'seccion': 'mi-cuenta'})
 @perfil_bp.route('/mi-perfil/<seccion>')
 def perfil_seccion(seccion):
-    if seccion not in ("mi-cuenta", "peliculas-vistas", "mis-compras", "resenas", "cupones-y-puntos", "merch", "tu-opinion"):
+    secciones_validas = (
+        "mi-cuenta",
+        "peliculas-vistas",
+        "mis-compras",
+        "resenas",
+        "cupones-y-puntos",
+        "merch",
+        "tu-opinion",
+    )
+    if seccion not in secciones_validas:
         return render_template("error.html"), 404
+
     if "cookie_backend" not in session:
         return redirect(url_for("usuarios.login"))
 
-    datos, historial = {}, {}
+    datos = {}
+    historial = {"compras": [], "peliculas_vistas": []}
 
+    # 1. Datos personales del usuario
     estado, res_datos = pedir("GET", "/api/usuarios/me")
     redir = verificar_estado(estado)
     if redir:
         return redir
 
     if estado == 200:
-        datos = res_datos
+        datos = res_datos or {}
     else:
         flash(mensaje_error(res_datos), "error")
 
+    # 2. Historial real desde el backend
     if seccion in ("mis-compras", "peliculas-vistas"):
         estado_h, res_hist = pedir("GET", "/api/usuarios/me/historial")
         redir_h = verificar_estado(estado_h)
@@ -72,32 +50,144 @@ def perfil_seccion(seccion):
             return redir_h
 
         if estado_h == 200:
-            if not historial.get("compras") and not historial.get("peliculas_vistas"):
-                historial = historial_de_prueba()   # PRUEBA: borrar antes de commitear
+            if isinstance(res_hist, list):
+                historial = {"compras": res_hist, "peliculas_vistas": []}
+            elif isinstance(res_hist, dict):
+                historial = res_hist
+        else:
+            flash(mensaje_error(res_hist), "error")
 
-        # Procesamos las compras dentro de historial
+        if seccion == "mis-compras":
+            estado_c, res_c = pedir("GET", "/api/historial")
+            if estado_c == 200:
+                extra = {c["id_compra"]: c for c in res_c}
+                for compra in historial.get("compras", []):
+                    for clave, valor in extra.get(compra["id_compra"], {}).items():
+                        compra.setdefault(clave, valor)
+
+    # 3. Completar datos de película, póster, total y fecha de compra
     if seccion == 'mis-compras':
-        ahora = datetime.now(ZoneInfo("America/Argentina/Buenos_Aires"))
-        compras_activas = []
+        zona_ar = ZoneInfo("America/Argentina/Buenos_Aires")
+        ahora = datetime.now(zona_ar)
+        compras_procesadas = []
+        cache_funciones = {}
+        cache_peliculas = {}
 
-        for compra in historial.get("compras", []):
-            if compra.get("estado") == "cancelada":
-                continue
+        for compra in (historial.get("compras") or []):
+            es_cancelada = compra.get("estado") == "cancelada"
 
-            valor_fecha = compra.get("fecha_hora_inicio")
-            if valor_fecha:
-                inicio_funcion = datetime.fromisoformat(str(valor_fecha))
-                if inicio_funcion.tzinfo is None:
-                    inicio_funcion = inicio_funcion.replace(tzinfo=ZoneInfo("America/Argentina/Buenos_Aires"))
-                compra["puede_cancelar"] = ahora < (inicio_funcion - timedelta(hours=1))
+            # Buscar datos de la función
+            id_funcion = compra.get("id_funcion")
+            if id_funcion and id_funcion not in cache_funciones:
+                est_f, res_f = pedir("GET", f"/api/funciones/{id_funcion}")
+                if est_f == 200 and isinstance(res_f, dict):
+                    cache_funciones[id_funcion] = res_f.get("funcion") or res_f
+                else:
+                    cache_funciones[id_funcion] = {}
+
+            funcion = cache_funciones.get(id_funcion, {})
+            pelicula = funcion.get("pelicula") if isinstance(funcion.get("pelicula"), dict) else {}
+            sala = funcion.get("sala") if isinstance(funcion.get("sala"), dict) else {}
+            local = funcion.get("local") if isinstance(funcion.get("local"), dict) else {}
+
+            titulo = (
+                compra.get("titulo_pelicula")
+                or pelicula.get("titulo")
+                or funcion.get("titulo_pelicula")
+                or funcion.get("titulo")
+                or (funcion.get("pelicula") if isinstance(funcion.get("pelicula"), str) else None)
+                or "Película"
+            )
+            poster_url = (
+                compra.get("poster_url")
+                or pelicula.get("poster_url")
+                or pelicula.get("imagen_url")
+                or pelicula.get("portada")
+                or funcion.get("poster_url")
+                or funcion.get("imagen_url")
+                or ""
+            )
+            genero = pelicula.get("genero") or funcion.get("genero") or "CINE"
+
+            # Si la función no trajo el póster, buscarlo en /api/peliculas/<id_pelicula>
+            id_pelicula = pelicula.get("id_pelicula") or funcion.get("id_pelicula") or compra.get("id_pelicula")
+            if not poster_url and id_pelicula:
+                if id_pelicula not in cache_peliculas:
+                    est_p, res_p = pedir("GET", f"/api/peliculas/{id_pelicula}")
+                    if est_p == 200 and isinstance(res_p, dict):
+                        cache_peliculas[id_pelicula] = res_p.get("pelicula") or res_p
+                    else:
+                        cache_peliculas[id_pelicula] = {}
+
+                peli_data = cache_peliculas.get(id_pelicula, {})
+                poster_url = (
+                    peli_data.get("poster_url")
+                    or peli_data.get("imagen_url")
+                    or peli_data.get("portada")
+                    or peli_data.get("imagen")
+                    or ""
+                )
+                if genero == "CINE" and peli_data.get("genero"):
+                    genero = peli_data.get("genero")
+
+            compra["titulo_pelicula"] = titulo
+            compra["poster_url"] = poster_url
+            compra["genero"] = genero
+
+            # Local, sala y butacas (conserva las de /api/historial si 'entradas' viene vacía)
+            compra["local"] = compra.get("local") or local.get("nombre") or funcion.get("local_nombre") or funcion.get("local") or ""
+            compra["numero_sala"] = compra.get("numero_sala") or sala.get("numero_sala") or sala.get("numero") or funcion.get("numero_sala") or ""
+
+            entradas = compra.get("entradas") or []
+            if entradas:
+                butacas_ordenadas = sorted(entradas, key=lambda e: (str(e.get("fila", "")), int(e.get("numero", 0))))
+                compra["butacas"] = ", ".join(f"{e.get('fila', '')}{e.get('numero', '')}" for e in butacas_ordenadas)
+            else:
+                compra.setdefault("butacas", "")
+
+            # Formatear precio total
+            total_num = float(compra.get("total") or 0)
+            compra["total_formateado"] = f"${total_num:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+
+            # Fecha de COMPRA
+            fecha_compra_raw = compra.get("fecha_hora") or compra.get("fecha_creacion")
+            if fecha_compra_raw:
+                try:
+                    dt_compra = datetime.fromisoformat(str(fecha_compra_raw).replace("Z", "+00:00"))
+                    if dt_compra.tzinfo is None:
+                        dt_compra = dt_compra.replace(tzinfo=zona_ar)
+                    else:
+                        dt_compra = dt_compra.astimezone(zona_ar)
+                    compra["fecha_formateada"] = dt_compra.strftime("%d/%m/%Y - %H:%M HS")
+                except ValueError:
+                    compra["fecha_formateada"] = str(fecha_compra_raw)
+            else:
+                compra["fecha_formateada"] = ""
+
+            # Fecha de FUNCIÓN y permiso de cancelación
+            fecha_funcion_raw = compra.get("fecha_hora_inicio") or funcion.get("fecha_hora_inicio")
+            if fecha_funcion_raw:
+                try:
+                    inicio_funcion = datetime.fromisoformat(str(fecha_funcion_raw).replace("Z", "+00:00"))
+                    if inicio_funcion.tzinfo is None:
+                        inicio_funcion = inicio_funcion.replace(tzinfo=zona_ar)
+                    else:
+                        inicio_funcion = inicio_funcion.astimezone(zona_ar)
+
+                    compra["puede_cancelar"] = (not es_cancelada) and (ahora < (inicio_funcion - timedelta(hours=1)))
+                    compra["fecha_hora_inicio"] = inicio_funcion.isoformat()
+                    compra["fecha_formateada_funcion"] = inicio_funcion.strftime("%d/%m/%Y - %H:%M HS")
+                except ValueError:
+                    compra["puede_cancelar"] = False
             else:
                 compra["puede_cancelar"] = False
 
-            compras_activas.append(compra)
+            compras_procesadas.append(compra)
 
-        historial["compras"] = compras_activas
+        historial["compras"] = compras_procesadas
 
     return render_template("perfil.html", perfil=datos, historial=historial, seccion=seccion)
+
 
 @perfil_bp.route('/mi-perfil/mi-cuenta', methods=['POST'])
 def cambiar_clave():
@@ -112,8 +202,11 @@ def cambiar_clave():
         flash("Las contraseñas nuevas no coinciden.", "clave_error")
         return redirect(url_for("perfil.perfil_seccion", seccion="mi-cuenta"))
 
-    estado, datos = pedir("PATCH", "/api/usuarios/me/password",
-                          {"contrasena_actual": actual, "contrasena_nueva": nueva})
+    estado, datos = pedir(
+        "PATCH",
+        "/api/usuarios/me/password",
+        {"contrasena_actual": actual, "contrasena_nueva": nueva}
+    )
 
     redir = verificar_estado(estado)
     if redir:
@@ -125,6 +218,7 @@ def cambiar_clave():
         flash(mensaje_error(datos), "clave_error")
 
     return redirect(url_for("perfil.perfil_seccion", seccion="mi-cuenta"))
+
 
 @perfil_bp.route('/mi-perfil/actualizar-datos', methods=['POST'])
 def actualizar_datos():
@@ -140,7 +234,7 @@ def actualizar_datos():
         "nombre": nombre,
         "apellido": apellido,
         "email": email,
-        "fecha_nacimiento": fecha_nacimiento
+        "fecha_nacimiento": fecha_nacimiento,
     }
 
     estado, datos = pedir("PATCH", "/api/usuarios/me", datos_actualizados)
@@ -157,15 +251,12 @@ def actualizar_datos():
 
     return redirect(url_for("perfil.perfil_seccion", seccion="mi-cuenta"))
 
+
 @perfil_bp.route('/mi-perfil/baja', methods=['POST'])
 def baja_cuenta():
     if "cookie_backend" not in session:
         return redirect(url_for("usuarios.login"))
 
-    comentario = request.form.get("comentario", "").strip()
-
-    # Si la API en el backend acepta el comentario, se lo podés pasar como payload:
-    # estado, datos = pedir("PATCH", "/api/usuarios/me/arrepentimiento", {"comentario": comentario})
     estado, datos = pedir("PATCH", "/api/usuarios/me/arrepentimiento")
 
     redir = verificar_estado(estado)
@@ -179,6 +270,7 @@ def baja_cuenta():
 
     flash(mensaje_error(datos), "error")
     return redirect(url_for("perfil.perfil_seccion", seccion="mi-cuenta"))
+
 
 @perfil_bp.route('/mi-perfil/mis-compras', methods=['POST'])
 def cancelar_compra():
@@ -195,10 +287,11 @@ def cancelar_compra():
         if redir:
             return redir
 
-        if estado == 200 and datos.get("exito"):
+        if estado == 200 and isinstance(datos, dict) and datos.get("exito"):
             flash('Compra cancelada exitosamente.', 'success')
         else:
-            flash(datos.get("mensaje", "No se pudo cancelar la compra."), 'error')
+            mensaje = datos.get("mensaje", "No se pudo cancelar la compra.") if isinstance(datos, dict) else "No se pudo cancelar la compra."
+            flash(mensaje, 'error')
 
     return redirect(url_for('perfil.perfil_seccion', seccion='mis-compras'))
 
@@ -209,29 +302,95 @@ def descargar_pdf_compra(id_compra):
         return redirect(url_for("usuarios.login"))
 
     try:
-        # Petición directa al backend enviando la cookie de sesión
         respuesta = requests.get(
-            f"{BACKEND_URL}/api/compras/{id_compra}/pdf",
+            f"{BACKEND_URL}/api/compras/{id_compra}/qr",
             cookies=cookies_backend(),
-            timeout=15
+            timeout=15,
         )
     except requests.RequestException:
         flash("No se pudo conectar con el servidor.", "error")
         return redirect(url_for("perfil.perfil_seccion", seccion="mis-compras"))
 
-    # Manejar expiración de sesión (401/403)
     redir = verificar_estado(respuesta.status_code)
     if redir:
         return redir
 
     if respuesta.status_code != 200:
-        flash("No se pudo descargar el comprobante.", "error")
+        try:
+            data = respuesta.json()
+            mensaje = data.get("description") or data.get("message") or "No se pudieron descargar las entradas."
+        except ValueError:
+            mensaje = "No se pudieron descargar las entradas."
+        flash(mensaje, "error")
         return redirect(url_for("perfil.perfil_seccion", seccion="mis-compras"))
 
-    # Forzar la descarga en el navegador
     return send_file(
         io.BytesIO(respuesta.content),
         mimetype='application/pdf',
         as_attachment=True,
-        download_name=f'factura_compra_{id_compra}.pdf'
+        download_name=f'entradas_compra_{id_compra}.pdf',
     )
+
+
+@perfil_bp.route('/mi-perfil/mis-compras/<int:id_compra>/reembolso/pdf')
+def descargar_pdf_reembolso(id_compra):
+    if "cookie_backend" not in session:
+        return redirect(url_for("usuarios.login"))
+    try:
+        respuesta = requests.get(
+            f"{BACKEND_URL}/api/compras/{id_compra}/reembolso",
+            cookies=cookies_backend(),
+            timeout=15,
+        )
+    except requests.RequestException:
+        flash("No se pudo conectar con el servidor.", "error")
+        return redirect(url_for("perfil.perfil_seccion", seccion="mis-compras"))
+
+    redir = verificar_estado(respuesta.status_code)
+    if redir:
+        return redir
+
+    if respuesta.status_code != 200:
+        try:
+            data = respuesta.json()
+            mensaje = data.get("description") or data.get("message") or "No se pudo descargar el comprobante de reembolso."
+        except ValueError:
+            mensaje = "No se pudo descargar el comprobante de reembolso."
+        flash(mensaje, "error")
+        return redirect(url_for("perfil.perfil_seccion", seccion="mis-compras"))
+
+    return send_file(
+        io.BytesIO(respuesta.content),
+        mimetype='application/pdf',
+        as_attachment=True,
+        download_name=f'reembolso_compra_{id_compra}.pdf',
+    )
+
+@perfil_bp.route('/mi-perfil/tu-opinion', methods=['POST'])
+def enviar_opinion():
+    if "cookie_backend" not in session:
+        return redirect(url_for("usuarios.login"))
+
+    texto = request.form.get("comentario", "").strip()
+    categoria = request.form.get("categoria", "").strip() or None
+    try:
+        puntuacion = int(request.form.get("puntuacion", ""))
+    except ValueError:
+        puntuacion = 0  # el back la rechaza con su mensaje
+
+    payload = {
+        "texto": texto,
+        "puntuacion": puntuacion,
+        "categoria": categoria,
+    }
+    estado, datos = pedir("POST", "/api/opiniones", payload)
+
+    redir = verificar_estado(estado)
+    if redir:
+        return redir
+
+    if estado == 201:
+        flash("¡Gracias por tu opinión!", "exito")
+    else:
+        flash(mensaje_error(datos), "error")
+    return redirect(url_for("perfil.perfil_seccion", seccion="tu-opinion"))

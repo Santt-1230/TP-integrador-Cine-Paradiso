@@ -1,91 +1,60 @@
 
-document.addEventListener('DOMContentLoaded', function(){
-    const botonesBaja = document.querySelectorAll('.boton-tabla--baja');
+document.querySelectorAll('form[data-accion]').forEach(form => {
+    form.addEventListener('submit', e => {
+        const { accion, numeroSala } = form.dataset;
 
-    botonesBaja.forEach(boton => {
-        boton.addEventListener('click', function(evento){
-            const formulario = this.closest('form');
-            const numeroSala = formulario.dataset.numeroSala;
-
-            const confirmar = confirm(`¿Dar de baja la sala ${numeroSala}?`);
-            
-            if (!confirmar){
-                evento.preventDefault();
-            }
-        });
+        if (!confirm(`¿Seguro que querés ${accion} la sala ${numeroSala}?`)) {
+            e.preventDefault();
+        }
     });
 });
-
-
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const formulario = document.querySelector('.formulario-sala');
-
     if (!formulario) {
         return;
     }
 
-    const campos = ['capacidad', 'numero_sala'];
+    const contenedor = document.getElementById('filas-container');
+    const botonAgregar = document.getElementById('agregar-fila');
+    const plantilla = document.getElementById('plantilla-fila');
 
-    function validarCampo(campo) {
-        const input = document.getElementById(campo);
-
-        if (!input) {
-            return true;
-        }
-
-        const error = document.getElementById(`error-${campo}`);
-        const valor = input.value.trim();
-
-        let mensaje = '';
-
-        if (valor === '') {
-            mensaje = 'Este campo es obligatorio.';
-        } else if (!Number.isInteger(Number(valor)) || Number(valor) <= 0) {
-            mensaje = 'Ingresá un número entero mayor a cero.';
-        }
-
-        error.textContent = mensaje;
-
-        return mensaje === '';
+    // Con una sola fila, Eliminar queda deshabilitado
+    function actualizarBotones() {
+        const filas = contenedor.querySelectorAll('.fila-formulario');
+        filas.forEach(fila => {
+            fila.querySelector('.eliminar-fila').disabled = filas.length === 1;
+        });
     }
 
-    campos.forEach(function(campo) {
-        const input = document.getElementById(campo);
-        const error = document.getElementById(`error-${campo}`);
-
-        if (input && error) {
-            error.textContent = '';
-            input.addEventListener('input', function() {
-                validarCampo(campo);
-            });
-        }
+    botonAgregar.addEventListener('click', function () {
+        const nuevaFila = plantilla.content.firstElementChild.cloneNode(true);
+        contenedor.appendChild(nuevaFila);
+        actualizarBotones();
+        nuevaFila.querySelector('input[name="fila"]').focus();
     });
 
-    formulario.addEventListener('submit', function(evento) {
-        let formularioValido = true;
-
-        campos.forEach(function(campo) {
-            if (!validarCampo(campo)) {
-                formularioValido = false;
-            }
-        });
-
-        if (!formularioValido) {
-            evento.preventDefault();
+    contenedor.addEventListener('click', function (evento) {
+        const boton = evento.target.closest('.eliminar-fila');
+        if (!boton || boton.disabled) {
             return;
         }
+        boton.closest('.fila-formulario').remove();
+        actualizarBotones();
+    });
 
+    formulario.addEventListener('submit', function () {
         const boton = formulario.querySelector('button[type="submit"]');
         boton.disabled = true;
         boton.textContent = 'Guardando...';
     });
-});
 
-document.addEventListener('DOMContentLoaded', function(){
+    actualizarBotones();
+});
+document.addEventListener('DOMContentLoaded', function () {
     const filtrosLocal = document.querySelectorAll('.filtro-local__select');
 
     filtrosLocal.forEach(filtro => {
-        filtro.addEventListener('change', function(){
+        filtro.addEventListener('change', function () {
             this.form.submit();
         });
     });

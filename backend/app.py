@@ -19,6 +19,7 @@ from routes.promociones import promociones_bp
 from routes.funciones import funciones_bp
 from routes.compras import compras_bp
 from routes.validar_qr import validar_qr_bp
+from routes.opiniones import opiniones_bp
 
 
 
@@ -47,6 +48,7 @@ app.register_blueprint(promociones_bp)
 app.register_blueprint(funciones_bp)
 app.register_blueprint(compras_bp)
 app.register_blueprint(validar_qr_bp)
+app.register_blueprint(opiniones_bp)
 
 
 

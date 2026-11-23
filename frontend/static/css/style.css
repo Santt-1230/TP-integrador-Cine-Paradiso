@@ -393,9 +393,16 @@ footer {
 }
 .btn-cancelar{
     width: 30%;
-    background-color:#f6b5b5;
+    background-color:#b30000;
     border-width: 0;
     color: white;
+}
+
+.divisor-compra {
+  border: none;
+  border-top: 2px solid #ababab; /* Usá #ccc si tu fondo es blanco */
+  width: 70%;
+  margin: 32px auto;
 }
 
 .sidebar-menu > form, .form-cerrar{
@@ -430,6 +437,179 @@ footer {
 .tarjeta-pelicula > h4, .tarjeta-pelicula > p{
     margin: 0.5rem 0;
 }
+
+.header-fecha {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.badge-cancelada {
+  background-color: rgba(220, 53, 69, 0.15);
+  color: #e55361;
+  border: 1px solid rgba(220, 53, 69, 0.4);
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+#compra-confirmada{
+    color: #55b342;
+    border: 1px solid rgba(53, 220, 61, 0.4);
+    background-color: rgba(53, 220, 75, 0.15);
+}
+
+.qr-inactivo-box {
+  opacity: 0.65;
+  pointer-events: none;
+}
+
+.estado-qr-inactivo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #999;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+}
+
+.texto-reembolsado {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #e55361;
+  margin-left: 6px;
+}
+
+.contenedor-poster {
+    display: flex ;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.contenedor-poster.pastel-purpura {
+    background-color: #f3e8ff ;
+    color: #7e22ce;
+}
+
+.contenedor-poster.pastel-azul {
+    background-color: #e0f2fe ;
+    color: #0369a1;
+}
+
+.icono-placeholder {
+    font-size: 3.2rem;
+    line-height: 1;
+}
+
+.lista-combos-compra {
+    list-style: none;
+    padding-left: 0 ;
+    margin: 0.35rem 0 0;
+    font-weight: 700;
+    font-size: 0.85rem;
+    line-height: 1.35;
+}
+
+.lista-combos-compra li {
+    margin-bottom: 0.25rem;
+}
+
+.detalle-funcion{
+    margin:0.5rem 0;
+}
+
+/* Selector de estrellas en el perfil de usuario */
+.rating-estrellas {
+    display: inline-flex;
+    flex-direction: row-reverse;
+    gap: 6px;
+    margin-top: 4px;
+}
+
+.rating-estrellas input {
+    display: none;
+}
+
+.rating-estrellas label {
+    font-size: 1.7rem;
+    color: #CBD5E1;
+    cursor: pointer;
+    margin: 0;
+    transition: color 0.15s ease, transform 0.1s ease;
+}
+
+.rating-estrellas label:hover,
+.rating-estrellas label:hover ~ label,
+.rating-estrellas input:checked ~ label {
+    color: #E5A93D;
+}
+
+.rating-estrellas label:hover {
+    transform: scale(1.1);
+}
+.selector-puntuacion {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 12px;
+    margin-top: 6px;
+}
+
+.estrellas-interactivas {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.selector-puntuacion .input-puntuacion {
+    width: 70px !important;
+    flex: 0 0 70px;
+    text-align: center;
+    font-weight: 600;
+    margin: 0;
+}
+
+.texto-puntuacion {
+    font-size: 0.9rem;
+    color: #64748B;
+    white-space: nowrap;
+}
+
+.estrellas-interactivas .btn-estrella {
+    background: transparent;
+    border: none;
+    padding: 0 3px;
+    font-size: 2rem;
+    line-height: 1;
+    color: #CBD5E1;
+    cursor: pointer;
+    transition: color 0.15s ease, transform 0.1s ease;
+}
+
+.estrellas-interactivas .btn-estrella:hover {
+    transform: scale(1.15);
+}
+
+.estrellas-interactivas .btn-estrella.preview {
+    color: #F3C66F;
+}
+
+.estrellas-interactivas .btn-estrella.llena {
+    color: #E5A93D;
+}
+
+.input-puntuacion {
+    width: 75px;
+    text-align: center;
+    font-weight: 600;
+}
+
 
 .seccion-arrepentimiento {
   margin-top: 1rem;
@@ -647,6 +827,11 @@ footer {
   border: 1px solid #e0e0e0;
 }
 
+.enlace-cambiar{
+    text-decoration: underline;
+    color: black;
+}
+
 .contenedor-cambiar-clave h3 {
   margin-bottom: 15px;
   color: #333333;
@@ -730,7 +915,7 @@ footer {
 }
 
 .tarjeta-compra-layout {
-  margin-bottom: 40px;
+  margin-bottom: 1.5rem 0; 
   width: 100%;
 }
 
@@ -747,6 +932,7 @@ footer {
   gap: 30px;
   align-items: start;
   width: 100%;
+  margin-bottom: 1rem;
 }
 
 .columna-item {
@@ -807,6 +993,7 @@ footer {
   text-align: center;
   width: 210px;
   padding-right: 4rem;
+  padding-top:4rem;
 }
 
 .titulo-qr {
