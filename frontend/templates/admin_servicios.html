@@ -78,6 +78,7 @@
                 <thead>
                     <tr>
                         <th>Promoción</th>
+                        <th>Categoria</th>
                         <th>Vigencia</th>
                         <th>Estado</th>
                         <th>Acciones</th>
@@ -87,12 +88,30 @@
                     {% for promocion in promociones %}
                     <tr>
                         <td>{{ promocion.nombre }}</td>
+                        <td>
+                            {% if promocion.tipo == 'nxm' %}
+                                N×M
+                            {% elif promocion.tipo == 'porcentaje' %}
+                                Porcentaje
+                            {% elif promocion.tipo == 'monto_fijo' %}
+                                Monto fijo
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
                         <td>{{ promocion.vigente_desde or '—' }} → {{ promocion.vigente_hasta or '—' }}</td>
                         <td>
-                            {% if promocion.activa %}
+                            {% if promocion.estado == 'Activa' %}
                                 <span class="estado-admin">Activa</span>
-                            {% else %}
+
+                            {% elif promocion.estado == 'Inactiva' %}
                                 <span class="estado-admin estado-admin--inactivo">Inactiva</span>
+
+                            {% elif promocion.estado == 'Vencida' %}
+                                <span class="estado-admin estado-admin--vencido">Vencida</span>
+
+                            {% elif promocion.estado == 'Pendiente' %}
+                                <span class="estado-admin estado-admin--pendiente">Pendiente</span>
                             {% endif %}
                         </td>
                         <td>
@@ -112,7 +131,7 @@
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="4">Todavía no hay promociones.</td>
+                        <td colspan="5">Todavía no hay promociones.</td>
                     </tr>
                     {% endfor %}
                 </tbody>

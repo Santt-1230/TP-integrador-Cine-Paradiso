@@ -67,9 +67,11 @@
                 {% if promo.imagen_url %}
                     <img class="servicios-cliente__imagen"
                          src="{{ promo.imagen_url }}"
-                         alt="{{ promo.titulo }}">
+                         alt="{{ promo.nombre }}">
+                {% else %}
+                    <div class="servicios-cliente__imagen servicios-cliente__imagen--vacia"></div>
                 {% endif %}
-                <h3>{{ promo.titulo }}</h3>
+                <h3>{{ promo.nombre }}</h3>
                 {% if promo.descripcion %}<p>{{ promo.descripcion }}</p>{% endif %}
             </article>
             {% endfor %}
@@ -91,6 +93,8 @@
                     <img class="servicios-cliente__imagen"
                          src="{{ prod.imagen_url }}"
                          alt="{{ prod.nombre }}">
+                {% else %}
+                    <div class="servicios-cliente__imagen servicios-cliente__imagen--vacia"></div>
                 {% endif %}
 
                 <h3>{{ prod.nombre }}</h3>

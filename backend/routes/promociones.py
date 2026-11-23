@@ -54,12 +54,23 @@ def crear_promocion_route():
 @promociones_bp.route('/promociones/<int:id_promocion>', methods=['PATCH'])
 def modificar_promocion_route(id_promocion):
     datos = request.get_json(silent=True)
-    mensaje = validar_modificacion(datos)
+
+    if not isinstance(datos, dict):
+        return error_datos_invalidos("El cuerpo del pedido debe ser un JSON")
+
+    actual = listar_promocion_por_id(id_promocion)
+    if actual is None:
+        return error_no_encontrado(id_promocion)
+
+    datos_completos = actual.copy()
+    datos_completos["activa"] = bool(datos_completos["activa"])
+    datos_completos.update(datos or {})
+    
+    mensaje = validar_modificacion(datos_completos)
     if mensaje:
         return error_datos_invalidos(mensaje)
+
     promocion = actualizar_promocion(id_promocion, datos)
-    if promocion is None:
-        return error_no_encontrado(id_promocion)
     return jsonify(promocion), 200
 
 
