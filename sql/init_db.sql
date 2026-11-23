@@ -207,7 +207,7 @@ CREATE TABLE IF NOT EXISTS qr (
         )
 );
 
-CREATE TABLE opiniones (
+CREATE TABLE IF NOT EXISTS opiniones (
     id_opinion INT NOT NULL AUTO_INCREMENT,
     id_usuario INT NOT NULL,
     texto VARCHAR(1000) NOT NULL,
