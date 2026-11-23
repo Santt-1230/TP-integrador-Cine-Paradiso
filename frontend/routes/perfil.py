@@ -336,7 +336,6 @@ def descargar_pdf_compra(id_compra):
 def descargar_pdf_reembolso(id_compra):
     if "cookie_backend" not in session:
         return redirect(url_for("usuarios.login"))
-
     try:
         respuesta = requests.get(
             f"{BACKEND_URL}/api/compras/{id_compra}/reembolso",
@@ -366,3 +365,32 @@ def descargar_pdf_reembolso(id_compra):
         as_attachment=True,
         download_name=f'reembolso_compra_{id_compra}.pdf',
     )
+
+@perfil_bp.route('/mi-perfil/tu-opinion', methods=['POST'])
+def enviar_opinion():
+    if "cookie_backend" not in session:
+        return redirect(url_for("usuarios.login"))
+
+    texto = request.form.get("comentario", "").strip()
+    categoria = request.form.get("categoria", "").strip() or None
+    try:
+        puntuacion = int(request.form.get("puntuacion", ""))
+    except ValueError:
+        puntuacion = 0  # el back la rechaza con su mensaje
+
+    payload = {
+        "texto": texto,
+        "puntuacion": puntuacion,
+        "categoria": categoria,
+    }
+    estado, datos = pedir("POST", "/api/opiniones", payload)
+
+    redir = verificar_estado(estado)
+    if redir:
+        return redir
+
+    if estado == 201:
+        flash("¡Gracias por tu opinión!", "exito")
+    else:
+        flash(mensaje_error(datos), "error")
+    return redirect(url_for("perfil.perfil_seccion", seccion="tu-opinion"))

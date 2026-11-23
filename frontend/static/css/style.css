@@ -522,6 +522,95 @@ footer {
     margin:0.5rem 0;
 }
 
+/* Selector de estrellas en el perfil de usuario */
+.rating-estrellas {
+    display: inline-flex;
+    flex-direction: row-reverse;
+    gap: 6px;
+    margin-top: 4px;
+}
+
+.rating-estrellas input {
+    display: none;
+}
+
+.rating-estrellas label {
+    font-size: 1.7rem;
+    color: #CBD5E1;
+    cursor: pointer;
+    margin: 0;
+    transition: color 0.15s ease, transform 0.1s ease;
+}
+
+.rating-estrellas label:hover,
+.rating-estrellas label:hover ~ label,
+.rating-estrellas input:checked ~ label {
+    color: #E5A93D;
+}
+
+.rating-estrellas label:hover {
+    transform: scale(1.1);
+}
+.selector-puntuacion {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 12px;
+    margin-top: 6px;
+}
+
+.estrellas-interactivas {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.selector-puntuacion .input-puntuacion {
+    width: 70px !important;
+    flex: 0 0 70px;
+    text-align: center;
+    font-weight: 600;
+    margin: 0;
+}
+
+.texto-puntuacion {
+    font-size: 0.9rem;
+    color: #64748B;
+    white-space: nowrap;
+}
+
+.estrellas-interactivas .btn-estrella {
+    background: transparent;
+    border: none;
+    padding: 0 3px;
+    font-size: 2rem;
+    line-height: 1;
+    color: #CBD5E1;
+    cursor: pointer;
+    transition: color 0.15s ease, transform 0.1s ease;
+}
+
+.estrellas-interactivas .btn-estrella:hover {
+    transform: scale(1.15);
+}
+
+.estrellas-interactivas .btn-estrella.preview {
+    color: #F3C66F;
+}
+
+.estrellas-interactivas .btn-estrella.llena {
+    color: #E5A93D;
+}
+
+.input-puntuacion {
+    width: 75px;
+    text-align: center;
+    font-weight: 600;
+}
+
+
 .seccion-arrepentimiento {
   margin-top: 1rem;
   border-radius: 8px;
