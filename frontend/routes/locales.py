@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, flash, request
+from flask import Blueprint, render_template, flash, request, redirect, url_for
 import api
 
 locales_bp = Blueprint('locales', __name__)
@@ -32,6 +32,13 @@ def elegir_cine(id_local):
 
     api.session['cine_id'] = local['id_local']
     api.session['cine_nombre'] = local['nombre']
+
+    pelicula_pendiente_id = api.session.pop('pelicula_pendiente_id', None)
+    if pelicula_pendiente_id:
+        return redirect(url_for(
+            'peliculas_front.detalle',
+            id_pelicula=pelicula_pendiente_id
+        ))
 
     return api.redirigir_al_inicio()
      
