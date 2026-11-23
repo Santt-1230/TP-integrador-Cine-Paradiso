@@ -7,6 +7,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import mm
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image, PageBreak
+from datetime import datetime
 
 
 def generar_pdf_factura(factura):
@@ -84,11 +85,12 @@ def generar_pdf_factura(factura):
     contenido.append(Table([
         ["Subtotal entradas", f"$ {totales['subtotal_entradas']:.2f}"],
         ["Subtotal productos", f"$ {totales['subtotal_productos']:.2f}"],
+        ["Descuento promociones", f"- $ {totales['descuento']:.2f}"],
         ["Total (ARS)", f"$ {totales['total']:.2f}"],
     ], colWidths=[137 * mm, 32 * mm], hAlign="RIGHT", style=TableStyle([
         ("ALIGN", (1, 0), (1, -1), "RIGHT"),
-        ("LINEABOVE", (0, 2), (-1, 2), 1, colors.HexColor("#26364a")),
-        ("FONTNAME", (0, 2), (-1, 2), "Helvetica-Bold"),
+        ("LINEABOVE", (0, 3), (-1, 3), 1, colors.HexColor("#26364a")),
+        ("FONTNAME", (0, 3), (-1, 3), "Helvetica-Bold"),
         ("TOPPADDING", (0, 0), (-1, -1), 5),
     ])))
     documento.build(contenido)
@@ -224,6 +226,7 @@ def generar_pdf_entradas(factura, qrs):
     documento.build(contenido)
     salida.seek(0)
     return salida.getvalue()
+
 def generar_pdf_productos(qrs):
     """Genera un PDF con un producto por página y su QR escaneable."""
 
@@ -474,4 +477,121 @@ def generar_pdf_productos(qrs):
 
     salida.seek(0)
 
+
+def generar_pdf_reembolso(factura, monto_reembolso=None, fecha_cancelacion=None):
+    salida = BytesIO()
+    datos = factura["factura"]
+    numero_original = datos.get("numero") or f"compra-{datos.get('id_compra')}"
+    total_original = float(factura["totales"]["total"])
+    reembolso = float(monto_reembolso) if monto_reembolso is not None else total_original
+    fecha_canc = fecha_cancelacion or datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    documento = SimpleDocTemplate(
+        salida, pagesize=A4, rightMargin=20 * mm, leftMargin=20 * mm,
+        topMargin=18 * mm, bottomMargin=18 * mm,
+        title=f"Comprobante de Reembolso - {numero_original}",
+    )
+    estilos = getSampleStyleSheet()
+    estilo_celda = ParagraphStyle("CeldaReembolso", parent=estilos["BodyText"], fontSize=9, leading=12)
+    estilo_nota = ParagraphStyle(
+        "NotaReembolso", parent=estilos["BodyText"], fontSize=8.5,
+        leading=12, textColor=colors.HexColor("#475569"),
+    )
+
+    contenido = [
+        Paragraph("Cine Paradiso", estilos["Heading2"]),
+        Paragraph("Comprobante de Cancelación y Reembolso", estilos["Title"]),
+        Spacer(1, 5 * mm),
+        Paragraph(
+            f"<b>Factura original:</b> {escape(str(numero_original))}"
+            f" &nbsp;&nbsp; <b>Compra:</b> {escape(str(datos.get('id_compra') or ''))}"
+            f" &nbsp;&nbsp; <b>Cancelación:</b> {escape(str(fecha_canc))}"
+            f" &nbsp;&nbsp; <b>Estado:</b> Cancelada",
+            estilos["BodyText"],
+        ),
+    ]
+
+    cliente = factura["cliente"]
+    contenido.extend([
+        Spacer(1, 4 * mm),
+        Paragraph("Cliente", estilos["Heading2"]),
+        Paragraph(
+            f"{escape(str(cliente.get('nombre') or ''))} — "
+            f"{escape(str(cliente.get('email') or ''))} "
+            f"(ID {escape(str(cliente.get('id_usuario') or ''))})",
+            estilos["BodyText"],
+        ),
+        Spacer(1, 4 * mm),
+        Paragraph("Función cancelada", estilos["Heading2"]),
+        Paragraph(
+            f"Película: {escape(str(factura['funcion'].get('pelicula') or ''))} "
+            f"— {escape(str(factura['funcion'].get('fecha_hora_inicio') or ''))} "
+            f"— Sala {escape(str(factura['funcion'].get('sala') or ''))} "
+            f"— {escape(str(factura['funcion'].get('local') or ''))}",
+            estilos["BodyText"],
+        ),
+        Spacer(1, 4 * mm),
+        Paragraph("Detalle de ítems anulados", estilos["Heading2"]),
+    ])
+
+    filas = [["Concepto", "Cantidad", "Precio unitario", "Subtotal"]]
+    for entrada in factura.get("entradas", []):
+        filas.append([
+            Paragraph(
+                f"Entrada anulada — fila {escape(str(entrada.get('fila', '')))}, "
+                f"butaca {escape(str(entrada.get('numero', '')))}",
+                estilo_celda,
+            ),
+            "1",
+            f"$ {entrada['precio_unitario']:.2f}",
+            f"$ {entrada['precio_unitario']:.2f}",
+        ])
+    for producto in factura.get("productos", []):
+        filas.append([
+            Paragraph(f"{escape(str(producto.get('nombre') or 'Producto'))} (anulado)", estilo_celda),
+            str(producto.get("cantidad", 0)),
+            f"$ {producto['precio_unitario']:.2f}",
+            f"$ {producto['subtotal']:.2f}",
+        ])
+
+    tabla = Table(filas, colWidths=[85 * mm, 20 * mm, 32 * mm, 32 * mm], repeatRows=1)
+    tabla.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#26364a")),
+        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+        ("FONTSIZE", (0, 0), (-1, -1), 9),
+        ("GRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#d5dbe3")),
+        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f3f6f9")]),
+        ("ALIGN", (1, 1), (-1, -1), "RIGHT"),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 7),
+        ("TOPPADDING", (0, 0), (-1, -1), 7),
+    ]))
+    contenido.extend([tabla, Spacer(1, 5 * mm)])
+
+    totales = factura["totales"]
+    contenido.append(Table([
+        ["Subtotal entradas anuladas", f"$ {totales['subtotal_entradas']:.2f}"],
+        ["Subtotal productos anulados", f"$ {totales['subtotal_productos']:.2f}"],
+        ["Total original abonado", f"$ {total_original:.2f}"],
+        ["Monto reembolsado (ARS)", f"$ {reembolso:.2f}"],
+    ], colWidths=[137 * mm, 32 * mm], hAlign="RIGHT", style=TableStyle([
+        ("ALIGN", (1, 0), (1, -1), "RIGHT"),
+        ("LINEABOVE", (0, 3), (-1, 3), 1, colors.HexColor("#26364a")),
+        ("FONTNAME", (0, 3), (-1, 3), "Helvetica-Bold"),
+        ("TOPPADDING", (0, 0), (-1, -1), 5),
+    ])))
+
+    contenido.extend([
+        Spacer(1, 8 * mm),
+        Paragraph(
+            "Las entradas y códigos QR asociados a esta compra fueron invalidados y ya no son válidos "
+            "para el ingreso a sala ni retiro de productos. El reintegro se acreditará en el mismo medio "
+            "de pago utilizado en la compra original.",
+            estilo_nota,
+        ),
+    ])
+
+    documento.build(contenido)
+    salida.seek(0)
     return salida.getvalue()

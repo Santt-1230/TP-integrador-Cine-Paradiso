@@ -349,6 +349,10 @@ def detalle(id_pelicula):
     if estado != 200:
         return error_backend(estado, pelicula)
 
+    if not api.session.get("cine_id"):
+        api.session["pelicula_pendiente_id"] = id_pelicula
+        return redirect(url_for("locales.mostrar_locales"))
+
     # Obtener otras películas para recomendar.
 
     otras = api.get_lista(

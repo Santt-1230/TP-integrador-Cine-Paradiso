@@ -203,17 +203,17 @@ def eliminar_funcion_cancelada(id_funcion):
 
 def listar_butacas_funcion(id_funcion):
     sql = (
-        "SELECT b.id_butaca, b.fila, b.numero, "
+        "SELECT b.id_butaca, b.fila, b.numero, b.estado AS estado_butaca, "
         "CASE WHEN c.id_compra IS NULL THEN 'disponible' ELSE 'ocupada' END AS estado "
         "FROM funciones f "
         "INNER JOIN butacas b ON b.id_sala = f.id_sala "
         "LEFT JOIN entradas e ON e.id_funcion = f.id_funcion "
         "AND e.id_butaca = b.id_butaca "
-        "AND e.estado IN ('reservada', 'confirmada', 'utilizada') "
+        "AND e.estado IN ('confirmada', 'utilizada') "
         "LEFT JOIN compras c ON c.id_compra = e.id_compra "
         "AND (c.estado = 'confirmada' OR "
         "(c.estado = 'pendiente' AND c.expira_en > NOW())) "
-        "WHERE f.id_funcion = %s "
+        "WHERE f.id_funcion = %s AND b.estado = 'activa' "
         "ORDER BY b.fila, b.numero"
     )
     return ejecutar_consulta(sql, (id_funcion,))

@@ -5,8 +5,78 @@ from repositories import qr as qr_repositories
 from repositories import peliculas as peliculas_repositories
 from repositories import salas as salas_repositories 
 from repositories import locales as locales_repositories
+from services import promociones as promociones_services
 import constants as const
 import secrets
+from decimal import Decimal, ROUND_HALF_UP
+from datetime import date
+
+CENTAVO = Decimal("0.01")
+
+def obtener_promocion_vigente(id_promocion):
+    promocion = promociones_services.obtener_promocion_por_id(id_promocion)
+    hoy = date.today()
+    if (
+        not promocion
+        or not promocion["activa"]
+        or hoy < promocion["vigente_desde"]
+        or hoy > promocion["vigente_hasta"]
+    ):
+        return None
+    return promocion
+
+
+def calcular_descuentos_compra(ids_promociones, cantidad_entradas, precio_entrada, subtotal_compra):
+    precio = Decimal(str(precio_entrada)).quantize(CENTAVO, rounding=ROUND_HALF_UP)
+    subtotal_entradas = (precio * cantidad_entradas).quantize(CENTAVO, rounding=ROUND_HALF_UP)
+    total_restante = Decimal(str(subtotal_compra)).quantize(CENTAVO, rounding=ROUND_HALF_UP)
+    descuento_entradas = Decimal("0.00")
+
+    promociones = []
+    for id_promocion in ids_promociones:
+        promocion = obtener_promocion_vigente(id_promocion)
+        if not promocion:
+            return None, "PROMOCION_NO_DISPONIBLE"
+        promociones.append(promocion)
+
+    if sum(promo["tipo"] == "nxm" for promo in promociones) > 1:
+        return None, "PROMOCIONES_CATEGORIA_DUPLICADA"
+    if sum(promo["tipo"] in ("porcentaje", "monto_fijo") for promo in promociones) > 1:
+        return None, "PROMOCIONES_CATEGORIA_DUPLICADA"
+
+    for promocion in promociones:
+        if promocion["tipo"] != "nxm":
+            continue
+        comprar = int(promocion["cantidad_comprar"] or 0)
+        pagar = int(promocion["cantidad_pagar"] or 0)
+        if comprar <= 0 or pagar < 0 or pagar > comprar:
+            return None, "PROMOCION_NO_DISPONIBLE"
+        grupos = cantidad_entradas // comprar
+        bonificadas = grupos * (comprar - pagar)
+        descuento_entradas += precio * bonificadas
+    descuento_entradas = min(
+        descuento_entradas.quantize(CENTAVO, rounding=ROUND_HALF_UP), subtotal_entradas
+    )
+    total_restante = max(Decimal("0.00"), total_restante - descuento_entradas)
+
+    descuento_total = descuento_entradas
+    for promocion in promociones:
+        if promocion["tipo"] == "porcentaje":
+            descuento = total_restante * Decimal(str(promocion["porcentaje"])) / Decimal("100")
+        elif promocion["tipo"] == "monto_fijo":
+            descuento = Decimal(str(promocion["monto_descuento"]))
+        elif promocion["tipo"] == "nxm":
+            continue
+        else:
+            return None, "PROMOCION_NO_DISPONIBLE"
+        descuento = min(
+            descuento.quantize(CENTAVO, rounding=ROUND_HALF_UP), total_restante
+        )
+        descuento_total += descuento
+        total_restante -= descuento
+
+    return min(descuento_total, Decimal(str(subtotal_compra)).quantize(CENTAVO, rounding=ROUND_HALF_UP)), None
+
 
 def generar_token():
     return secrets.token_hex(32)
@@ -79,13 +149,14 @@ def registrar_compra(id_usuario, datos):
 
     if funcion["estado"] != "programada":
         return None, "FUNCION_NO_DISPONIBLE"
-
-    butacas_libres = compras_repositories.butacas_disponibles(
-        funcion["id_funcion"],
-        datos["butacas"]
+    estado_butacas = compras_repositories.butacas_disponibles(
+        funcion["id_funcion"], datos["butacas"]
     )
-
-    if not butacas_libres:
+    if estado_butacas == "inexistentes":
+        return None, "BUTACA_INEXISTENTE"
+    if estado_butacas == "inactivas":
+        return None, "BUTACA_INACTIVA"
+    if estado_butacas != "disponibles":
         return None, "BUTACA_NO_DISPONIBLE"
 
     # Preparar los productos y sus futuros QR
@@ -99,7 +170,7 @@ def registrar_compra(id_usuario, datos):
 
         if not producto:
             return None, "PRODUCTO_NO_DISPONIBLE"
-
+        
         productos.append({
         "producto": producto,
         "cantidad": item["cantidad"],
@@ -109,9 +180,20 @@ def registrar_compra(id_usuario, datos):
         ]
     })
 
+    subtotal_entradas = Decimal(str(funcion["precio_entrada"])) * len(datos["butacas"])
+    subtotal_productos = sum(
+        (Decimal(str(producto["precio"])) * cantidad for producto, cantidad in productos),
+        Decimal("0.00"),
+    )
+    subtotal_compra = (subtotal_entradas + subtotal_productos).quantize(CENTAVO, rounding=ROUND_HALF_UP)
+    descuento, error_promocion = calcular_descuentos_compra(
+        datos.get("id_promociones", []), len(datos["butacas"]), funcion["precio_entrada"], subtotal_compra
+    )
+    if error_promocion:
+        return None, error_promocion
+    
     try:
-        id_compra = compras_repositories.registrar_compra(id_usuario,datos,productos)
-
+        id_compra = compras_repositories.registrar_compra(id_usuario, datos, productos, descuento)
     except Exception:
         return None, "ERROR_COMPRA"
 
@@ -130,11 +212,16 @@ def cancelar_compra(id_compra, id_usuario):
     return None
 
 def construir_factura(compra, cliente, funcion, entradas, productos, sala, pelicula, local):
-    subtotal_entradas = sum(entrada["precio_unitario"] for entrada in entradas)
+    subtotal_entradas = sum((Decimal(str(entrada["precio_unitario"])) for entrada in entradas), Decimal("0.00"))
 
-    subtotal_productos = sum(producto["precio_unitario"] * producto["cantidad"] for producto in productos)
+    subtotal_productos = sum(
+        (Decimal(str(producto["precio_unitario"])) * producto["cantidad"] for producto in productos),
+        Decimal("0.00"),
+    )
 
-    total = subtotal_entradas + subtotal_productos
+    subtotal_bruto = (subtotal_entradas + subtotal_productos).quantize(CENTAVO, rounding=ROUND_HALF_UP)
+    total = Decimal(str(compra["total"])).quantize(CENTAVO, rounding=ROUND_HALF_UP)
+    descuento = max(Decimal("0.00"), (subtotal_bruto - total).quantize(CENTAVO, rounding=ROUND_HALF_UP))
 
     return {
         "factura": {
@@ -187,6 +274,7 @@ def construir_factura(compra, cliente, funcion, entradas, productos, sala, pelic
         "totales": {
             "subtotal_entradas": subtotal_entradas,
             "subtotal_productos": subtotal_productos,
+            "descuento": descuento,
             "total": total
         }
     }
