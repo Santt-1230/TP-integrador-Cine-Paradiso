@@ -4,7 +4,6 @@ from db import (
     transaccion
 )
 
-
 def listar_filas_sala(id_sala: int) -> list[dict]:
     sql = ("SELECT fila, COUNT(*) AS cantidad FROM butacas "
            "WHERE id_sala = %s AND estado = 'activa' GROUP BY fila ORDER BY fila")
@@ -14,7 +13,7 @@ def validar_disponibilidad_futura(cursor, ids_butacas):
     valores = ', '.join(['%s'] * len(ids_butacas))
 
     sql = "SELECT COUNT(*) AS cantidad FROM entradas e JOIN funciones f ON f.id_funcion = e.id_funcion " \
-    f'WHERE e.id_butaca IN ({valores})' "AND f.fecha_hora_inicio > NOW() " \
+    f'WHERE e.id_butaca IN ({valores})' " AND f.fecha_hora_inicio > NOW() " \
     " AND f.estado = 'programada' AND e.estado IN ('reservada', 'confirmada')"
     cursor.execute(sql, tuple(ids_butacas))
 
@@ -72,8 +71,6 @@ def sincronizar_butacas(cursor, id_sala, filas):
         cursor.executemany(
             sql, [(id_sala, fila, numero) for fila, numero in sorted(a_crear)]
             )
-    
-    
 
     return True
 
@@ -126,12 +123,6 @@ def crear_sala(id_local, numero_sala, filas):
 
     return listar_sala_por_id(id_sala)
 
-
-def obtener_butacas(id_sala:int) -> list[dict]:
-    sql = 'SELECT id_butaca, fila, numero, estado FROM butacas ' \
-    'WHERE id_sala = %s ORDER BY fila, numero'
-    return ejecutar_consulta(sql, (id_sala,))
-
     
 def actualizar_sala(id_sala, cambios):
     with transaccion() as cursor:
@@ -156,8 +147,3 @@ def desactivar_sala(id_sala):
     parametros = ('inactiva', id_sala,)
     ejecutar_mutacion(sql, parametros)
     return listar_sala_por_id(id_sala)
-
-def listar_salas_activas(id_local:int)->list[dict]:
-    sql = "SELECT id_sala, numero_sala, capacidad FROM salas " \
-    "WHERE id_local = %s AND estado = 'activa' ORDER BY numero_sala"
-    return ejecutar_consulta(sql, (id_local,))
