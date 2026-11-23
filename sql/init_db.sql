@@ -155,7 +155,12 @@ CREATE TABLE IF NOT EXISTS promociones (
 	imagen_url VARCHAR(500),
 	vigente_desde DATE NOT NULL,
 	vigente_hasta DATE NOT NULL,
-	activa BOOLEAN NOT NULL DEFAULT TRUE
+	activa BOOLEAN NOT NULL DEFAULT TRUE,
+	tipo ENUM('nxm', 'porcentaje', 'monto_fijo') NULL,
+	cantidad_comprar INT NULL,
+	cantidad_pagar INT NULL,
+	porcentaje DECIMAL(5,2) NULL,
+	monto_descuento DECIMAL(10,2) NULL
 );
 
 CREATE TABLE IF NOT EXISTS compra_productos (
