@@ -8,19 +8,6 @@ from services import mailer
 compras_bp = Blueprint('compras', __name__, url_prefix='/api')
 
 
-@compras_bp.route('/compras', methods=['GET'])
-@login_requerido
-def listar_compras():
-    id_usuario = session["id_usuario"]
-    compras, error = compras_services.listar_compras(id_usuario)
- 
-    if error == "SIN_COMPRAS":
-        return jsonify(construir_error_api(
-            code="SIN_COMPRAS",
-            message="Usuario sin compras",
-            description=f"La compra del usuario de ID: {id_usuario} no existe o no le pertenece"
-        )), 404
-    return jsonify(compras), 200
 
 
 

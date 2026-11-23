@@ -4,21 +4,7 @@ from decimal import Decimal, ROUND_HALF_UP
 
 CENTAVO = Decimal("0.01")
 
-def obtener_compras(id):
-    sql = "SELECT * FROM compras WHERE id_usuario = %s;"
-    params = [id]
-    compras = ejecutar_consulta(sql, params)
-    return compras
 
-
-def obtener_compra_id(id_compra, id_usuario):
-    sql = "SELECT * FROM compras WHERE id_compra = %s"
-    parametros = [id_compra]
-    if id_usuario is not None:
-        sql += " AND id_usuario = %s"
-        parametros.append(id_usuario)
-    compra = ejecutar_consulta(sql, parametros)
-    return  compra[0] if compra else None
 
 
 def generar_numero_factura(id_compra):
@@ -148,12 +134,6 @@ def butacas_disponibles(id_funcion, id_butacas):
 
     return "disponibles"
 
-def obtener_funcion_precio(id_funcion):
-    sql = "SELECT precio_entrada from funciones WHERE id_funcion = %s"
-    parametros = [id_funcion]
-    precio_unitario = ejecutar_consulta(sql, parametros)
-    return precio_unitario[0] if precio_unitario else None
-
 
 
 
@@ -205,24 +185,6 @@ def obtener_producto_activo(id_producto):
     return filas[0] if filas else None
 
 
-def insertar_servicio_compra(id_compra, id_producto, cantidad, precio):
-    return ejecutar_mutacion(
-        "INSERT INTO compra_productos "
-        "(id_compra, id_producto, cantidad, precio_unitario) "
-        "VALUES (%s, %s, %s, %s)",
-        (id_compra, id_producto, cantidad, precio),
-    )
-
-
-def actualizar_total_compra(id_compra, subtotal):
-    ejecutar_mutacion(
-        "UPDATE compras SET total = total + %s WHERE id_compra = %s",
-        (subtotal, id_compra),
-    )
-    filas = ejecutar_consulta(
-        "SELECT total FROM compras WHERE id_compra = %s", (id_compra,)
-    )
-    return filas[0]["total"] if filas else None
 
 def butacas_id(id_butaca):
     butaca = ejecutar_consulta(

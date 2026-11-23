@@ -85,56 +85,13 @@ def generar_codigo_manual():
     return "".join(secrets.choice(const.ALFABETO_CODIGO) for _ in range(12))
 
 
-def construir_compra(compra, pelicula, entradas, productos):
-    compra = {
-        "id": compra["id_compra"],
-        "fecha": compra["fecha_creacion"],
-        "fecha_confirmacion": compra.get("fecha_confirmacion"),
-        "estado": compra["estado"],
-        "pelicula": {"id": pelicula["id_pelicula"],
-                     "titulo": pelicula["nombre"],
-                     "imagen_url": pelicula["poster_url"]},
-        "entrada": [],
-        "productos": productos,
-        "total": compra["total"]
-    }
-    for entrada in entradas:
-        butaca = compras_repositories.butacas_id(entrada["id_butaca"])
-        entrada_dict = {
-            "id_entrada": entrada["id_entrada"],
-            "fila": butaca["fila"],
-            "numero": butaca["numero"],
-            "estado": entrada["estado"]
-        }
-        compra["entrada"].append(entrada_dict)
-    return compra
 
 
-def listar_compras(id_usuario):
-    compras = compras_repositories.obtener_compras(id_usuario)
-    if not compras:
-        return None, "SIN_COMPRAS"
-    resultado = []
-    
-    for compra in compras:
-        funcion = compras_repositories.obtener_funcion(compra["id_funcion"])
-        pelicula = peliculas_repositories.buscar_por_id(funcion["id_pelicula"])
-        entradas  = compras_repositories.obtener_entradas(compra["id_compra"])
-        productos = compras_repositories.obtener_productos_compra(compra["id_compra"])
-        resultado.append(construir_compra(compra, pelicula, entradas, productos))
-    return resultado, None
 
 
-def compra_id(id_compra, id_usuario=None):
-    compra = compras_repositories.obtener_compra_id(id_compra, id_usuario)
-    if not compra:
-        return None, "COMPRA_INEXISTENTE"
-    funcion = compras_repositories.obtener_funcion(compra["id_funcion"])
-    pelicula = peliculas_repositories.buscar_por_id(funcion["id_pelicula"])
-    entradas  = compras_repositories.obtener_entradas(compra["id_compra"])
-    productos = compras_repositories.obtener_productos_compra(compra["id_compra"])
 
-    return construir_compra(compra,pelicula,entradas,productos), None
+
+
 
 def registrar_compra(id_usuario, datos):
     # El validador ya devuelve el error armado (o None si todo esta bien)
