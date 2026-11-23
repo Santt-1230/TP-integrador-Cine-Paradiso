@@ -30,7 +30,6 @@ function animarBarrasOcupacion() {
     });
 }
 
-
 function dimensionarBarrasComparativas() {
     document.querySelectorAll('.lista-barras').forEach((lista) => {
         const filas = Array.from(lista.querySelectorAll('.fila-barra--simple'));
@@ -64,25 +63,24 @@ function dimensionarBarrasComparativas() {
         });
     });
 }
-
 function configurarFiltroPeriodo() {
-    const formulario = document.querySelector('.estadisticas-admin__filtro');
+
+    const formulario = document.querySelector(
+        '.estadisticas-admin__filtro'
+    );
+
     if (!formulario) return;
 
-    const selector = formulario.querySelector('select[name="periodo"]');
-    const boton = formulario.querySelector('button[type="submit"]');
-    const periodosPermitidos = new Set(['7', '30', '90', '365']);
+    const boton = formulario.querySelector(
+        'button[type="submit"]'
+    );
 
-    formulario.addEventListener('submit', (evento) => {
-        if (selector && !periodosPermitidos.has(selector.value)) {
-            evento.preventDefault();
-            selector.focus();
-            return;
-        }
+    formulario.addEventListener('submit', () => {
 
         if (boton) {
             boton.disabled = true;
             boton.textContent = 'Aplicando...';
         }
+
     });
 }
