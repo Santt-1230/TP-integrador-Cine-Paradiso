@@ -85,14 +85,3 @@ def admin_requerido(funcion):
             return jsonify(error), 403
         return funcion(*args, **kwargs)
     return verificar_rol
-
-def rol_requerido(*roles):
-    def decorador(funcion):
-        @wraps(funcion)
-        def verificar_rol(*args, **kwargs):
-            if session.get("rol") not in roles:
-                error = construir_error_api("PERMISO_DENEGADO", "Permiso denegado", "No tienes permisos para acceder")
-                return jsonify(error), 403
-            return funcion(*args, **kwargs)
-        return verificar_rol
-    return decorador

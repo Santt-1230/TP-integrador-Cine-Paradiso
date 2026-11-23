@@ -4,16 +4,7 @@ from repositories.validar_qr import (
     validar_qr_entrada,
     validar_qr_producto
 )
-
-
-CATEGORIAS_PRODUCTOS = {
-    "bebida",
-    "comida",
-    "estacionamiento",
-    "vip"
-}
-
-
+from validators.validar_qr import validar_categoria
 
 def error_qr(codigo: str, mensaje: str, detalles: dict = None) -> dict:
 
@@ -101,7 +92,7 @@ def comprobar_entrada(qr: dict) -> dict | None:
 
 def comprobar_producto(qr: dict, categoria: str) -> dict | None:
 
-    if categoria not in CATEGORIAS_PRODUCTOS:
+    if not validar_categoria(categoria):
         return error_qr(
             "CATEGORIA_INVALIDA",
             "La categoría seleccionada no es válida."
@@ -192,11 +183,10 @@ def procesar_validacion(
 
     respuesta = {
         "valido": True,
-        "mensaje": "QR validado correctamente."
     }
 
     if tipo == "entrada":
-
+        
         respuesta["mensaje"] = "Entrada validada correctamente. Puede ingresar."
         respuesta["entrada"] = qr_actualizado
 
@@ -207,26 +197,3 @@ def procesar_validacion(
 
     return respuesta
 
-def procesar_validacion_entrada(
-    token: str,
-    id_validador: int
-) -> dict:
-
-    return procesar_validacion(
-        token,
-        id_validador,
-        "entrada"
-    )
-
-def procesar_validacion_producto(
-    token: str,
-    id_validador: int,
-    categoria: str
-) -> dict:
-
-    return procesar_validacion(
-        token,
-        id_validador,
-        "producto",
-        categoria
-    )
