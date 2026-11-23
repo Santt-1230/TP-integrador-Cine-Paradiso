@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block titulo %}Servicios - Cine Paradiso{% endblock %}
+{% block estilos_extra %}
+    {{ super() }}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/checkout.css') }}">
+{% endblock %}
+
+{% block contenido %}
+<section class="funciones-pagina checkout-pagina" data-checkout-duracion-segundos="600">
+    <a href="{{ url_for('compras_bp.checkout', id_funcion=id_funcion, butacas=ids_butacas, id_promociones=ids_promociones) }}">← Volver al checkout y promociones</a>
+    <h1>Elegí tus servicios</h1>
+    {% if error %}<p class="mensaje-error" role="alert">{{ error }}</p>{% endif %}
+
+    <div class="resumen-checkout">
+        <h2>{{ funcion.pelicula if funcion else 'Función' }}</h2>
+        {% if funcion %}
+            <p>{{ funcion.local|default('', true) }}{% if funcion.numero_sala %} · Sala {{ funcion.numero_sala }}{% endif %}</p>
+            <p>Función: {{ funcion.fecha_hora_inicio|default('') }}</p>
+            <p>Precio por entrada: <strong>{{ funcion.precio_entrada|precio_ar if funcion.precio_entrada is defined else '$0' }}</strong></p>
+        {% endif %}
+        <p>Entradas: <strong>{% for butaca in butacas %}{{ butaca.fila }}{{ butaca.numero }}{% if not loop.last %}, {% endif %}{% endfor %}</strong></p>
+        <p>Subtotal original de entradas: <strong>{{ total|precio_ar }}</strong></p>
+        <p>Promociones seleccionadas:
+            <strong>{% if promociones_seleccionadas %}{% for promocion in promociones_seleccionadas %}{{ promocion.nombre }}{% if not loop.last %}, {% endif %}{% endfor %}{% else %}Sin promoción{% endif %}</strong>
+        </p>
+    </div>
+
+    {% if servicios_error %}<p class="mensaje-error">No se pudieron cargar los servicios: {{ servicios_error }}</p>{% endif %}
+    <form class="checkout-form" method="post" action="{{ url_for('compras_bp.checkout_servicios') }}">
+        <input type="hidden" name="id_funcion" value="{{ id_funcion }}">
+        {% for id_butaca in ids_butacas %}<input type="hidden" name="butacas" value="{{ id_butaca }}">{% endfor %}
+
+        <div class="promociones-preview" hidden>
+            {% for promocion in promociones %}
+                {% if promocion.id_promocion in ids_promociones %}
+                <input type="checkbox" name="id_promociones" value="{{ promocion.id_promocion }}" checked
+                    data-tipo="{{ promocion.tipo }}" data-comprar="{{ promocion.cantidad_comprar }}"
+                    data-pagar="{{ promocion.cantidad_pagar }}" data-porcentaje="{{ promocion.porcentaje }}"
+                    data-monto-descuento="{{ promocion.monto_descuento }}">
+                {% endif %}
+            {% endfor %}
+            {% set ids_promociones_activas = promociones|map(attribute='id_promocion')|list %}
+            {% for id_promocion in ids_promociones %}
+                {% if id_promocion not in ids_promociones_activas %}<input type="hidden" name="id_promociones" value="{{ id_promocion }}">{% endif %}
+            {% endfor %}
+        </div>
+
+        <h2>Productos y servicios</h2>
+        {% if productos %}
+            <div class="lista-servicios-checkout">
+            {% for producto in productos %}
+                <label class="servicio-checkout">
+                    <input type="checkbox" name="productos" value="{{ producto.id_producto }}" data-precio="{{ producto.precio }}" {% if producto.cantidad_seleccionada %}checked{% endif %}>
+                    <span><strong>{{ producto.nombre }}</strong>{% if producto.descripcion %}<small>{{ producto.descripcion }}</small>{% endif %}</span>
+                    <span>{{ producto.precio|precio_ar }}</span>
+                    <span>Cantidad <input type="number" name="cantidad_{{ producto.id_producto }}" min="1" max="20" value="{{ producto.cantidad_seleccionada or 1 }}"></span>
+                </label>
+            {% endfor %}
+            </div>
+        {% elif not servicios_error %}
+            <p>No hay servicios disponibles para agregar.</p>
+        {% endif %}
+        <div class="checkout-actions" data-base-total="{{ total }}" data-precio-entrada="{{ funcion.precio_entrada if funcion else 0 }}">
+            <p class="checkout-descuento-linea" hidden>Descuento promocional: <strong class="checkout-descuento-dinamico">$0</strong></p>
+            <p>Total estimado: <strong class="checkout-total-dinamico">{{ total|precio_ar }}</strong></p>
+            <button class="boton" type="submit">Confirmar compra</button>
+        </div>
+    </form>
+</section>
+<script src="{{ url_for('static', filename='js/checkout.js', v=9) }}" defer></script>
+{% endblock %}

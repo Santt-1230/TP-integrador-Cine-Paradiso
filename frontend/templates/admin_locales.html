@@ -64,7 +64,9 @@
                     </p>
                 </div>
 
-                <a class="boton-tabla boton-tabla--agregar" href="{{ url_for('salas.crear_sala', id_local=local.id_local) }}">Agregar sala</a>
+                <a class="boton-tabla boton-tabla--agregar" 
+                href="{{ url_for('salas.crear_sala', id_local=local.id_local, 
+                filtro_estado=filtro_estado, filtro_local=filtro_local) }}">Agregar sala</a>
             </div>
             <table class="tabla-admin tabla-salas">
                 <thead>
@@ -83,23 +85,26 @@
                             <td class="estado-{{ sala.estado }}">{{ sala.estado|capitalize }}</td>
                             <td>
                                 <div class="acciones-tabla">
-                                    <a class="boton-tabla boton-tabla--editar" href="{{ url_for('salas.editar_sala', id_sala=sala.id_sala) }}">Editar</a>
+                                    <a class="boton-tabla boton-tabla--editar" href="{{ url_for('salas.editar_sala', 
+                                    id_sala=sala.id_sala, filtro_estado=filtro_estado, filtro_local=filtro_local) }}">
+                                    Editar</a>
                                     {% if sala.estado == 'activa' %}
-                                        <form method="post" 
+                                        <form method="post"
                                             action="{{ url_for('salas.desactivar_sala', id_sala=sala.id_sala) }}"
                                             data-numero-sala="{{ sala.numero_sala }}" data-accion="desactivar">
+                                            <input type="hidden" name="filtro_estado" value="{{ filtro_estado }}">
+                                            <input type="hidden" name="filtro_local" value="{{ filtro_local or '' }}">
                                             <button type="submit" class="boton-tabla boton-tabla--baja">Desactivar</button>
-                                            <input type="hidden" name="estado" value="{{ filtro_estado }}">
                                         </form>
-                                    {% else %}        
-                                        <form method="post" 
+                                    {% else %}
+                                        <form method="post"
                                             action="{{ url_for('salas.activar_sala', id_sala=sala.id_sala) }}"
                                             data-numero-sala="{{ sala.numero_sala }}" data-accion="reactivar">
-                                            <input type="hidden" name="nuevo_estado" value="activa">
-                                            <input type="hidden" name="estado" value="{{ filtro_estado }}">
+                                            <input type="hidden" name="filtro_estado" value="{{ filtro_estado }}">
+                                            <input type="hidden" name="filtro_local" value="{{ filtro_local or '' }}">
                                             <button type="submit" class="boton-tabla boton-tabla--activar">Reactivar</button>
-                                        </form>           
-                                    {% endif %}      
+                                        </form>
+                                    {% endif %}
                                 </div>
                             </td>
                         </tr>

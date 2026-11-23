@@ -14,14 +14,46 @@ def obtener_promocion_por_id(id_promocion: int) -> dict | None:
     return filas[0] if filas else None
 
 
-def crear_promocion(nombre, descripcion, imagen_url, vigente_desde, vigente_hasta, activa):
-    sql = "INSERT INTO promociones (nombre, descripcion, imagen_url, vigente_desde, vigente_hasta, activa) VALUES (%s, %s, %s, %s, %s, %s)"
-    return ejecutar_mutacion(sql, (nombre, descripcion, imagen_url, vigente_desde, vigente_hasta, activa))
+def crear_promocion(nombre, descripcion, imagen_url, vigente_desde, vigente_hasta,
+                    activa, tipo, cantidad_comprar, cantidad_pagar, porcentaje, monto_descuento
+):
+    sql = """
+           INSERT INTO promociones (
+           nombre, descripcion, imagen_url, vigente_desde, vigente_hasta,
+           activa, tipo, cantidad_comprar, cantidad_pagar, porcentaje, monto_descuento
+           ) 
+           VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+           """
+    return ejecutar_mutacion(sql, (
+        nombre, descripcion, imagen_url, vigente_desde, vigente_hasta,
+        activa, tipo, cantidad_comprar, cantidad_pagar, porcentaje, monto_descuento
+    ))
 
 
-def actualizar_promocion(id_promocion, nombre, descripcion, imagen_url, vigente_desde, vigente_hasta, activa):
-    sql = "UPDATE promociones SET nombre = %s, descripcion = %s, imagen_url = %s, vigente_desde = %s, vigente_hasta = %s, activa = %s WHERE id_promocion = %s"
-    return ejecutar_mutacion(sql, (nombre, descripcion, imagen_url, vigente_desde, vigente_hasta, activa, id_promocion))
+def actualizar_promocion(id_promocion, nombre, descripcion, imagen_url, vigente_desde,
+                        vigente_hasta, activa, tipo, cantidad_comprar, cantidad_pagar,
+                        porcentaje, monto_descuento
+):
+    sql = """
+          UPDATE promociones SET
+             nombre = %s,
+             descripcion = %s,
+             imagen_url = %s,
+             vigente_desde = %s, 
+             vigente_hasta = %s, 
+             activa = %s,
+             tipo = %s,
+             cantidad_comprar = %s,
+             cantidad_pagar = %s,
+             porcentaje = %s,
+             monto_descuento = %s 
+          WHERE id_promocion = %s
+          """
+    return ejecutar_mutacion(sql, (
+        nombre, descripcion, imagen_url, vigente_desde, vigente_hasta,
+        activa, tipo, cantidad_comprar, cantidad_pagar, porcentaje,
+        monto_descuento, id_promocion
+    ))
 
 
 def dar_de_baja_promocion(id_promocion: int):

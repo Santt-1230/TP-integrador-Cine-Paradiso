@@ -26,8 +26,68 @@
         </div>
 
         <div class="campo-formulario">
-            <label for="imagen_url">Imagen (URL o ruta)</label>
-            <input id="imagen_url" type="text" name="imagen_url" value="{{ promocion.imagen_url or '' }}" required>
+            <label for="tipo">Tipo de promoción</label>
+            <select id="tipo" name="tipo" required>
+                <option value="">Seleccionar tipo</option>
+
+                <option value="nxm" {% if promocion.get('tipo') == 'nxm' %}selected{% endif %}>
+                    2x1 / N×M
+                </option>
+
+                <option value="porcentaje" {% if promocion.get('tipo') == 'porcentaje' %}selected{% endif %}>
+                    Porcentaje
+                </option>
+
+                <option value="monto_fijo" {% if promocion.get('tipo') == 'monto_fijo' %}selected{% endif %}>
+                    Monto fijo
+                </option>
+            </select>
+        </div>
+
+        <div id="campos-nxm" class="campo-formulario">
+            <label for="cantidad_comprar">Cantidad a comprar</label>
+            <input
+                id="cantidad_comprar"
+                type="number"
+                name="cantidad_comprar"
+                min="1"
+                value="{{ promocion.get('cantidad_comprar') or '' }}">
+
+            <label for="cantidad_pagar">Cantidad a pagar</label>
+            <input
+                id="cantidad_pagar"
+                type="number"
+                name="cantidad_pagar"
+                min="1"
+                value="{{ promocion.get('cantidad_pagar') or '' }}">
+        </div>
+
+        <div id="campos-porcentaje" class="campo-formulario">
+            <label for="porcentaje">Porcentaje de descuento</label>
+            <input
+                id="porcentaje"
+                type="number"
+                name="porcentaje"
+                min="0.01"
+                max="100"
+                step="0.01"
+                value="{{ promocion.get('porcentaje') or '' }}">
+        </div>
+
+        <div id="campos-monto-fijo" class="campo-formulario">
+            <label for="monto_descuento">Monto de descuento</label>
+            <input
+                id="monto_descuento"
+                type="number"
+                name="monto_descuento"
+                min="0.01"
+                step="0.01"
+                value="{{ promocion.get('monto_descuento') or '' }}">
+        </div>
+
+        <div class="campo-formulario">
+            <label for="imagen_url">Imagen URL</label>
+            <input id="imagen_url" type="text" name="imagen_url" value="{{ promocion.imagen_url or '' }}">
         </div>
 
         <div class="campo-formulario">
@@ -51,4 +111,5 @@
         </div>
     </form>
 </div>
+<script src="{{ url_for('static', filename='js/promociones.js') }}"></script>
 {% endblock %}

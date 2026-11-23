@@ -6,8 +6,11 @@ from repositories.cancelaciones import (
 
 MINUTOS_LIMITE_CANCELACION = 60
 
-def procesar_cancelacion_cliente(id_compra: int, datos: dict | None = None) -> tuple[dict, int]:
-    compra = obtener_compra_para_cancelar(id_compra)
+
+def procesar_cancelacion_cliente(
+    id_compra: int, id_usuario: int, datos: dict | None = None
+) -> tuple[dict, int]:
+    compra = obtener_compra_para_cancelar(id_compra, id_usuario)
 
     if not compra:
         return {"exito": False, "mensaje": "Compra no encontrada"}, 404
@@ -15,8 +18,11 @@ def procesar_cancelacion_cliente(id_compra: int, datos: dict | None = None) -> t
     if compra["estado"] == "cancelada":
         return {"exito": False, "mensaje": "La compra ya se encuentra cancelada"}, 400
 
+    if compra["estado"] != "confirmada":
+        return {"exito": False, "mensaje": "Solo se pueden cancelar compras confirmadas"}, 400
+
     ahora = datetime.now()
-    limite = compra["fecha_hora"] - timedelta(minutes=MINUTOS_LIMITE_CANCELACION)
+    limite = compra["fecha_hora_inicio"] - timedelta(minutes=MINUTOS_LIMITE_CANCELACION)
 
     if ahora > limite:
         return {

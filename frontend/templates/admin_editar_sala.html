@@ -12,12 +12,10 @@
     {% endif %}
 
     <form method="post"
-        action="{% if sala %}{{ url_for('salas.editar_sala', id_sala=sala.id_sala) }}
-        {% else %}{{ url_for('salas.crear_sala', id_local=id_local) }}{% endif %}"
+        action="{% if sala %}{{ url_for('salas.editar_sala', id_sala=sala.id_sala) }}{% else %}{{ url_for('salas.crear_sala', id_local=id_local) }}{% endif %}"
         class="formulario-sala" novalidate>
-        {% if not sala %}
-            <input type="hidden" name="id_local" value="{{ id_local }}">
-        {% endif %}
+        <input type="hidden" name="filtro_estado" value="{{ filtro_estado }}">
+        <input type="hidden" name="filtro_local" value="{{ filtro_local or '' }}">
         <div class="campo-formulario">
             <label for="numero_sala">Número de sala</label>
             <input
@@ -38,46 +36,44 @@
                 {% for fila in filas %}
                     <div class="fila-formulario">
                         <div class="campo-fila">
-                        <label for="fila_{{ loop.index }}">Letra</label>
-                        <input type="text" id="fila_{{ loop.index }}" name="fila"
-                            maxlength="1" pattern="[A-Z]" value="{{ fila.fila }}" required>
-            </div>
+                            <label for="fila_{{ loop.index }}">Letra</label>
+                            <input type="text" id="fila_{{ loop.index }}" name="fila"
+                                maxlength="1"  value="{{ fila.fila }}" required>
+                        </div>
 
-            <div class="campo-cantidad">
-                <label for="cantidad_{{ loop.index }}">Butacas</label>
-                <input type="number" id="cantidad_{{ loop.index }}" name="cantidad"
-                    min="1" step="1" value="{{ fila.cantidad }}" required>
+                        <div class="campo-cantidad">
+                            <label for="cantidad_{{ loop.index }}">Butacas</label>
+                            <input type="number" id="cantidad_{{ loop.index }}" name="cantidad"
+                                min="1" step="1" value="{{ fila.cantidad }}" required>
+                        </div>
+                        <button type="button" class="eliminar-fila">
+                            Eliminar
+                        </button>
+                    </div>
+                {% endfor %}
             </div>
-            <button type="button" class="eliminar-fila">
-                Eliminar
-            </button>
-        </div>
-        {% endfor %}
-    </div>
 
             <button type="button" id="agregar-fila" class="boton-agregar">
                 Agregar fila
             </button>
+            <template id="plantilla-fila">
+                <div class="fila-formulario">
+                    <div class="campo-fila">
+                        <label>Letra</label>
+                        <input type="text" name="fila" maxlength="1" required>
+                    </div>
+                    <div class="campo-cantidad">
+                        <label>Butacas</label>
+                        <input type="number" name="cantidad" min="1" step="1" required>
+                    </div>
+                    <button type="button" class="eliminar-fila">Eliminar</button>
+                </div>
+            </template>
         </div>
-
-        {% if sala %}
-        <div class="campo-formulario">
-            <label for="estado">Estado</label>
-            <select id="estado" name="estado">
-                <option value="activa"
-                    {% if sala.estado == 'activa' %}selected{% endif %}>
-                    Activa
-                </option>
-                <option value="inactiva"
-                    {% if sala.estado == 'inactiva' %}selected{% endif %}>
-                    Inactiva
-                </option>
-            </select>
-        </div>
-        {% endif %}
 
         <div class="acciones-formulario">
-            <a class="boton-agregar" href="{{ url_for('locales.admin_locales') }}">
+            <a class="boton-agregar" href="{{ url_for('locales.admin_locales', 
+            estado=filtro_estado, local=filtro_local) }}">
                 Cancelar
             </a>
             <button type="submit" class="boton-agregar">
