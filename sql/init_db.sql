@@ -299,27 +299,8 @@ INSERT INTO productos (nombre, tipo, descripcion, precio) VALUES
   ('Acceso por vehículo', 'estacionamiento', NULL, 3000),
   ('Ingreso prioritario a la sala', 'vip', NULL, 5000);
 
-INSERT INTO promociones (nombre, descripcion, vigente_desde, vigente_hasta)
+INSERT INTO promociones (nombre, descripcion, vigente_desde, vigente_hasta, tipo, cantidad_comprar, cantidad_pagar, porcentaje, monto_descuento)
 VALUES
-('2x1 los martes', 'Entradas 2x1', '2026-01-01', '2027-12-31'),
-('Combo pareja', 'Pochoclo + 2 gaseosas', '2026-01-01', '2027-12-31'),
-('Descuento en entradas', 'Promoción especial', '2026-01-01', '2027-12-31');
-
-INSERT INTO qr (
-    id_compra,
-    id_entrada,
-    id_compra_producto,
-    tipo,
-    token,
-    codigo_manual,
-    estado
-)
-VALUES (
-    1,
-    1,
-    NULL,
-    'entrada',
-    'a3f91c7e2b4d6085f1a9c3e7b2d4068f9a1c5e3b7d2f6084c9a1e5b3d7f2068c',
-    'CPQR26A8B9C2',
-    'valido'
-);
+('2x1 en entradas', 'Entradas 2x1', '2026-01-01', '2027-12-31', 'nxm', 2, 1, NULL, NULL),
+('$4000 de descuento', NULL , '2026-01-01', '2027-12-31', 'monto_fijo', NULL, NULL, NULL, 4000),
+('Descuento en entradas', 'Promoción especial', '2026-01-01', '2027-12-31', 'porcentaje', NULL, NULL, 30, NULL);
