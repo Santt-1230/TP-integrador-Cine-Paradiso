@@ -207,6 +207,17 @@ CREATE TABLE IF NOT EXISTS qr (
         )
 );
 
+CREATE TABLE opiniones (
+    id_opinion INT NOT NULL AUTO_INCREMENT,
+    id_usuario INT NOT NULL,
+    texto VARCHAR(1000) NOT NULL,
+    fecha_creacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    puntuacion TINYINT NOT NULL DEFAULT 5,
+    categoria VARCHAR(50) DEFAULT NULL,
+    PRIMARY KEY (id_opinion),
+    KEY id_usuario (id_usuario),
+    CONSTRAINT opiniones_ibfk_1 FOREIGN KEY (id_usuario) REFERENCES usuarios (id_usuario)
+);
 
 
 INSERT INTO usuarios (nombre, apellido, email, fecha_nacimiento, contrasena_hash, rol, email_verificado) VALUES (
