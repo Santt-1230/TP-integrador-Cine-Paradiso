@@ -26,37 +26,56 @@ def obtener_promocion_vigente(id_promocion):
     return promocion
 
 
-def calcular_descuento_compra(id_promocion, cantidad_entradas, precio_entrada, subtotal_compra):
-    if id_promocion is None:
-        return Decimal("0.00"), None
-
-    promocion = obtener_promocion_vigente(id_promocion)
-    if not promocion:
-        return None, "PROMOCION_NO_DISPONIBLE"
-
+def calcular_descuentos_compra(ids_promociones, cantidad_entradas, precio_entrada, subtotal_compra):
     precio = Decimal(str(precio_entrada)).quantize(CENTAVO, rounding=ROUND_HALF_UP)
     subtotal_entradas = (precio * cantidad_entradas).quantize(CENTAVO, rounding=ROUND_HALF_UP)
-    subtotal_total = Decimal(str(subtotal_compra)).quantize(CENTAVO, rounding=ROUND_HALF_UP)
-    tipo = promocion["tipo"]
+    total_restante = Decimal(str(subtotal_compra)).quantize(CENTAVO, rounding=ROUND_HALF_UP)
+    descuento_entradas = Decimal("0.00")
 
-    if tipo == "nxm":
+    promociones = []
+    for id_promocion in ids_promociones:
+        promocion = obtener_promocion_vigente(id_promocion)
+        if not promocion:
+            return None, "PROMOCION_NO_DISPONIBLE"
+        promociones.append(promocion)
+
+    if sum(promo["tipo"] == "nxm" for promo in promociones) > 1:
+        return None, "PROMOCIONES_CATEGORIA_DUPLICADA"
+    if sum(promo["tipo"] in ("porcentaje", "monto_fijo") for promo in promociones) > 1:
+        return None, "PROMOCIONES_CATEGORIA_DUPLICADA"
+
+    for promocion in promociones:
+        if promocion["tipo"] != "nxm":
+            continue
         comprar = int(promocion["cantidad_comprar"] or 0)
         pagar = int(promocion["cantidad_pagar"] or 0)
         if comprar <= 0 or pagar < 0 or pagar > comprar:
             return None, "PROMOCION_NO_DISPONIBLE"
         grupos = cantidad_entradas // comprar
         bonificadas = grupos * (comprar - pagar)
-        descuento = precio * bonificadas
-    elif tipo == "porcentaje":
-        descuento = subtotal_total * Decimal(str(promocion["porcentaje"])) / Decimal("100")
-    elif tipo == "monto_fijo":
-        descuento = Decimal(str(promocion["monto_descuento"]))
-    else:
-        return None, "PROMOCION_NO_DISPONIBLE"
+        descuento_entradas += precio * bonificadas
+    descuento_entradas = min(
+        descuento_entradas.quantize(CENTAVO, rounding=ROUND_HALF_UP), subtotal_entradas
+    )
+    total_restante = max(Decimal("0.00"), total_restante - descuento_entradas)
 
-    descuento = descuento.quantize(CENTAVO, rounding=ROUND_HALF_UP)
-    limite = subtotal_entradas if tipo == "nxm" else subtotal_total
-    return min(descuento, limite), None
+    descuento_total = descuento_entradas
+    for promocion in promociones:
+        if promocion["tipo"] == "porcentaje":
+            descuento = total_restante * Decimal(str(promocion["porcentaje"])) / Decimal("100")
+        elif promocion["tipo"] == "monto_fijo":
+            descuento = Decimal(str(promocion["monto_descuento"]))
+        elif promocion["tipo"] == "nxm":
+            continue
+        else:
+            return None, "PROMOCION_NO_DISPONIBLE"
+        descuento = min(
+            descuento.quantize(CENTAVO, rounding=ROUND_HALF_UP), total_restante
+        )
+        descuento_total += descuento
+        total_restante -= descuento
+
+    return min(descuento_total, Decimal(str(subtotal_compra)).quantize(CENTAVO, rounding=ROUND_HALF_UP)), None
 
 
 def generar_token():
@@ -153,8 +172,8 @@ def registrar_compra(id_usuario, datos):
         Decimal("0.00"),
     )
     subtotal_compra = (subtotal_entradas + subtotal_productos).quantize(CENTAVO, rounding=ROUND_HALF_UP)
-    descuento, error_promocion = calcular_descuento_compra(
-        datos.get("id_promocion"), len(datos["butacas"]), funcion["precio_entrada"], subtotal_compra
+    descuento, error_promocion = calcular_descuentos_compra(
+        datos.get("id_promociones", []), len(datos["butacas"]), funcion["precio_entrada"], subtotal_compra
     )
     if error_promocion:
         return None, error_promocion

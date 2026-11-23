@@ -74,12 +74,8 @@
 
 .promociones-checkout {
     display: grid;
-    gap: .55rem;
+    gap: 1rem;
     margin-bottom: 1.5rem;
-    padding: 1rem;
-    background: #fffafa;
-    border: 1px solid #eadada;
-    border-radius: 10px;
 }
 
 .promociones-checkout h2,
@@ -87,15 +83,51 @@
     margin: 0;
 }
 
-.promociones-checkout select {
-    width: 100%;
-    padding: .7rem;
-    border: 1px solid #c9c9c9;
-    border-radius: 6px;
-    background: #fff;
-    font: inherit;
+.promociones-grupo {
+    display: grid;
+    gap: .75rem;
+    margin: 0;
+    padding: 0;
+    border: 0;
 }
 
+.promociones-grupo legend {
+    margin-bottom: .65rem;
+    color: #292929;
+    font-weight: 700;
+}
+
+.promocion-opcion {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: #fff;
+    border: 1px solid #e3e3e3;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: border-color .15s ease, background-color .15s ease;
+}
+
+.promocion-opcion:has(input:checked) {
+    background: #fffafa;
+    border-color: #b30000;
+}
+
+.promocion-opcion input {
+    margin-top: .2rem;
+    accent-color: #b30000;
+}
+
+.promocion-opcion span {
+    display: grid;
+    gap: .2rem;
+}
+
+.promocion-opcion small {
+    color: #666;
+}
 
 
 .resumen-checkout p {

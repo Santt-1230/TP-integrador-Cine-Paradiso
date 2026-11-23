@@ -8,15 +8,34 @@ import api
 
 compras_bp = Blueprint("compras_bp", __name__)
 
+def leer_ids_promociones(fuente):
+    valores = fuente.getlist("id_promociones")
+    if not valores:
+        promocion_anterior = fuente.get("id_promocion")
+        valores = [promocion_anterior] if promocion_anterior else []
+    try:
+        ids = [int(valor) for valor in valores if valor]
+    except ValueError:
+        abort(400)
+    if any(id_promocion < 1 for id_promocion in ids) or len(set(ids)) != len(ids):
+        abort(400)
+    return ids
+
+def validar_seleccion_checkout(id_funcion, ids_butacas):
+    return (
+        id_funcion > 0
+        and 1 <= len(ids_butacas) <= 6
+        and all(id_butaca > 0 for id_butaca in ids_butacas)
+        and len(set(ids_butacas)) == len(ids_butacas)
+    )
+
 @compras_bp.route("/checkout", methods=["GET", "POST"])
 def checkout():
     if request.method == "POST":
         try:
             id_funcion = int(request.form.get("id_funcion", ""))
             ids_butacas = [int(id_butaca) for id_butaca in request.form.getlist("butacas")]
-            id_promocion = request.form.get("id_promocion") or ""
-            if id_promocion:
-                id_promocion = int(id_promocion)
+            ids_promociones = leer_ids_promociones(request.form)
         except ValueError:
             abort(400)
 
@@ -28,7 +47,7 @@ def checkout():
             "compras_bp.checkout_servicios",
             id_funcion=id_funcion,
             butacas=ids_butacas,
-            id_promocion=id_promocion,
+            id_promociones=ids_promociones,
         ))
 
     try:
@@ -38,9 +57,7 @@ def checkout():
         if vienen_separadas_por_coma:
             butacas_recibidas = butacas_recibidas[0].split(",")
         ids_butacas = [int(id_butaca) for id_butaca in butacas_recibidas if id_butaca]
-        id_promocion = request.args.get("id_promocion") or ""
-        if id_promocion:
-            id_promocion = int(id_promocion)
+        ids_promociones = leer_ids_promociones(request.args)
     except ValueError:
         abort(400)
 
@@ -48,15 +65,8 @@ def checkout():
         flash("Podés seleccionar hasta seis butacas. Volvé a elegirlas.", "warning")
         return redirect(url_for("funciones_front.pagina_butacas", id_funcion=id_funcion))
 
-    return render_checkout(id_funcion, ids_butacas, id_promocion_seleccionada=id_promocion)
+    return render_checkout(id_funcion, ids_butacas, ids_promociones_seleccionadas=ids_promociones)
 
-def validar_seleccion_checkout(id_funcion, ids_butacas):
-    return (
-        id_funcion > 0
-        and 1 <= len(ids_butacas) <= 6
-        and all(id_butaca > 0 for id_butaca in ids_butacas)
-        and len(set(ids_butacas)) == len(ids_butacas)
-    )
 
 
 @compras_bp.route("/checkout/servicios", methods=["GET", "POST"])
@@ -68,9 +78,7 @@ def checkout_servicios():
         if len(valores_butacas) == 1 and "," in valores_butacas[0]:
             valores_butacas = valores_butacas[0].split(",")
         ids_butacas = [int(valor) for valor in valores_butacas if valor]
-        id_promocion = fuente.get("id_promocion") or ""
-        if id_promocion:
-            id_promocion = int(id_promocion)
+        ids_promociones = leer_ids_promociones(fuente)
     except ValueError:
         abort(400)
 
@@ -96,7 +104,7 @@ def checkout_servicios():
                 "id_funcion": id_funcion,
                 "id_butacas": ids_butacas,
                 "productos": productos_elegidos,
-                "id_promocion": id_promocion or None,
+                "id_promociones": ids_promociones,
             },
         )
         if estado_respuesta == 201:
@@ -104,15 +112,15 @@ def checkout_servicios():
 
         cantidades = {producto["id_producto"]: producto["cantidad"] for producto in productos_elegidos}
         return render_servicios_checkout(
-            id_funcion, ids_butacas, id_promocion,
+            id_funcion, ids_butacas, ids_promociones,
             productos_seleccionados=cantidades,
             error=api.mensaje_error(cuerpo_respuesta),
         )
 
-    return render_servicios_checkout(id_funcion, ids_butacas, id_promocion)
+    return render_servicios_checkout(id_funcion, ids_butacas, ids_promociones)
 
 
-def render_checkout(id_funcion, ids_butacas, id_promocion_seleccionada="", error=None):
+def render_checkout(id_funcion, ids_butacas, ids_promociones_seleccionadas=None, error=None):
     id_funcion_invalido = id_funcion < 1
     cantidad_butacas_invalida = not 1 <= len(ids_butacas) <= 6
     hay_id_butaca_invalido = any(id_butaca < 1 for id_butaca in ids_butacas)
@@ -175,13 +183,13 @@ def render_checkout(id_funcion, ids_butacas, id_promocion_seleccionada="", error
         butacas=butacas,
         ids_butacas=ids_butacas,
         promociones=promociones,
-        id_promocion_seleccionada=id_promocion_seleccionada,
+        ids_promociones_seleccionadas=ids_promociones_seleccionadas or [],
         total=total,
         error=error,
     )
 
 
-def render_servicios_checkout(id_funcion, ids_butacas, id_promocion, productos_seleccionados=None, error=None):
+def render_servicios_checkout(id_funcion, ids_butacas, ids_promociones, productos_seleccionados=None, error=None):
     estado_funcion, datos_funcion = api.pedir("GET", f"/api/funciones/{id_funcion}")
     estado_butacas, datos_butacas = api.pedir("GET", f"/api/funciones/{id_funcion}/butacas")
     estado_servicios, datos_servicios = api.pedir("GET", "/api/servicios")
@@ -208,10 +216,10 @@ def render_servicios_checkout(id_funcion, ids_butacas, id_promocion, productos_s
 
     promociones = datos_promociones if estado_promociones == 200 and isinstance(datos_promociones, list) else []
     promociones = [promo for promo in promociones if promo.get("estado") == "Activa"]
-    promocion_seleccionada = next(
-        (promo for promo in promociones if str(promo.get("id_promocion")) == str(id_promocion)),
-        None,
-    )
+    promociones_seleccionadas = [
+        promo for promo in promociones
+        if str(promo.get("id_promocion")) in {str(id_promocion) for id_promocion in ids_promociones}
+    ]
 
     try:
         precio_entrada = Decimal(str(funcion["precio_entrada"])) if funcion else Decimal("0")
@@ -238,8 +246,8 @@ def render_servicios_checkout(id_funcion, ids_butacas, id_promocion, productos_s
         productos=servicios,
         servicios_error=servicios_error,
         promociones=promociones,
-        promocion_seleccionada=promocion_seleccionada,
-        id_promocion=id_promocion,
+        promociones_seleccionadas=promociones_seleccionadas,
+        ids_promociones=ids_promociones,
         total=total_entradas,
         error=error,
     )

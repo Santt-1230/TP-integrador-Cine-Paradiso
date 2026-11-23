@@ -73,19 +73,36 @@ def validar_datos(compra):
         productos_ids.add(producto["id_producto"])
     compra["productos"] = productos
 
-    id_promocion = compra.get("id_promocion")
-    if id_promocion not in (None, ""):
+    ids_promociones = compra.get("id_promociones")
+    if ids_promociones is None:
+        id_promocion_anterior = compra.get("id_promocion")
+        ids_promociones = [] if id_promocion_anterior in (None, "") else [id_promocion_anterior]
+    if not isinstance(ids_promociones, list):
+        return construir_error_api(
+            code="PROMOCIONES_INVALIDAS",
+            message="Promociones inválidas",
+            description="id_promociones debe ser una lista de identificadores",
+        )
+
+    promociones_ids = []
+    for id_promocion in ids_promociones:
         try:
-            validar_entero_positivo(id_promocion, const.ENTERO_POSITIVO_MINIMO, "id_promocion")
-            compra["id_promocion"] = int(id_promocion)
+            promociones_ids.append(validar_entero_positivo(
+                id_promocion, const.ENTERO_POSITIVO_MINIMO, "id_promocion"
+            ))
         except ValueError:
             return construir_error_api(
                 code="PROMOCION_INVALIDA",
                 message="Promoción inválida",
-                description="id_promocion debe ser un entero positivo",
+                description="Cada identificador de promoción debe ser un entero positivo",
             )
-    else:
-        compra["id_promocion"] = None
+    if len(set(promociones_ids)) != len(promociones_ids):
+        return construir_error_api(
+            code="PROMOCION_DUPLICADA",
+            message="Promoción duplicada",
+            description="No se puede aplicar la misma promoción más de una vez",
+        )
+    compra["id_promociones"] = promociones_ids
 
     return None
 
