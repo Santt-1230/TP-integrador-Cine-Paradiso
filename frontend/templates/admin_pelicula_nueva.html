@@ -1,0 +1,110 @@
+{% extends "base_admin.html" %}
+
+{% block titulo %}Agregar película · Administración{% endblock %}
+
+{% block estilos_extra %}
+    {{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin_peliculas.css') }}">
+{% endblock %}
+
+{% block contenido_admin %}
+<div class="servicios-admin">
+
+    <div class="servicios-admin__encabezado">
+        <div>
+            <p class="servicios-admin__migas">Administración / Películas / Agregar</p>
+            <h1>Agregar película</h1>
+            <p class="servicios-admin__descripcion">Buscá el título en TMDB e importalo. Los datos (sinopsis, póster, duración, géneros y clasificación) se cargan solos; vos definís las fechas de cartelera.</p>
+        </div>
+        <a class="servicios-admin__accion" href="{{ url_for('admin_peliculas.listado') }}">Volver al listado</a>
+    </div>
+
+    {% if error %}
+        <p class="servicios-admin__error">{{ error }}</p>
+    {% endif %}
+
+    <form class="filtros-admin" method="get" action="{{ url_for('admin_peliculas.nueva') }}">
+        <input type="search" name="q" value="{{ q }}" placeholder="Título de la película (mínimo 2 letras)" aria-label="Título en TMDB" required>
+        <button type="submit" class="boton-tabla boton-tabla--agregar">Buscar en TMDB</button>
+    </form>
+
+    {% if q and not error %}
+    <div class="servicios-admin__tarjeta">
+        <div class="tabla-contenedor">
+            <table class="tabla-admin">
+
+                <thead>
+                    <tr>
+                        <th>Película</th>
+                        <th>Sinopsis</th>
+                        <th>Importar</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for r in resultados %}
+                    <tr>
+                        <td>
+                            <div class="pelicula-admin">
+                                {% if r.poster_url %}
+                                    <img src="{{ r.poster_url }}" alt="" class="pelicula-admin__poster">
+                                {% else %}
+                                    <span class="pelicula-admin__poster pelicula-admin__poster--vacio"></span>
+                                {% endif %}
+                                <span>
+                                    {{ r.nombre }}
+                                    <small class="pelicula-admin__sub">
+                                        {% if r.nombre_original and r.nombre_original != r.nombre %}{{ r.nombre_original }} · {% endif %}{{ r.fecha_estreno[:4] if r.fecha_estreno else 's/f' }}
+                                    </small>
+                                </span>
+                            </div>
+                        </td>
+                        <td class="pelicula-admin__sinopsis">{{ (r.sinopsis|truncate(140)) if r.sinopsis else 'Sin sinopsis' }}</td>
+                        <td>
+                            {% if r.ya_importada %}
+                                <span class="estado-admin estado-admin--inactivo">Ya importada</span>
+                            {% else %}
+                            <form class="importar-admin" method="post" action="{{ url_for('admin_peliculas.importar') }}">
+                                <input type="hidden" name="id_externo" value="{{ r.id_externo }}">
+                                <input type="hidden" name="q" value="{{ q }}">
+                                <input type="hidden" name="pagina" value="{{ pagina }}">
+                                <label>En cartelera desde
+                                    <input type="date" name="cartelera_desde">
+                                </label>
+                                <label>Hasta
+                                    <input type="date" name="cartelera_hasta">
+                                </label>
+                                <label>Duración (min), solo si TMDB no la informa
+                                    <input type="number" name="duracion_min" min="1" step="1">
+                                </label>
+                                <button type="submit" class="boton-tabla boton-tabla--agregar">Importar</button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="3">TMDB no encontró resultados para «{{ q }}».</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+
+            </table>
+        </div>
+
+        <div class="servicios-admin__pie paginacion-admin">
+            <span>Página {{ pagina }} de {{ total_paginas or 1 }}</span>
+            <span>
+                {% if pagina > 1 %}
+                    <a class="servicios-admin__accion" href="{{ url_for('admin_peliculas.nueva', q=q, pagina=pagina - 1) }}">← Anterior</a>
+                {% endif %}
+                {% if pagina < total_paginas %}
+                    <a class="servicios-admin__accion" href="{{ url_for('admin_peliculas.nueva', q=q, pagina=pagina + 1) }}">Siguiente →</a>
+                {% endif %}
+            </span>
+        </div>
+    </div>
+    <p class="servicios-admin__aviso">Si dejás las fechas vacías, la película queda en cartelera sin límite de fechas. Se pueden cambiar después.</p>
+    {% endif %}
+</div>
+{% endblock %}

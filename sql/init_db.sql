@@ -176,7 +176,7 @@ CREATE TABLE IF NOT EXISTS qr (
     id_compra_producto INT NULL UNIQUE,
     tipo ENUM('entrada', 'producto') NOT NULL,
     token VARCHAR(64) NOT NULL UNIQUE,
-	token_manual VARCHAR(12) NOT NULL UNIQUE,
+	codigo_manual VARCHAR(12) NOT NULL UNIQUE,
     fecha_generacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     fecha_uso DATETIME NULL,
     estado ENUM('valido', 'utilizado', 'expirado', 'cancelado')
@@ -223,11 +223,15 @@ INSERT INTO salas (id_local, numero_sala, capacidad) VALUES
     (2, 1, 200),
 	(3, 1, 150);
 
-INSERT INTO butacas (id_sala, fila, numero) VALUES
-    (1, 'A', 1), (1, 'A', 2), (1, 'A', 3),
-    (1, 'B', 1), (1, 'B', 2), (1, 'B', 3),
-    (2, 'A', 1), (2, 'A', 2), (2, 'A', 3),
-    (2, 'B', 1), (2, 'B', 2), (2, 'B', 3);
+INSERT INTO butacas (id_sala, fila, numero)
+WITH RECURSIVE n AS (
+    SELECT 1 AS i UNION ALL SELECT i + 1 FROM n WHERE i < 300
+)
+SELECT s.id_sala,
+       CHAR(65 + FLOOR((n.i - 1) / 10)),
+       ((n.i - 1) MOD 10) + 1
+FROM salas s
+JOIN n ON n.i <= s.capacidad;
 
 
 -- Datos de ejemplo: peliculas, generos y relaciones
@@ -250,7 +254,7 @@ INSERT  IGNORE INTO `generos` (`id_genero`, `nombre`) VALUES (2,'Ciencia ficció
 INSERT  IGNORE INTO `generos` (`id_genero`, `nombre`) VALUES (13,'Comedia');
 INSERT  IGNORE INTO `generos` (`id_genero`, `nombre`) VALUES (5,'Crimen');
 INSERT  IGNORE INTO `generos` (`id_genero`, `nombre`) VALUES (7,'Drama');
-INSERT  IGNORE INTO `generos` (`id_genero`, `nombre`) VALUES (10,'Suspense');
+INSERT  IGNORE INTO `generos` (`id_genero`, `nombre`) VALUES (10,'Suspenso');
 /*!40000 ALTER TABLE `generos` ENABLE KEYS */;
 
 /*!40000 ALTER TABLE `peliculas` DISABLE KEYS */;

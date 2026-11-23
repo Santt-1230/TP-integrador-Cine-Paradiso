@@ -5,7 +5,7 @@
 <section class="inicio-admin">
 
     <!-- Bienvenida -->
-    <div class="inicio-admin__bienvenida">
+    <div class="inicio-admin__encabezado">
         <p>ADMINISTRACIÓN / INICIO</p>
 
         <h1>Buen día, {{ nombre_admin|default('ADMIN', true) }}</h1>
@@ -55,6 +55,7 @@
                     <th>Película</th>
                     <th>Estreno</th>
                     <th>Funciones</th>
+                    <th>Próxima función</th>
                     <th>Estado</th>
                 </tr>
             </thead>
@@ -62,9 +63,17 @@
             <tbody>
                 {% for pelicula in novedades %}
                 <tr>
-                    <td>{{ pelicula.nombre }}</td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            {% if pelicula.poster_url %}
+                                <img src="{{ pelicula.poster_url }}" alt="" width="38" height="56" style="object-fit: cover; border-radius: 4px;">
+                            {% endif %}
+                            <span>{{ pelicula.nombre }}</span>
+                        </div>
+                    </td>
                     <td>{{ pelicula.fecha_estreno }}</td>
                     <td>{{ pelicula.cantidad_funciones }}</td>
+                    <td>{% for linea in pelicula.proxima_funcion %}<div>{{ linea }}</div>{% else %}—{% endfor %}</td>
                     <td>{{ pelicula.estado }}</td>
                 </tr>
                 {% endfor %}
