@@ -477,6 +477,8 @@ def generar_pdf_productos(qrs):
 
     salida.seek(0)
 
+    return salida.getvalue()
+
 
 def generar_pdf_reembolso(factura, monto_reembolso=None, fecha_cancelacion=None):
     salida = BytesIO()
