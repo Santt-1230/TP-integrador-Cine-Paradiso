@@ -209,7 +209,6 @@ def obtener_ocupacion_por_funcion(id_funcion=None, periodo=30):
     """
 
     return ejecutar_consulta(consulta, tuple(parametros))
-
 def obtener_ocupacion_por_pelicula(id_pelicula=None, periodo=30):
 
     fecha_desde = obtener_fecha_inicio(periodo)
@@ -222,11 +221,28 @@ def obtener_ocupacion_por_pelicula(id_pelicula=None, periodo=30):
         parametros.append(id_pelicula)
 
     consulta = f"""
-        WITH ocupacion_funciones AS (
+        SELECT
+            pelicula.id_pelicula,
+            pelicula.nombre AS pelicula,
+
+            COUNT(*) AS cantidad_funciones,
+
+            SUM(ocupacion.capacidad_total) AS capacidad_total,
+
+            SUM(ocupacion.entradas_ocupadas) AS entradas_ocupadas,
+
+            ROUND(
+                SUM(ocupacion.entradas_ocupadas) * 100.0 /
+                NULLIF(SUM(ocupacion.capacidad_total), 0),
+                2
+            ) AS porcentaje
+
+        FROM (
 
             SELECT
                 funcion.id_funcion,
                 funcion.id_pelicula,
+
                 sala.capacidad AS capacidad_total,
 
                 COUNT(compra.id_compra) AS entradas_ocupadas
@@ -245,38 +261,19 @@ def obtener_ocupacion_por_pelicula(id_pelicula=None, periodo=30):
                 AND compra.estado = 'confirmada'
 
             WHERE funcion.estado = 'finalizada'
-            AND funcion.fecha_hora_inicio BETWEEN %s AND NOW()
+            AND funcion.fecha_hora_inicio >= %s
+            AND funcion.fecha_hora_inicio <= NOW()
             {filtro}
 
             GROUP BY
                 funcion.id_funcion,
                 funcion.id_pelicula,
                 sala.capacidad
-        )
 
-        SELECT
-            pelicula.id_pelicula,
-            pelicula.nombre AS pelicula,
-
-            COUNT(*) AS cantidad_funciones,
-
-            SUM(ocupacion_funciones.capacidad_total) AS capacidad_total,
-
-            SUM(ocupacion_funciones.entradas_ocupadas) AS entradas_ocupadas,
-
-            COALESCE(
-                ROUND(
-                    SUM(ocupacion_funciones.entradas_ocupadas) * 100.0 /
-                    NULLIF(SUM(ocupacion_funciones.capacidad_total), 0),
-                    2
-                ),
-                0
-            ) AS porcentaje
-
-        FROM ocupacion_funciones
+        ) AS ocupacion
 
         INNER JOIN peliculas AS pelicula
-            ON ocupacion_funciones.id_pelicula = pelicula.id_pelicula
+            ON ocupacion.id_pelicula = pelicula.id_pelicula
 
         GROUP BY
             pelicula.id_pelicula,
