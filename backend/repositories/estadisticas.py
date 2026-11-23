@@ -1,28 +1,8 @@
 from db import ejecutar_consulta, ejecutar_mutacion
-from datetime import datetime, timedelta
-
-
-
-def obtener_fecha_inicio(periodo=30):
-
-    if periodo is None:
-        periodo = 30
-
-    periodos_validos = (7, 30, 90, 365)
-
-    try:
-        dias = int(periodo)
-    except (TypeError, ValueError):
-        raise ValueError("El período debe ser 7, 30, 90 o 365 días")
-
-    if dias not in periodos_validos:
-        raise ValueError("El período seleccionado no es válido")
-
-    return datetime.now() - timedelta(days=dias)
-
+from services.estadisticas import obtener_fecha_inicio
 
 def obtener_ventas_totales(periodo=30):
-
+    
     fecha_desde = obtener_fecha_inicio(periodo)
 
     consulta = """
