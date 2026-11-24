@@ -145,18 +145,11 @@ def obtener_entradas_vendidas_por_franja(periodo=30):
 
     return ejecutar_consulta(consulta, (fecha_desde,))
 
-def obtener_ocupacion_por_funcion(id_funcion=None, periodo=30):
+def obtener_ocupacion_por_funcion(periodo=30):
 
     fecha_desde = obtener_fecha_inicio(periodo)
 
-    filtro = ""
-    parametros = [fecha_desde]
-
-    if id_funcion is not None:
-        filtro = "AND funcion.id_funcion = %s"
-        parametros.append(id_funcion)
-
-    consulta = f"""
+    consulta = """
         SELECT
             funcion.id_funcion,
             pelicula.nombre AS pelicula,
@@ -197,7 +190,6 @@ def obtener_ocupacion_por_funcion(id_funcion=None, periodo=30):
 
         WHERE funcion.estado = 'finalizada'
         AND funcion.fecha_hora_inicio BETWEEN %s AND NOW()
-        {filtro}
 
         GROUP BY
             funcion.id_funcion,
@@ -209,20 +201,13 @@ def obtener_ocupacion_por_funcion(id_funcion=None, periodo=30):
         ORDER BY funcion.fecha_hora_inicio DESC
     """
 
-    return ejecutar_consulta(consulta, tuple(parametros))
+    return ejecutar_consulta(consulta, (fecha_desde,))
 
-def obtener_ocupacion_por_pelicula(id_pelicula=None, periodo=30):
+def obtener_ocupacion_por_pelicula(periodo=30):
 
     fecha_desde = obtener_fecha_inicio(periodo)
 
-    filtro = ""
-    parametros = [fecha_desde]
-
-    if id_pelicula is not None:
-        filtro = "AND funcion.id_pelicula = %s"
-        parametros.append(id_pelicula)
-
-    consulta = f"""
+    consulta = """
         SELECT
             pelicula.id_pelicula,
             pelicula.nombre AS pelicula,
@@ -233,10 +218,13 @@ def obtener_ocupacion_por_pelicula(id_pelicula=None, periodo=30):
 
             SUM(ocupacion.entradas_ocupadas) AS entradas_ocupadas,
 
-            ROUND(
-                SUM(ocupacion.entradas_ocupadas) * 100.0 /
-                NULLIF(SUM(ocupacion.capacidad_total), 0),
-                2
+            COALESCE(
+                ROUND(
+                    SUM(ocupacion.entradas_ocupadas) * 100.0 /
+                    NULLIF(SUM(ocupacion.capacidad_total), 0),
+                    2
+                ),
+                0
             ) AS porcentaje
 
         FROM (
@@ -265,7 +253,6 @@ def obtener_ocupacion_por_pelicula(id_pelicula=None, periodo=30):
             WHERE funcion.estado = 'finalizada'
             AND funcion.fecha_hora_inicio >= %s
             AND funcion.fecha_hora_inicio <= NOW()
-            {filtro}
 
             GROUP BY
                 funcion.id_funcion,
@@ -284,4 +271,4 @@ def obtener_ocupacion_por_pelicula(id_pelicula=None, periodo=30):
         ORDER BY porcentaje DESC
     """
 
-    return ejecutar_consulta(consulta, tuple(parametros))
+    return ejecutar_consulta(consulta, (fecha_desde,))
