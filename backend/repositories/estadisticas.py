@@ -144,6 +144,7 @@ def obtener_entradas_vendidas_por_franja(periodo=30):
     """
 
     return ejecutar_consulta(consulta, (fecha_desde,))
+
 def obtener_ocupacion_por_funcion(id_funcion=None, periodo=30):
 
     fecha_desde = obtener_fecha_inicio(periodo)
@@ -209,6 +210,7 @@ def obtener_ocupacion_por_funcion(id_funcion=None, periodo=30):
     """
 
     return ejecutar_consulta(consulta, tuple(parametros))
+
 def obtener_ocupacion_por_pelicula(id_pelicula=None, periodo=30):
 
     fecha_desde = obtener_fecha_inicio(periodo)
