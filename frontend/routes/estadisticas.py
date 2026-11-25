@@ -2,11 +2,7 @@ from flask import Blueprint, render_template, request
 import api
 
 
-estadisticas_bp = Blueprint(
-    "estadisticas",
-    __name__,
-    url_prefix="/admin"
-)
+estadisticas_bp = Blueprint("estadisticas",__name__,url_prefix="/admin")
 
 
 @estadisticas_bp.route("/estadisticas")
