@@ -13,16 +13,13 @@ BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:5000")
 
 
 def _error(estado, mensaje):
-    """Arma un error con el mismo formato que usa el backend."""
     return estado, {"errors": [{"message": mensaje}]}
 
 
 def mensaje_error(datos):
-    """Devuelve un texto legible a partir del cuerpo de error del backend, venga como venga."""
     if not isinstance(datos, dict):
         return "Ocurrió un error."
 
-    # El backend manda los errores como una lista: {"errors": [{...}]}
     errores = datos.get("errors")
     if isinstance(errores, list) and errores and isinstance(errores[0], dict):
         error = errores[0]
@@ -42,18 +39,12 @@ def mensaje_error(datos):
 
 
 def cookies_backend():
-    """Cookie de sesión del backend, guardada en la sesión del frontend al hacer login."""
     if "cookie_backend" in session:
         return {"session": session["cookie_backend"]}
     return {}
 
 
 def pedir(metodo, ruta, datos=None, params=None):
-    """Hace la llamada al backend y devuelve (estado, cuerpo).
-
-    Reenvía la cookie de sesión y guarda la nueva si el backend manda una (login).
-    Si no hay conexión o la respuesta no es JSON, devuelve (503/502, error).
-    """
     try:
         r = requests.request(
             metodo, f"{BACKEND_URL}{ruta}",
@@ -75,12 +66,10 @@ def pedir(metodo, ruta, datos=None, params=None):
 
 
 def get(ruta, params=None):
-    """GET al backend. Devuelve (estado, cuerpo)."""
     return pedir("GET", ruta, params=params)
 
 
 def get_lista(ruta, clave, params=None):
-    """Devuelve la lista que viene en el campo `clave`. Si falla o no hay nada, devuelve []."""
     estado, datos = get(ruta, params)
     if estado != 200:
         return []
@@ -90,10 +79,6 @@ def get_lista(ruta, clave, params=None):
 
 
 def pedir_api(metodo, ruta, **opciones):
-    """Llamada simple al backend: acepta cualquier opción de requests (json, params, cookies...).
-
-    Devuelve (estado, datos). No reenvía la sesión por sí sola.
-    """
     try:
         respuesta = requests.request(metodo, BACKEND_URL + ruta, timeout=5, **opciones)
         datos = respuesta.json()

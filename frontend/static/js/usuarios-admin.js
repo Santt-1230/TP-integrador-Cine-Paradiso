@@ -13,10 +13,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const guardarUsuario = document.getElementById("guardar-usuario");
 
 
-    // ==========================================
-    // ABRIR MODAL
-    // ==========================================
-
     if (modal && modal.dataset.reabrir === "true") {
 
         modal.showModal();
@@ -29,10 +25,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     }
 
-
-    // ==========================================
-    // CERRAR MODAL
-    // ==========================================
 
     function cerrar() {
 
@@ -50,9 +42,6 @@ document.addEventListener("DOMContentLoaded", function () {
         cancelarEdicion.addEventListener("click", cerrar);
     }
 
-
-    // Cerrar al hacer clic fuera del formulario
-
     if (modal) {
 
         modal.addEventListener("click", function (evento) {
@@ -65,10 +54,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     }
 
-
-    // ==========================================
-    // VALIDAR FORMULARIO
-    // ==========================================
 
     if (formulario) {
 
@@ -136,10 +121,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     }
 
-
-    // ==========================================
-    // MOSTRAR ERRORES
-    // ==========================================
 
     function mostrarError(mensaje) {
 

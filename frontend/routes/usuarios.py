@@ -23,11 +23,6 @@ CLAVES_USUARIO = (
     "cookie_backend"
 )
 
-
-# ====================================
-# MANEJO DE SESIÓN
-# ====================================
-
 def guardar_sesion(usuario):
 
     session["id_usuario"] = usuario["id_usuario"]
@@ -50,10 +45,6 @@ def manejar_sesion_expirada(estado):
 
     return None
 
-
-# ====================================
-# MI CUENTA
-# ====================================
 
 def render_cuenta(usuario=None, error=None, mensaje=None):
 
@@ -112,10 +103,6 @@ def actualizar_perfil(datos, mensaje_ok):
     )
 
 
-# ====================================
-# LOGIN
-# ====================================
-
 @usuarios_bp.route("/login", methods=["GET", "POST"])
 def login():
 
@@ -137,7 +124,6 @@ def login():
 
         mensaje = api.mensaje_error(respuesta)
 
-        # Email sin confirmar
         if estado == 403:
 
             return render_template(
@@ -155,7 +141,6 @@ def login():
 
     guardar_sesion(usuario)
 
-    # Redireccionar según el rol
     if usuario["rol"] == "administrador":
 
         return redirect(
@@ -165,11 +150,6 @@ def login():
     return redirect(
         url_for("peliculas_front.inicio")
     )
-
-
-# ====================================
-# REGISTRO
-# ====================================
 
 @usuarios_bp.route("/registro", methods=["GET", "POST"])
 def registro():
@@ -209,7 +189,6 @@ def registro():
 
         mensaje = api.mensaje_error(respuesta)
 
-        # La cuenta se creó, pero falló el envío del correo
         if estado == 502:
 
             return render_template(
@@ -229,10 +208,6 @@ def registro():
         email=datos["email"]
     )
 
-
-# ====================================
-# VERIFICAR EMAIL
-# ====================================
 
 @usuarios_bp.route("/verificar-email")
 def verificar_email():
@@ -256,11 +231,6 @@ def verificar_email():
         "verificar_email.html",
         ok=True
     )
-
-
-# ====================================
-# REENVIAR VERIFICACIÓN
-# ====================================
 
 @usuarios_bp.route("/reenviar-verificacion", methods=["POST"])
 def reenviar_verificacion():
@@ -287,38 +257,71 @@ def reenviar_verificacion():
         mensaje="Si el email está pendiente de confirmación, te enviamos un nuevo mail."
     )
 
-
-# ====================================
-# DATOS DE MI CUENTA
-# ====================================
-
-
 @usuarios_bp.route("/olvide-contrasena", methods=["GET", "POST"])
 def olvide_contrasena():
+
     if request.method == "GET":
         return render_template("olvide_contrasena.html")
 
     email = request.form.get("email", "")
-    try:
-        api.pedir("POST", "/api/auth/olvide-contrasena", {"email": email})
-    except api.ApiError as e:
-        return render_template("olvide_contrasena.html", error=e.mensaje)
-    return render_template("olvide_contrasena.html", mensaje="Si el email tiene una cuenta, te enviamos un mail para cambiar la contraseña.")
 
+    estado, respuesta = api.pedir(
+        "POST",
+        "/api/auth/olvide-contrasena",
+        datos={"email": email}
+    )
+
+    if estado < 200 or estado >= 300:
+
+        return render_template(
+            "olvide_contrasena.html",
+            error=api.mensaje_error(respuesta)
+        )
+
+    return render_template(
+        "olvide_contrasena.html",
+        mensaje="Si el email tiene una cuenta, te enviamos un mail para cambiar la contraseña."
+    )
 
 @usuarios_bp.route("/restablecer-contrasena", methods=["GET", "POST"])
 def restablecer_contrasena():
+
     if request.method == "GET":
-        return render_template("restablecer_contrasena.html", token=request.args.get("token", ""))
 
-    campos = ("token", "contrasena_nueva", "repetir_contrasena")
-    datos = {campo: request.form.get(campo, "") for campo in campos}
-    try:
-        api.pedir("POST", "/api/auth/restablecer-contrasena", datos)
-    except api.ApiError as e:
-        return render_template("restablecer_contrasena.html", token=datos["token"], error=e.mensaje)
-    return render_template("restablecer_contrasena.html", ok=True)
+        return render_template(
+            "restablecer_contrasena.html",
+            token=request.args.get("token", "")
+        )
 
+    campos = (
+        "token",
+        "contrasena_nueva",
+        "repetir_contrasena"
+    )
+
+    datos = {
+        campo: request.form.get(campo, "")
+        for campo in campos
+    }
+
+    estado, respuesta = api.pedir(
+        "POST",
+        "/api/auth/restablecer-contrasena",
+        datos=datos
+    )
+
+    if estado < 200 or estado >= 300:
+
+        return render_template(
+            "restablecer_contrasena.html",
+            token=datos["token"],
+            error=api.mensaje_error(respuesta)
+        )
+
+    return render_template(
+        "restablecer_contrasena.html",
+        ok=True
+    )
 
 @usuarios_bp.route("/mi-cuenta", methods=["GET", "POST"])
 def mi_cuenta():
@@ -343,10 +346,6 @@ def mi_cuenta():
     )
 
 
-# ====================================
-# CAMBIAR CORREO
-# ====================================
-
 @usuarios_bp.route("/mi-cuenta/correo", methods=["POST"])
 def cambiar_correo():
 
@@ -365,10 +364,6 @@ def cambiar_correo():
         "Correo actualizado correctamente"
     )
 
-
-# ====================================
-# CAMBIAR CONTRASEÑA
-# ====================================
 
 @usuarios_bp.route("/mi-cuenta/password", methods=["POST"])
 def cambiar_contrasena():
@@ -412,15 +407,8 @@ def cambiar_contrasena():
     )
 
 
-# ====================================
-# LOGOUT
-# ====================================
-
 @usuarios_bp.route("/logout", methods=["POST"])
 def logout():
-
-    # Intentamos cerrar la sesión también en el backend.
-    # Aunque falle, cerramos igualmente la sesión del frontend.
 
     api.pedir(
         "POST",
