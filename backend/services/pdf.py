@@ -27,7 +27,6 @@ def generar_pdf_factura(factura):
     datos = factura["factura"]
     contenido.append(Paragraph(
         f"<b>Número:</b> {escape(str(datos.get('numero') or ''))}"
-        f" &nbsp;&nbsp; <b>Compra:</b> {escape(str(datos.get('id_compra') or ''))}"
         f" &nbsp;&nbsp; <b>Emisión:</b> {escape(str(datos.get('fecha_emision') or ''))}"
         f" &nbsp;&nbsp; <b>Estado:</b> {escape(str(datos.get('estado') or ''))}",
         estilos["BodyText"],
@@ -38,8 +37,7 @@ def generar_pdf_factura(factura):
         Paragraph("Cliente", estilos["Heading2"]),
         Paragraph(
             f"{escape(str(cliente.get('nombre') or ''))} — "
-            f"{escape(str(cliente.get('email') or ''))} "
-            f"(ID {escape(str(cliente.get('id_usuario') or ''))})",
+            f"{escape(str(cliente.get('email') or ''))}",
             estilos["BodyText"],
         ),
         Spacer(1, 4 * mm),
