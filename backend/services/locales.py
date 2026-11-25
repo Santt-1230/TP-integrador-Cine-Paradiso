@@ -9,24 +9,24 @@ def listar_locales():
     return locales_repository.listar_locales_activos()
 
 def obtener_local(id_local):
+    id_local = locales_validators.validar_id_local(id_local)
     local = locales_repository.obtener_local_id(id_local)
+    
     if local is None:
         raise ValueError(construir_error_api(
             code=ERROR_CODE_LOCAL_NOT_FOUND,
             message='Local no encontrado',
             description=f"No existe un local con el ID '{id_local}'."
         ))
+    if not local['activo']:
+            raise ValueError(construir_error_api(
+                code=ERROR_CODE_LOCAL_INACTIVE,
+                message='Local inactivo',
+                description=f"El local '{id_local}' esta inactivo"
+            ))
+    
     return local
 
-def obtener_local_activo(id_local):
-    local = obtener_local(id_local)
-    if not local['activo']:
-        raise ValueError(construir_error_api(
-            code=ERROR_CODE_LOCAL_INACTIVE,
-            message='Local inactivo',
-            description=f"El local '{id_local}' esta inactivo"
-        ))
-    return local
 
 def resumen_salas(id_local, estado):
     id_local = locales_validators.validar_filtro_local(id_local)
