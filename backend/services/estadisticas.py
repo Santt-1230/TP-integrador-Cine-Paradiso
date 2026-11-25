@@ -2,9 +2,6 @@ from datetime import datetime, timedelta
 from repositories import estadisticas as estadisticas_repositories
 from validators.estadisticas import validar_periodo_estadisticas
 
-
-
-
 def obtener_fecha_inicio(periodo=30):
 
     if periodo is None:
