@@ -16,32 +16,25 @@ def obtener_dashboard_estadisticas(periodo=30):
 
     periodo = validar_periodo_estadisticas(periodo)
 
-    # Obtener ocupación por función
     ocupacion_por_funcion = (
         estadisticas_repositories.obtener_ocupacion_por_funcion(
-            periodo=periodo
-        )
+            periodo=periodo)
     )
 
-    # Calcular capacidad total
     capacidad_total = sum(
         int(funcion["capacidad_total"] or 0)
-        for funcion in ocupacion_por_funcion
-    )
-
-    # Calcular entradas ocupadas
+        for funcion in ocupacion_por_funcion)
+    
     entradas_ocupadas = sum(
         int(funcion["entradas_ocupadas"] or 0)
         for funcion in ocupacion_por_funcion
     )
 
-    # Calcular ocupación promedio
     ocupacion_promedio = (
         round(entradas_ocupadas * 100 / capacidad_total, 2)
         if capacidad_total > 0 else 0
     )
 
-    # Reunir todas las estadísticas
     estadisticas = {
 
         "periodo": periodo,

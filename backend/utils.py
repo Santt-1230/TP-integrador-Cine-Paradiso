@@ -51,10 +51,7 @@ def validar_entero_positivo(valor, minimo, nombre):
             description=f"'{nombre}' debe ser mayor o igual a '{minimo}', se recibio {valor}"
         ))
     return numero
-"""
-Esta funcion sirve para proteger rutas de la API, verifica si hay un id_usuario en la sesion activa
-si esta logueado permite acceder: En caso de no estarlo, anula la peticion y devuelve error 401 (No autenticado)
-"""
+
 def login_requerido(funcion):
     @wraps(funcion)
     def verificar_sesion(*args, **kwargs):
@@ -64,11 +61,6 @@ def login_requerido(funcion):
         return funcion(*args, **kwargs)
     return verificar_sesion
 
-"""
-Verifica si el rol del usuario es admin
-si esta logueado y es admin permite acceder: En caso de no estarlo, 
-anula la peticion y devuelve error 403 (No autorizado)
-"""
 
 
 def admin_requerido(funcion):

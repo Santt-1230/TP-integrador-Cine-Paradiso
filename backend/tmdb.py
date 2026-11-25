@@ -47,8 +47,6 @@ def buscar(texto, pagina=1):
 def detalle(id_tmdb):
     return _get(f"/movie/{id_tmdb}", append_to_response="release_dates")
 
-
-# Generos de TMDB (por su id, que no cambia) con el nombre en español que usa el sitio.
 GENEROS_ES = {
     28: "Acción", 12: "Aventura", 16: "Animación", 35: "Comedia", 80: "Crimen",
     99: "Documental", 18: "Drama", 10751: "Familia", 14: "Fantasía", 36: "Historia",
@@ -59,7 +57,6 @@ GENEROS_ES = {
 
 
 def nombre_genero(genero):
-    """Nombre en español de un genero de TMDB ({"id":..., "name":...}). Si no esta en la tabla, usa el de TMDB."""
     return GENEROS_ES.get(genero.get("id")) or (genero.get("name") or "").strip()
 
 

@@ -61,7 +61,7 @@ def validar_registro(datos):
     apellido = texto(datos, "apellido").strip()
     email = texto(datos, "email").strip()
     fecha_nacimiento = texto(datos,"fecha_nacimiento").strip()
-    contrasena = texto(datos, "contrasena") #si la contraseña viene vacia, entonces --> datos, "" y luego len("") = 0
+    contrasena = texto(datos, "contrasena") 
     repetir_contrasena = texto(datos,"repetir_contrasena")
     
     return (validar_nombre(nombre) or validar_apellido(apellido) or validar_email(email) 
@@ -82,16 +82,16 @@ CAMPOS_EDITABLES = {"nombre": validar_nombre, "apellido": validar_apellido, "ema
 
 def validar_editar_perfil(datos):
     if not isinstance(datos, dict): 
-        return error_validacion("Faltan los datos a modificar") #Si no se envia nada
+        return error_validacion("Faltan los datos a modificar") 
 
-    campos_enviados = [campo for campo in CAMPOS_EDITABLES if campo in datos] #Revisa los campos y los guarda en una lista
+    campos_enviados = [campo for campo in CAMPOS_EDITABLES if campo in datos] 
     if not campos_enviados:
-        return error_validacion("Debe enviar almenos uno de los campos solicitados") #Si la lista esta vacia
+        return error_validacion("Debe enviar almenos uno de los campos solicitados") 
 
     for campo in campos_enviados:
-        error = CAMPOS_EDITABLES[campo](texto(datos,campo).strip()) #Por cada campo, se valida que cumpla sus validaciones
+        error = CAMPOS_EDITABLES[campo](texto(datos,campo).strip()) 
         if error:
-            return error #En caso de no hacerlo salta su respectivo error
+            return error 
 
     return None
 

@@ -129,10 +129,6 @@ def admin():
     ocupacion_promedio = None
     cantidad_funciones_programadas = None
 
-    # --------------------------------
-    # PELICULAS ACTIVAS
-    # --------------------------------
-
     estado, respuesta = pedir("GET","/api/admin/peliculas/activa")
 
     redireccion = verificar_estado(estado)
@@ -150,10 +146,7 @@ def admin():
             mensaje_error(respuesta)
         )
 
-    # --------------------------------
-    # OCUPACION PROMEDIO
-    # --------------------------------
-
+  
     estado, ocupacion_por_funcion = pedir("GET","/api/estadisticas/ocupacion",params={"periodo": "30"})
 
     redireccion = verificar_estado(estado)
@@ -184,10 +177,7 @@ def admin():
             mensaje_error(ocupacion_por_funcion)
         )
 
-    # --------------------------------
-    # FUNCIONES PROGRAMADAS
-    # --------------------------------
-
+   
     estado, respuesta_funciones = pedir(
         "GET",
         "/api/admin/funciones/programadas"
@@ -219,10 +209,6 @@ def admin():
     )
 
 
-# ====================================
-# ADMINISTRACIÓN DE USUARIOS
-# ====================================
-
 @admin_bp.route("/usuarios", methods=["GET"])
 @admin_front_requerido
 def admin_usuarios():
@@ -232,10 +218,6 @@ def admin_usuarios():
 
     usuario_editar = None
     error = None
-
-    # --------------------------------
-    # OBTENER USUARIOS
-    # --------------------------------
 
     estado, usuarios = pedir(
         "GET",
@@ -257,10 +239,6 @@ def admin_usuarios():
         error = "El servidor devolvió un formato de usuarios inválido."
         usuarios = []
 
-    # --------------------------------
-    # FILTRAR USUARIOS
-    # --------------------------------
-
     if buscar:
 
         termino = buscar.casefold()
@@ -271,10 +249,6 @@ def admin_usuarios():
             or termino in (usuario.get("email") or "").casefold()
             or termino in (usuario.get("rol") or "").casefold()
         ]
-
-    # --------------------------------
-    # OBTENER USUARIO PARA EDITAR
-    # --------------------------------
 
     if editar_id is not None:
 
@@ -309,10 +283,6 @@ def admin_usuarios():
         error=error
     )
 
-
-# ====================================
-# ACTUALIZAR USUARIO
-# ====================================
 
 @admin_bp.route("/usuarios/<int:id>/editar", methods=["POST"])
 @admin_front_requerido

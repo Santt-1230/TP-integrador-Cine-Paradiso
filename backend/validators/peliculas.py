@@ -8,7 +8,6 @@ ESTADOS = ("vigente", "proxima", "vencida", "inactiva")
 
 
 def parametro_invalido(descripcion):
-    """Error en el formato del grupo: (code, message, description)."""
     return (const.ERROR_CODE_INVALID_PARAMETER, "Parametro invalido", descripcion)
 
 
@@ -17,7 +16,6 @@ def a_fecha(valor):
 
 
 def _limpiar_campos(datos, permitidos):
-    """Valida solo los campos recibidos. Devuelve (campos_limpios, error)."""
     desconocidos = set(datos) - permitidos
     if desconocidos:
         return None, parametro_invalido(f"Campos no permitidos: {', '.join(sorted(desconocidos))}")
@@ -58,7 +56,6 @@ def _limpiar_campos(datos, permitidos):
 
 
 def validar_edicion(datos):
-    """PATCH. Devuelve (campos_limpios, generos_o_None, error)."""
     if not isinstance(datos, dict) or not datos:
         return None, None, parametro_invalido("Se esperaba un JSON con los campos a modificar")
     limpio, error = _limpiar_campos(datos, CAMPOS_EDITABLES | {"generos"})
@@ -71,7 +68,6 @@ def validar_edicion(datos):
 
 
 def validar_importacion(datos):
-    """POST. Devuelve (id_externo, opcionales, error)."""
     if not isinstance(datos, dict):
         return None, None, parametro_invalido("Se esperaba un JSON con el campo 'id_externo'")
     id_externo = datos.get("id_externo")
@@ -91,7 +87,6 @@ def validar_importacion(datos):
 
 
 def validar_limite(valor):
-    """?limite= de GET /api/peliculas. Devuelve (entero entre 1 y 50, error)."""
     try:
         limite = int(valor)
     except (TypeError, ValueError):
@@ -106,7 +101,6 @@ def validar_estado(estado):
 
 
 def validar_busqueda_externa(texto, pagina):
-    """Devuelve (texto_limpio, pagina, error)."""
     texto = (texto or "").strip()
     if len(texto) < 2:
         return None, None, parametro_invalido("El parametro 'q' debe tener al menos 2 caracteres")

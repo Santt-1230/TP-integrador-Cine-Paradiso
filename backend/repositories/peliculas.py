@@ -1,7 +1,6 @@
 """Consultas SQL de peliculas, generos y pelicula_genero. No tiene reglas de negocio."""
 from db import ejecutar_consulta, ejecutar_mutacion, transaccion
 
-# "Vigente" = activa y dentro del periodo de cartelera. Las fechas son opcionales: NULL = sin limite.
 VIGENTE = """
     p.activo = 1
     AND (p.cartelera_desde IS NULL OR p.cartelera_desde <= CURDATE())

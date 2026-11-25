@@ -17,8 +17,7 @@ def validar_datos(compra):
             message="El body recibido es invalido",
             description="Al body recibido le falta id_funcion"
         )
-    # id_butacas es el nombre del contrato HTTP; butacas queda como alias
-    # para clientes anteriores y como clave interna para services/repositories.
+
     butacas = compra.get("id_butacas", compra.get("butacas"))
 
     if not isinstance(butacas, list) or len(butacas) == 0:

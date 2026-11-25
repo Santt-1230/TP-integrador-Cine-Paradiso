@@ -46,7 +46,7 @@ def crear_servicio_route():
         error = construir_error_api('servicio.invalid_data', 'Datos invalidos', mensaje)
         return jsonify(error), 400
     servicio = crear_servicio(datos)
-    return jsonify(datos), 201
+    return jsonify(servicio), 201
 
 
 @servicios_bp.route('/servicios/<id_producto>', methods=['PATCH'])

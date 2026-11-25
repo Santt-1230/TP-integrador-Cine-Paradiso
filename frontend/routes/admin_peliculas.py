@@ -6,7 +6,6 @@ import api
 
 admin_peliculas_bp = Blueprint("admin_peliculas", __name__)
 
-# Estado de cartelera que calcula el backend -> texto para mostrar.
 ESTADOS = {
     "vigente": "Vigente",
     "proxima": "Próxima",
@@ -18,7 +17,6 @@ ESTADOS = {
 @admin_peliculas_bp.get("/admin/peliculas")
 @api.admin_front_requerido
 def listado():
-    """Todas las películas del catálogo. Filtros opcionales: ?estado= y ?q=."""
     estado = request.args.get("estado", "").strip()
     texto = request.args.get("q", "").strip()
     filtros = {clave: valor for clave, valor in (("estado", estado), ("q", texto)) if valor}
@@ -44,7 +42,6 @@ def listado():
 @admin_peliculas_bp.get("/admin/peliculas/nueva")
 @api.admin_front_requerido
 def nueva():
-    """Busca títulos en TMDB (?q=, ?pagina=) y muestra los resultados para importar."""
     texto = request.args.get("q", "").strip()
     try:
         pagina = max(1, int(request.args.get("pagina", 1)))
@@ -74,7 +71,6 @@ def nueva():
 @admin_peliculas_bp.post("/admin/peliculas/importar")
 @api.admin_front_requerido
 def importar():
-    """Importa la película elegida. Las fechas de cartelera y la duración son opcionales."""
     texto = request.form.get("q", "")
     pagina = request.form.get("pagina", 1)
     volver = redirect(url_for("admin_peliculas.nueva", q=texto, pagina=pagina))
@@ -125,7 +121,7 @@ def _cambios_de_estado(estado, desde_txt, hasta_txt):
     if estado == "vigente":
         if hasta and hasta < hoy:
             return None, "Con ese fin la película ya estaría vencida. Dejá 'Hasta' vacío o poné una fecha futura."
-        # si el inicio todavía no llegó, queda sin fecha de inicio
+        
         return {
             "activo": True,
             "cartelera_desde": desde_txt if desde and desde <= hoy else None,

@@ -25,7 +25,7 @@ def generar_numero_factura(id_compra):
 def registrar_compra(id_usuario, datos, productos, descuento=Decimal("0.00")):
     with transaccion() as cursor:
 
-        # Obtener el precio de las entradas
+  
         cursor.execute(
             "SELECT precio_entrada FROM funciones WHERE id_funcion = %s",
             (datos["id_funcion"],),
@@ -79,10 +79,8 @@ def registrar_compra(id_usuario, datos, productos, descuento=Decimal("0.00")):
             if cursor.rowcount != 1:
                 raise RuntimeError("No se pudo agregar un producto a la compra")
 
-            # Obtener el identificador del producto comprado
             id_compra_producto = cursor.lastrowid
 
-            # Registrar el QR del producto
             qr_registrado = False
 
             for token, codigo in item["qrs"]:
@@ -99,7 +97,6 @@ def registrar_compra(id_usuario, datos, productos, descuento=Decimal("0.00")):
             if not qr_registrado:
                 raise RuntimeError("No se pudo generar el QR del producto")
 
-            # Actualizar el total
             cursor.execute(
                 "UPDATE compras SET total = total + %s WHERE id_compra = %s",
                 (subtotal_producto, id_compra),
@@ -178,9 +175,6 @@ def butacas_disponibles(id_funcion, id_butacas):
         return "ocupadas"
 
     return "disponibles"
-
-
-
 
 
 

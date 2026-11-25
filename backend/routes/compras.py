@@ -1,9 +1,9 @@
 from flask import Blueprint, jsonify, session, request, send_file
 from io import BytesIO
-from utils import construir_error_api, validar_entero_positivo,login_requerido
+from utils import construir_error_api,login_requerido
 from services import compras as compras_services
 from services import pdf as pdf_services
-from validators import compras as compras_validators
+
 from services import mailer
 
 compras_bp = Blueprint('compras', __name__, url_prefix='/api')
@@ -86,13 +86,10 @@ def registrar_compras():
     email_cliente = factura["cliente"]["email"]
     numero = factura["factura"].get("numero") or f"compra-{id_compra}"
 
-    # Obtener QR de entradas
     qrs, error_qr = compras_services.obtener_qr(id_compra, session["id_usuario"])
 
-    # Obtener QR de productos
     qrs_productos, error_qr_productos = compras_services.obtener_qr_productos(id_compra, session["id_usuario"])
 
-    # Preparar los archivos adjuntos
     adjuntos = [{
         "contenido": pdf,
         "nombre": f"factura-{numero}.pdf",
@@ -100,7 +97,6 @@ def registrar_compras():
         "subtipo": "pdf",
     }]
 
-    # Adjuntar PDF de entradas
     if not error_qr:
         adjuntos.append({
             "contenido": pdf_services.generar_pdf_entradas(factura, qrs),
@@ -109,7 +105,6 @@ def registrar_compras():
             "subtipo": "pdf",
         })
 
-    # Adjuntar PDF de productos
     if not error_qr_productos and qrs_productos:
         
         adjuntos.append({

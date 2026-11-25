@@ -5,14 +5,11 @@ def validar_token(token: str) -> bool:
 
     token = token.strip()
 
-    # QR hexadecimal de 64 caracteres
     if len(token) == 64:
         return all(
             caracter in "0123456789abcdef"
             for caracter in token
         )
-
-    # QR manual de 12 caracteres
     if len(token) == 12:
         return all(
             caracter in "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"

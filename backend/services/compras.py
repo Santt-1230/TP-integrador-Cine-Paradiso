@@ -86,16 +86,8 @@ def generar_codigo_manual():
 
 
 
-
-
-
-
-
-
-
 def registrar_compra(id_usuario, datos):
 
-    # Validar los datos recibidos
     error = compras_validators.validar_datos(datos)
 
     if error is not None:
@@ -109,7 +101,6 @@ def registrar_compra(id_usuario, datos):
     if funcion["estado"] != "programada":
         return None, "FUNCION_NO_DISPONIBLE"
 
-    # Comprobar disponibilidad de butacas
     estado_butacas = compras_repositories.butacas_disponibles(
         funcion["id_funcion"],
         datos["butacas"]
@@ -124,7 +115,6 @@ def registrar_compra(id_usuario, datos):
     if estado_butacas != "disponibles":
         return None, "BUTACA_NO_DISPONIBLE"
 
-    # Preparar productos y sus futuros QR
     productos = []
 
     for item in datos.get("productos", []):
@@ -145,7 +135,6 @@ def registrar_compra(id_usuario, datos):
             ]
         })
 
-    # Calcular subtotal de entradas
     precio_entrada = Decimal(
         str(funcion["precio_entrada"])
     ).quantize(CENTAVO, rounding=ROUND_HALF_UP)
@@ -154,7 +143,6 @@ def registrar_compra(id_usuario, datos):
         precio_entrada * len(datos["butacas"])
     ).quantize(CENTAVO, rounding=ROUND_HALF_UP)
 
-    # Calcular subtotal de productos
     subtotal_productos = sum(
         (
             Decimal(str(item["producto"]["precio"]))
@@ -164,12 +152,10 @@ def registrar_compra(id_usuario, datos):
         Decimal("0.00")
     ).quantize(CENTAVO, rounding=ROUND_HALF_UP)
 
-    # Calcular subtotal general
     subtotal_compra = (
         subtotal_entradas + subtotal_productos
     ).quantize(CENTAVO, rounding=ROUND_HALF_UP)
 
-    # Calcular descuentos de promociones
     descuento, error_promocion = calcular_descuentos_compra(
         datos.get("id_promociones", []),
         len(datos["butacas"]),
@@ -180,7 +166,6 @@ def registrar_compra(id_usuario, datos):
     if error_promocion:
         return None, error_promocion
 
-    # Registrar la compra
     try:
         id_compra = compras_repositories.registrar_compra(
             id_usuario,
@@ -196,7 +181,6 @@ def registrar_compra(id_usuario, datos):
         return None, "ERROR_COMPRA"
 
     return id_compra, None
-
 
 
 

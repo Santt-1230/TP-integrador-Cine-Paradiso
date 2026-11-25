@@ -36,7 +36,6 @@ def _completa(id_pelicula):
     return _con_generos([fila])[0] if fila else None
 
 
-# ------------------------------------------------------------------ publico
 def listar_vigentes(genero=None, texto=None, limite_texto=None):
     """Cartelera: peliculas vigentes. Sin `limite_texto` devuelve todas; con el, un maximo de 50."""
     limite = None
@@ -54,7 +53,6 @@ def obtener_publica(id_pelicula):
     return _con_generos([fila])[0], None
 
 
-# -------------------------------------------------------------------- admin
 def listar_admin(estado=None, texto=None):
     error = validador.validar_estado(estado)
     if error:
@@ -96,7 +94,7 @@ def importar(datos):
             opcionales.get("cartelera_desde"), opcionales.get("cartelera_hasta"),
             opcionales.get("activo", 1), nombres_generos)
     except Exception as e:
-        if getattr(e, "errno", None) == 1062:  # dos pedidos simultaneos con el mismo id_externo
+        if getattr(e, "errno", None) == 1062:  
             return None, (409, const.ERROR_CODE_DUPLICATE, "Pelicula duplicada",
                           "Esa pelicula ya esta en el catalogo")
         raise
@@ -113,7 +111,6 @@ def editar(id_pelicula, datos):
     if not actual:
         return None, _no_encontrada(id_pelicula, solo_activas=False)
 
-    # El periodo resultante (lo enviado + lo que ya habia) tiene que ser coherente.
     desde = a_fecha(limpio.get("cartelera_desde", actual["cartelera_desde"]))
     hasta = a_fecha(limpio.get("cartelera_hasta", actual["cartelera_hasta"]))
     if desde and hasta and hasta < desde:

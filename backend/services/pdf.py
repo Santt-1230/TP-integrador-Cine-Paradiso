@@ -242,12 +242,10 @@ def generar_pdf_productos(qrs):
 
     estilos = getSampleStyleSheet()
 
-    # Colores de Cine Paradiso
     color_marca = colors.HexColor("#172B4D")
     color_acento = colors.HexColor("#E5A93D")
     color_fondo = colors.HexColor("#F3F6FA")
 
-    # Estilos
     estilo_marca = ParagraphStyle(
         "MarcaProducto",
         parent=estilos["Heading2"],
@@ -319,7 +317,6 @@ def generar_pdf_productos(qrs):
 
     for indice, qr in enumerate(qrs):
 
-        # Encabezado
         encabezado = Table(
             [[
                 Paragraph("CINE PARADISO", estilo_marca),
@@ -341,7 +338,6 @@ def generar_pdf_productos(qrs):
             ("LINEBELOW", (0, -1), (-1, -1), 3, color_acento),
         ]))
 
-        # Información del producto
         datos_producto = Table([
             [
                 Paragraph("CATEGORÍA", estilo_etiqueta),
@@ -384,7 +380,6 @@ def generar_pdf_productos(qrs):
             ("BOTTOMPADDING", (0, 0), (-1, -1), 7),
         ]))
 
-        # Construir contenido de la página
         contenido.extend([
             encabezado,
             Spacer(1, 12 * mm),
@@ -408,7 +403,6 @@ def generar_pdf_productos(qrs):
             Spacer(1, 10 * mm),
         ])
 
-        # Generar imagen QR
         imagen_qr = qrcode.make(qr["token"])
 
         buffer_qr = BytesIO()
@@ -422,7 +416,6 @@ def generar_pdf_productos(qrs):
             hAlign="CENTER"
         )
 
-        # Enmarcar QR
         tarjeta_qr = Table(
             [[imagen]],
             colWidths=[82 * mm],
@@ -467,7 +460,6 @@ def generar_pdf_productos(qrs):
             ),
         ])
 
-        # Una página por producto
         if indice < len(qrs) - 1:
             contenido.append(PageBreak())
 

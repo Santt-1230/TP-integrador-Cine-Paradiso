@@ -24,16 +24,12 @@ def ejecutar_consulta_periodo(funcion, *args):
         return jsonify({"mensaje": str(error)}), 400
 
 
-# DASHBOARD COMPLETO
-
 @estadisticas_bp.route("/dashboard", methods=["GET"])
 @admin_requerido
 def get_estadisticas_dashboard():
     return ejecutar_consulta_periodo(
         obtener_dashboard_estadisticas
     )
-
-# OCUPACIÓN Promedio
 
 @estadisticas_bp.route("/ocupacion", methods=["GET"])
 @admin_requerido

@@ -28,7 +28,7 @@ def formatear_fecha(promocion):
         return None
     for campo in ("vigente_desde", "vigente_hasta"):
         if promocion[campo] is not None:
-            promocion[campo] = promocion[campo].isoformat() #isoformat() convierte la fecha en formato AAAA-DD-MM
+            promocion[campo] = promocion[campo].isoformat() 
     return promocion
 
 

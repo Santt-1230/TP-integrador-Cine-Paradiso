@@ -7,7 +7,7 @@ def leer_fecha(texto):
     if not isinstance(texto, str) or len(texto) != 10:
         return None
     try:
-        return datetime.strptime(texto, "%Y-%m-%d").date() #strptime convierte el texto en fecha
+        return datetime.strptime(texto, "%Y-%m-%d").date() 
     except ValueError:
         return None
 

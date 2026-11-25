@@ -42,46 +42,34 @@ def validar_qr_por_tipo(tipo: str):
 
     else:
         try:
-
             if tipo == "entrada":
 
                 resultado = procesar_validacion(
                     token,
                     session["id_usuario"],
-                    "entrada"
-                )
-
+                    "entrada")
             else:
-
                 resultado = procesar_validacion(
                     token,
                     session["id_usuario"],
                     "producto",
-                    categoria
-                )
+                    categoria)
 
         except Exception:
-
             resultado = {
                 "valido": False,
                 "mensaje": "Error al comunicarse con la base de datos."
             }
-
             codigo_http = 503
-
         else:
-
             if resultado["valido"]:
                 codigo_http = 200
-
             elif resultado.get("codigo") == "QR_NO_EXISTE":
                 codigo_http = 404
-
             else:
                 codigo_http = 409
 
     return jsonify(resultado), codigo_http
-
 
 
 @validar_qr_bp.route('/entradas/validar', methods=['POST'])
