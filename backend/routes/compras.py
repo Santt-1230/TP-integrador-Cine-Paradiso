@@ -5,9 +5,9 @@ from services import compras as compras_services
 from services import pdf as pdf_services
 from validators import compras as compras_validators
 from services import mailer
+
 compras_bp = Blueprint('compras', __name__, url_prefix='/api')
-def usuario_registrado():
-    return {'id': 1, 'acceso': "admin"}
+
 
 @compras_bp.route('/compras', methods=['GET'])
 @login_requerido
@@ -46,6 +46,7 @@ def compra_id(id):
 @compras_bp.route('/compras', methods=['POST'])
 @login_requerido
 def registrar_compras():
+    
     datos = request.get_json()
     id_compra,error = compras_services.registrar_compra(session["id_usuario"], datos)
     if error == "FUNCION_INEXISTENTE":
@@ -72,6 +73,12 @@ def registrar_compras():
             message="Butaca inexistente",
             description="Alguna butaca no existe o no pertenece a la sala de esta funcion"
         )), 404
+    if error == "BUTACA_INACTIVA":
+        return jsonify(construir_error_api(
+            code="BUTACA_INACTIVA",
+            message="Butaca inactiva",
+            description="Alguna butaca seleccionada está inactiva. Volvé al mapa y elegí otras.",
+        )), 409
     if error == "BUTACA_NO_DISPONIBLE":
         return jsonify(construir_error_api(
             code="BUTACA_NO_DISPONIBLE",
@@ -84,20 +91,54 @@ def registrar_compras():
             message="Producto no disponible",
             description="Uno de los productos no existe o está inactivo",
         )), 404
+    if error == "PROMOCION_NO_DISPONIBLE":
+        return jsonify(construir_error_api(
+            code=error,
+            message="Promoción no disponible",
+            description="Una de las promociones seleccionadas no está vigente o ya no es válida. Actualizá el checkout e intentá de nuevo.",
+        )), 409
+    if error == "PROMOCIONES_CATEGORIA_DUPLICADA":
+        return jsonify(construir_error_api(
+            code=error,
+            message="Hay demasiadas promociones seleccionadas",
+            description="Elegí como máximo una promoción N×M y un descuento sobre el total.",
+        )), 400
     if error is not None:
         return jsonify(error), 400
 
     factura, error = compras_services.obtener_factura(id_compra)
+
+    if error is not None:
+        return jsonify(construir_error_api(
+            code=error,
+            message="No se pudo obtener la factura",
+            description="La compra se registró, pero no se pudo generar su factura."
+        )), 500
+
+    
     pdf = pdf_services.generar_pdf_factura(factura)
     email_cliente = factura["cliente"]["email"]
     numero = factura["factura"].get("numero") or f"compra-{id_compra}"
+
+    # Obtener QR de entradas
     qrs, error_qr = compras_services.obtener_qr(id_compra, session["id_usuario"])
+
+    # Obtener QR de productos
+    qrs_productos, error_qr_productos = compras_services.obtener_qr_productos(id_compra, session["id_usuario"])
+
+    print("ID COMPRA:", id_compra, flush=True)
+    print("ERROR QR PRODUCTOS:", repr(error_qr_productos), flush=True)
+    print("QR RECUPERADOS:", len(qrs_productos or []), flush=True)
+
+    # Preparar los archivos adjuntos
     adjuntos = [{
         "contenido": pdf,
         "nombre": f"factura-{numero}.pdf",
         "tipo": "application",
         "subtipo": "pdf",
     }]
+
+    # Adjuntar PDF de entradas
     if not error_qr:
         adjuntos.append({
             "contenido": pdf_services.generar_pdf_entradas(factura, qrs),
@@ -105,6 +146,18 @@ def registrar_compras():
             "tipo": "application",
             "subtipo": "pdf",
         })
+
+    # Adjuntar PDF de productos
+    if not error_qr_productos and qrs_productos:
+        
+        adjuntos.append({
+            "contenido": pdf_services.generar_pdf_productos(qrs_productos),
+            "nombre": f"productos-{numero}.pdf",
+            "tipo": "application",
+            "subtipo": "pdf",
+        })
+
+        
     mailer.enviar_mail(
         destino=email_cliente,
         asunto="Factura de compra - Cine Paradiso",
@@ -113,27 +166,6 @@ def registrar_compras():
     )
     return jsonify({"message": "Compra registrada"}), 201
     
-@compras_bp.route('/compras/<int:id>/cancelacion', methods=['PATCH'])
-@login_requerido
-def cancelar_compra(id):
-    error = compras_services.cancelar_compra(id, session["id_usuario"])
- 
-    if error == "COMPRA_INEXISTENTE":
-        return jsonify(construir_error_api(
-            code="COMPRA_INEXISTENTE",
-            message="COMPRA NO ENCONTRADA",
-            description=f"La compra de ID: {id} no existe o no le pertenece"
-        )), 404
-    if error == "ERROR_CANCELACION":
-        return jsonify(construir_error_api(
-            code="ERROR_CANCELACION",
-            message="CANCELACION RECHAZADA",
-            description=f"No se pudo cancelar la compra con ID: {id}"
-        )), 409
-    return jsonify({"message": "Compra cancelada con exito"}), 200
-
-    
-
 
 
 

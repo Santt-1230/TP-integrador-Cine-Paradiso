@@ -1,5 +1,10 @@
 from db import ejecutar_consulta, ejecutar_mutacion, transaccion
 from datetime import datetime
+from repositories import qr as qr_repositories
+
+from decimal import Decimal, ROUND_HALF_UP
+
+CENTAVO = Decimal("0.01")
 
 def obtener_compras(id):
     sql = "SELECT * FROM compras WHERE id_usuario = %s;"
@@ -17,56 +22,104 @@ def obtener_compra_id(id_compra, id_usuario):
     compra = ejecutar_consulta(sql, parametros)
     return  compra[0] if compra else None
 
-#validar que la butaca este activa, o libre, y agregar datos a la base de butacas
+
 def generar_numero_factura(id_compra):
     anio = datetime.now().year
     return f"FAC-{anio}-{id_compra:06d}"
 
-def registrar_compra(id_usuario, datos, productos):
+def registrar_compra(id_usuario, datos, productos, descuento=Decimal("0.00")):
     with transaccion() as cursor:
+
+        # Obtener el precio de las entradas
         cursor.execute(
             "SELECT precio_entrada FROM funciones WHERE id_funcion = %s",
             (datos["id_funcion"],),
         )
+
         funcion = cursor.fetchone()
+
         if not funcion:
             raise ValueError("La función dejó de existir al registrar la compra")
 
-        precio_entrada = funcion["precio_entrada"]
-        total = precio_entrada * len(datos["butacas"])
+        precio_entrada = Decimal(str(funcion["precio_entrada"])).quantize(CENTAVO, rounding=ROUND_HALF_UP)
+        butacas = datos["butacas"]
+        descuento = Decimal(str(descuento or 0)).quantize(CENTAVO, rounding=ROUND_HALF_UP)
+        subtotal_entradas = (precio_entrada * len(butacas)).quantize(CENTAVO, rounding=ROUND_HALF_UP)
+        total = subtotal_entradas
         cursor.execute(
             "INSERT INTO compras "
             "(id_usuario, id_funcion, estado, total, expira_en, fecha_confirmacion) "
             "VALUES (%s, %s, 'confirmada', %s, NOW(), NOW())",
             (id_usuario, datos["id_funcion"], total),
         )
+
         id_compra = cursor.lastrowid
 
-        for id_butaca in datos["butacas"]:
+        for id_butaca in butacas:
             cursor.execute(
                 "INSERT INTO entradas "
                 "(id_compra, id_funcion, id_butaca, precio_unitario, estado) "
                 "VALUES (%s, %s, %s, %s, 'confirmada')",
                 (id_compra, datos["id_funcion"], id_butaca, precio_entrada),
             )
+
             if cursor.rowcount != 1:
                 raise RuntimeError("No se pudo registrar una entrada")
 
-        for producto, cantidad in productos:
+        for item in productos:
+
+            producto = item["producto"]
+            cantidad = item["cantidad"]
+
+            precio_producto = Decimal(str(producto["precio"])).quantize(CENTAVO, rounding=ROUND_HALF_UP)
+            subtotal_producto = (precio_producto * cantidad).quantize(CENTAVO, rounding=ROUND_HALF_UP)
+            
             cursor.execute(
                 "INSERT INTO compra_productos "
                 "(id_compra, id_producto, cantidad, precio_unitario) "
                 "VALUES (%s, %s, %s, %s)",
-                (id_compra, producto["id_producto"], cantidad, producto["precio"]),
+                (id_compra, producto["id_producto"], cantidad, precio_producto),
             )
+
             if cursor.rowcount != 1:
                 raise RuntimeError("No se pudo agregar un producto a la compra")
+
+            # Obtener el identificador del producto comprado
+            id_compra_producto = cursor.lastrowid
+
+            # Registrar el QR del producto
+            qr_registrado = False
+
+            for token, codigo in item["qrs"]:
+
+                if not qr_registrado:
+                    qr_registrado = qr_repositories.registrar_qr_producto(
+                        cursor,
+                        id_compra,
+                        id_compra_producto,
+                        token,
+                        codigo
+                    )
+
+            if not qr_registrado:
+                raise RuntimeError("No se pudo generar el QR del producto")
+
+            # Actualizar el total
             cursor.execute(
                 "UPDATE compras SET total = total + %s WHERE id_compra = %s",
-                (producto["precio"] * cantidad, id_compra),
+                (subtotal_producto, id_compra),
             )
+
             if cursor.rowcount != 1:
                 raise RuntimeError("No se pudo actualizar el total de la compra")
+
+        if descuento:
+            cursor.execute(
+                "UPDATE compras SET total = total - %s WHERE id_compra = %s",
+                (descuento, id_compra),
+            )
+            if cursor.rowcount != 1:
+                raise RuntimeError("No se pudo aplicar el descuento de la compra")
 
             
         numero_factura = generar_numero_factura(id_compra)
@@ -79,7 +132,6 @@ def registrar_compra(id_usuario, datos, productos):
         if cursor.rowcount != 1:
             raise RuntimeError("No se pudo asignar el número de factura")
 
-        
         return id_compra
 
 def butacas_disponibles(id_funcion, id_butacas):
@@ -88,27 +140,49 @@ def butacas_disponibles(id_funcion, id_butacas):
 
     butacas = tuple(dict.fromkeys(int(butaca) for butaca in id_butacas))
     marcadores = ", ".join(["%s"] * len(butacas))
-    sql = (
-        "SELECT COUNT(DISTINCT b.id_butaca) AS butacas_validas, "
-        "COUNT(DISTINCT CASE WHEN c.id_compra IS NOT NULL "
-        "THEN b.id_butaca END) AS butacas_ocupadas "
-        "FROM funciones f "
-        "INNER JOIN butacas b ON b.id_sala = f.id_sala "
-        "LEFT JOIN entradas e ON e.id_funcion = f.id_funcion "
-        "AND e.id_butaca = b.id_butaca "
-        "AND e.estado IN ('reservada', 'confirmada', 'utilizada') "
-        "LEFT JOIN compras c ON c.id_compra = e.id_compra "
-        "AND (c.estado = 'confirmada' OR "
-        "(c.estado = 'pendiente' AND c.expira_en > NOW())) "
-        f"WHERE f.id_funcion = %s AND b.id_butaca IN ({marcadores})"
-    )
+
+    sql = f"""
+        SELECT
+            COUNT(DISTINCT b.id_butaca) AS butacas_existentes,
+            COUNT(DISTINCT CASE
+                WHEN b.estado = 'activa' THEN b.id_butaca
+            END) AS butacas_activas,
+            COUNT(DISTINCT CASE
+                WHEN c.id_compra IS NOT NULL THEN b.id_butaca
+            END) AS butacas_ocupadas
+        FROM funciones f
+        INNER JOIN butacas b
+            ON b.id_sala = f.id_sala
+        LEFT JOIN entradas e
+            ON e.id_funcion = f.id_funcion
+            AND e.id_butaca = b.id_butaca
+            AND e.estado IN ('confirmada', 'utilizada')
+        LEFT JOIN compras c
+            ON c.id_compra = e.id_compra
+            AND (
+                c.estado = 'confirmada'
+                OR (c.estado = 'pendiente' AND c.expira_en > NOW())
+            )
+        WHERE f.id_funcion = %s
+            AND b.id_butaca IN ({marcadores})
+    """
+
     resultado = ejecutar_consulta(sql, (id_funcion, *butacas))
     if not resultado:
         return False
-    return (
-        resultado[0]["butacas_validas"] == len(butacas)
-        and resultado[0]["butacas_ocupadas"] == 0
-    )
+
+    estado = resultado[0]
+
+    if estado["butacas_existentes"] != len(butacas):
+        return "inexistentes"
+
+    if estado["butacas_activas"] != len(butacas):
+        return "inactivas"
+
+    if estado["butacas_ocupadas"]:
+        return "ocupadas"
+
+    return "disponibles"
 
 def obtener_funcion_precio(id_funcion):
     sql = "SELECT precio_entrada from funciones WHERE id_funcion = %s"
@@ -117,12 +191,7 @@ def obtener_funcion_precio(id_funcion):
     return precio_unitario[0] if precio_unitario else None
 
 
-def cancelacion_de_compra(id_compra, id_usuario):
-    sql = "UPDATE compras SET estado = 'cancelada', fecha_cancelacion = NOW()  WHERE id_compra = %s AND id_usuario = %s AND (estado = 'confirmada' OR estado = 'pendiente')"
-    parametros = [id_compra, id_usuario]
-    print (parametros)
-    cambiar = ejecutar_mutacion(sql, parametros)
-    return cambiar["filas"] > 0
+
 
 def obtener_entradas(id_compra):
     sql = "SELECT * FROM entradas WHERE id_compra = %s"
@@ -197,3 +266,4 @@ def butacas_id(id_butaca):
         (id_butaca,)
     )
     return butaca[0] if butaca else None
+

@@ -1,8 +1,6 @@
 import os
 from dotenv import load_dotenv
 
-load_dotenv() #Lee el archivo .env y carga las variables
-
 from flask import Flask, jsonify
 
 from utils import construir_error_api
@@ -19,6 +17,7 @@ from routes.promociones import promociones_bp
 from routes.funciones import funciones_bp
 from routes.compras import compras_bp
 from routes.validar_qr import validar_qr_bp
+from routes.opiniones import opiniones_bp
 
 
 
@@ -28,7 +27,7 @@ load_dotenv()
 # 2. Inicializar la app UNA SOLA VEZ
 app = Flask(__name__)
 app.json.ensure_ascii = False
-app.secret_key = os.getenv("SECRET_KEY") or "8d9c1ba006f9d7a5c2cc81d83f7a046d332a7fa37e8651c6214b98b4e4d3de7"
+app.secret_key = os.getenv("SECRET_KEY") 
 
 if not app.secret_key:
     raise RuntimeError("Falta la SECRET_KEY en el .env")
@@ -47,6 +46,7 @@ app.register_blueprint(promociones_bp)
 app.register_blueprint(funciones_bp)
 app.register_blueprint(compras_bp)
 app.register_blueprint(validar_qr_bp)
+app.register_blueprint(opiniones_bp)
 
 
 

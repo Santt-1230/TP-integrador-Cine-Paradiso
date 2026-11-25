@@ -27,9 +27,9 @@ def validar(datos, es_creacion):
         return "Activo debe ser verdadero o falso"
 
     if "imagen_url" in datos:
-        imagen_url = datos["imagen_url"]
-        if not isinstance(imagen_url, str) or not imagen_url.strip() or len(imagen_url) > 500:
-            return "La imagen es obligatoria (hasta 500 caracteres)"
+        imagen_url = datos.get("imagen_url")
+        if imagen_url is not None and (not isinstance(imagen_url, str) or not imagen_url.strip() or len(imagen_url) > 500):
+            return "La imagen URL debe ser un texto y de hasta 500 caracteres"
 
     return None
 

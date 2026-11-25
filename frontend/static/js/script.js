@@ -1,62 +1,23 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const btnToggle = document.getElementById('btn-toggle-clave');
-    const contenedor = document.getElementById('contenedor-cambiar-clave');
-    const flecha = document.getElementById('flecha-clave');
+    // 1. Alternar edición de datos del perfil
+    const btnEditar = document.getElementById('btn-toggle-editar');
+    const btnCancelar = document.getElementById('btn-cancelar-editar');
+    const vistaDatos = document.getElementById('vista-datos-perfil');
+    const formEditar = document.getElementById('form-editar-perfil');
 
-    if (btnToggle && contenedor) {
-        btnToggle.addEventListener('click', () => {
-            const abierto = contenedor.classList.toggle('abierto');
-            if (flecha) flecha.textContent = abierto ? '▲' : '▼';
+    if (btnEditar && btnCancelar && vistaDatos && formEditar) {
+        btnEditar.addEventListener('click', () => {
+            vistaDatos.style.display = 'none';
+            formEditar.style.display = 'block';
+        });
+
+        btnCancelar.addEventListener('click', () => {
+            formEditar.style.display = 'none';
+            vistaDatos.style.display = 'block';
         });
     }
 
-    const form = document.getElementById('form-cambiar-clave');
-    if (form) {
-        form.addEventListener('submit', (e) => {
-            const nueva = document.getElementById('nueva_clave').value;
-            const confirmar = document.getElementById('confirmar_clave').value;
-            const mensaje = document.getElementById('mensaje-clave');
-
-            if (nueva !== confirmar) {
-                e.preventDefault();
-                mensaje.className = 'mensaje-alerta error';
-                mensaje.style.display = 'block';
-                mensaje.textContent = 'Las contraseñas nuevas no coinciden.';
-            }
-        });
-    }
-});
-
-document.addEventListener('DOMContentLoaded', () => {
-    const btnToggle = document.getElementById('btn-toggle-clave');
-    const contenedorClave = document.getElementById('contenedor-cambiar-clave');
-    const flecha = document.getElementById('flecha-clave');
-
-    if (btnToggle && contenedorClave) {
-        btnToggle.addEventListener('click', () => {
-            const estaOculto = contenedorClave.style.display === 'none';
-            contenedorClave.style.display = estaOculto ? 'block' : 'none';
-            if (flecha) flecha.textContent = estaOculto ? '▲' : '▼';
-        });
-    }
-
-    const formClave = document.getElementById('form-cambiar-clave');
-    if (formClave) {
-        formClave.addEventListener('submit', (e) => {
-            const nueva = document.getElementById('nueva_clave').value;
-            const confirmar = document.getElementById('confirmar_clave').value;
-            const mensaje = document.getElementById('mensaje-clave');
-
-            if (nueva !== confirmar) {
-                e.preventDefault();
-                mensaje.className = 'mensaje-alerta error';
-                mensaje.style.display = 'block';
-                mensaje.textContent = 'Las contraseñas nuevas no coinciden.';
-            }
-        });
-    }
-
-    // Confirmación antes de darse de baja
+    // 2. Confirmación antes de darse de baja
     const formBaja = document.getElementById('form-baja-cuenta');
     if (formBaja) {
         formBaja.addEventListener('submit', (e) => {
@@ -64,62 +25,102 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!ok) e.preventDefault();
         });
     }
+
+    // 3. Ocultar automáticamente avisos de éxito tras 5 segundos
+    document.querySelectorAll('main .success').forEach((aviso) => {
+        setTimeout(() => aviso.remove(), 5000);
+    });
 });
 
-document.addEventListener('DOMContentLoaded', function () {
-    const btnEditar = document.getElementById('btn-toggle-editar');
-    const btnCancelar = document.getElementById('btn-cancelar-editar');
-    const vistaDatos = document.getElementById('vista-datos-perfil');
-    const formEditar = document.getElementById('form-editar-perfil');
-
-    if (btnEditar && btnCancelar) {
-        btnEditar.addEventListener('click', function () {
-            vistaDatos.style.display = 'none';
-            formEditar.style.display = 'block';
-        });
-
-        btnCancelar.addEventListener('click', function () {
-            formEditar.style.display = 'none';
-            vistaDatos.style.display = 'block';
-        });
-    }
-
-    const btnClave = document.getElementById('btn-toggle-clave');
-    const contenedorClave = document.getElementById('contenedor-cambiar-clave');
-    const flechaClave = document.getElementById('flecha-clave');
-
-    if (btnClave) {
-        btnClave.addEventListener('click', function () {
-            contenedorClave.classList.toggle('abierto');
-            if (contenedorClave.classList.contains('abierto')) {
-                flechaClave.textContent = '▲';
-            } else {
-                flechaClave.textContent = '▼';
-            }
-        });
-    }
-});
-
-function toggleVisibilidadPassword(idInput, icono) {
-    const input = document.getElementById(idInput);
-    if (input.type === 'password') {
-        input.type = 'text';
-        icono.classList.remove('bi-eye');
-        icono.classList.add('bi-eye-slash');
-    } else {
-        input.type = 'password';
-        icono.classList.remove('bi-eye-slash');
-        icono.classList.add('bi-eye');
-    }
-}
-
-document.addEventListener('click', function (evento) {
+// Cerrar menú desplegable al hacer clic fuera
+document.addEventListener('click', (evento) => {
     const desplegable = document.querySelector('.desplegable');
     if (desplegable && !desplegable.contains(evento.target)) {
         desplegable.removeAttribute('open');
     }
 });
 
-document.querySelectorAll('main .success').forEach(function(aviso){
-  setTimeout(function() { aviso.remove(); }, 5000);
-});
+(function () {
+    function iniciarEstrellas() {
+        const contenedor = document.getElementById("estrellas-interactivas");
+        const inputNumero = document.getElementById("puntuacion-numero");
+        const textoEstado = document.getElementById("texto-puntuacion");
+
+        if (!contenedor || !inputNumero) return;
+
+        const botones = contenedor.querySelectorAll(".btn-estrella");
+        const etiquetas = {
+            1: "1 / 5 — Muy malo",
+            2: "2 / 5 — Malo",
+            3: "3 / 5 — Regular",
+            4: "4 / 5 — Muy bueno",
+            5: "5 / 5 — Excelente"
+        };
+
+        function pintarEstrellas(cantidad, esPreview = false) {
+            botones.forEach((btn) => {
+                const valor = Number(btn.dataset.valor);
+                const activa = valor <= cantidad;
+                btn.classList.toggle("llena", activa && !esPreview);
+                btn.classList.toggle("preview", activa && esPreview);
+            });
+
+            if (!esPreview && textoEstado) {
+                textoEstado.textContent = etiquetas[cantidad] || "Elegí o escribí un puntaje";
+            }
+        }
+
+        // Selección directa haciendo clic o pasando el mouse
+        botones.forEach((btn) => {
+            const valor = Number(btn.dataset.valor);
+
+            btn.addEventListener("click", () => {
+                inputNumero.value = valor;
+                pintarEstrellas(valor);
+            });
+
+            btn.addEventListener("mouseenter", () => {
+                pintarEstrellas(valor, true);
+            });
+        });
+
+        contenedor.addEventListener("mouseleave", () => {
+            const actual = parseInt(inputNumero.value, 10) || 0;
+            pintarEstrellas(actual);
+        });
+
+        // Pintado automático al escribir o cambiar el número
+        function actualizarDesdeInput() {
+            const raw = inputNumero.value.trim();
+            if (raw === "") {
+                pintarEstrellas(0);
+                return;
+            }
+
+            let valor = parseInt(raw, 10);
+            if (Number.isNaN(valor)) {
+                pintarEstrellas(0);
+                return;
+            }
+
+            if (valor > 5) {
+                valor = 5;
+                inputNumero.value = 5;
+            } else if (valor < 1) {
+                valor = 1;
+                inputNumero.value = 1;
+            }
+
+            pintarEstrellas(valor);
+        }
+
+        inputNumero.addEventListener("input", actualizarDesdeInput);
+        inputNumero.addEventListener("change", actualizarDesdeInput);
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", iniciarEstrellas);
+    } else {
+        iniciarEstrellas();
+    }
+})();

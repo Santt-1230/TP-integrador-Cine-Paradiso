@@ -1,0 +1,60 @@
+{% extends "base_admin.html" %}
+
+{% block titulo %}
+    Opiniones - Cine Paradiso
+{% endblock %}
+
+{% block contenido_admin %}
+
+<div class="opiniones-admin">
+   <div class="servicios-admin__encabezado">
+        <div>
+            <p class="servicios-admin__migas">Administración / Opiniones</p>
+            <h1>Opiniones</h1>
+            <p class="servicios-admin__descripcion">Opiniones de los usuarios</p>
+        </div>
+    </div>
+
+    <div class="lista-opiniones">
+        {% set nombres_categoria = {
+            'cine': 'Cine / Salas',
+            'servicio': 'Servicio / Atención',
+            'combos': 'Combos',
+            'web': 'Web'
+        } %}
+
+        {% for o in opiniones %}
+        <article class="tarjeta-opinion">
+            <div class="opinion-cabecera">
+                <div>
+                    <p class="opinion-usuario">{{ o.nombre }} {{ o.apellido }}</p>
+                    <p class="opinion-email">{{ o.email }}</p>
+                </div>
+
+                <div class="opinion-meta">
+                    {% if o.categoria %}
+                        <span class="badge-categoria-opinion">
+                            {{ nombres_categoria.get(o.categoria, o.categoria | capitalize) }}
+                        </span>
+                    {% endif %}
+
+                    {% if o.puntuacion %}
+                        <div class="opinion-estrellas" title="{{ o.puntuacion }} de 5 estrellas">
+                            {% for i in range(1, 6) %}
+                                <i class="bi {{ 'bi-star-fill activa' if i <= o.puntuacion else 'bi-star' }}"></i>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <p class="opinion-fecha">{{ o.fecha_creacion[:16].replace('T', ' ') }}</p>
+            <p class="opinion-texto">{{ o.texto }}</p>
+        </article>
+        {% else %}
+        <p class="sin-opiniones">Todavía no hay opiniones.</p>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}
