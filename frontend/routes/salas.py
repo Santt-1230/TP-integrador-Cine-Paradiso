@@ -71,7 +71,7 @@ def editar_sala(id_sala):
     filtro_estado = request.values.get('filtro_estado', 'todas')
     filtro_local = request.values.get('filtro_local', type=int)
     if request.method == 'GET':
-        estado, resp = api.pedir('GET', f'/api/salas/{id_sala}')
+        estado, resp = api.get(f'/api/salas/{id_sala}')
         estado_respuesta = api.verificar_estado(estado)
         if estado_respuesta:
             return estado_respuesta
@@ -82,7 +82,7 @@ def editar_sala(id_sala):
         
         sala = resp['sala']
         
-        estado_filas, resp_filas = api.pedir('GET', f'/api/salas/{id_sala}/filas')
+        estado_filas, resp_filas = api.get(f'/api/salas/{id_sala}/filas')
         estado_respuesta = api.verificar_estado(estado_filas)
         if estado_respuesta:
             return estado_respuesta
