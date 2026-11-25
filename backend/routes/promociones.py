@@ -7,7 +7,7 @@ from services.promociones import (
     dar_de_baja_promocion,
 )
 from validators.promociones import validar_creacion, validar_modificacion
-from utils import construir_error_api
+from utils import construir_error_api, admin_requerido
 
 promociones_bp = Blueprint('promociones', __name__, url_prefix='/api')
 
@@ -34,6 +34,7 @@ def obtener_promociones_route():
 
 
 @promociones_bp.route('/promociones/<int:id_promocion>', methods=['GET'])
+@admin_requerido
 def obtener_promocion_por_id_route(id_promocion):
     promocion = listar_promocion_por_id(id_promocion)
     if promocion is None:
@@ -42,6 +43,7 @@ def obtener_promocion_por_id_route(id_promocion):
 
 
 @promociones_bp.route('/promociones', methods=['POST'])
+@admin_requerido
 def crear_promocion_route():
     datos = request.get_json(silent=True)
     mensaje = validar_creacion(datos)
@@ -52,6 +54,7 @@ def crear_promocion_route():
 
 
 @promociones_bp.route('/promociones/<int:id_promocion>', methods=['PATCH'])
+@admin_requerido
 def modificar_promocion_route(id_promocion):
     datos = request.get_json(silent=True)
 
@@ -75,6 +78,7 @@ def modificar_promocion_route(id_promocion):
 
 
 @promociones_bp.route('/promociones/<int:id_promocion>', methods=['DELETE'])
+@admin_requerido
 def dar_de_baja_promocion_route(id_promocion):
     se_dio_de_baja = dar_de_baja_promocion(id_promocion)
     if not se_dio_de_baja:
