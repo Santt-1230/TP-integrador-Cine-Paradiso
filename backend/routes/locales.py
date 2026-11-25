@@ -28,6 +28,9 @@ def obtener_local(id_local):
         if codigo == ERROR_CODE_LOCAL_NOT_FOUND:
             return jsonify(respuesta), 404
 
+        if codigo == ERROR_CODE_LOCAL_INACTIVE:
+            return jsonify(respuesta), 409
+
         return jsonify(respuesta), 400
 
     except (RuntimeError, mysql.connector.Error):
