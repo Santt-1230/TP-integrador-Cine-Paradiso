@@ -1,5 +1,7 @@
 from db import ejecutar_consulta, ejecutar_mutacion, transaccion
 from datetime import datetime
+from repositories import qr as qr_repositories
+
 from decimal import Decimal, ROUND_HALF_UP
 
 CENTAVO = Decimal("0.01")
@@ -13,11 +15,15 @@ def generar_numero_factura(id_compra):
 
 def registrar_compra(id_usuario, datos, productos, descuento=Decimal("0.00")):
     with transaccion() as cursor:
+
+        # Obtener el precio de las entradas
         cursor.execute(
             "SELECT precio_entrada FROM funciones WHERE id_funcion = %s",
             (datos["id_funcion"],),
         )
+
         funcion = cursor.fetchone()
+
         if not funcion:
             raise ValueError("La función dejó de existir al registrar la compra")
 
@@ -32,6 +38,7 @@ def registrar_compra(id_usuario, datos, productos, descuento=Decimal("0.00")):
             "VALUES (%s, %s, 'confirmada', %s, NOW(), NOW())",
             (id_usuario, datos["id_funcion"], total),
         )
+
         id_compra = cursor.lastrowid
 
         for id_butaca in butacas:
@@ -41,24 +48,54 @@ def registrar_compra(id_usuario, datos, productos, descuento=Decimal("0.00")):
                 "VALUES (%s, %s, %s, %s, 'confirmada')",
                 (id_compra, datos["id_funcion"], id_butaca, precio_entrada),
             )
+
             if cursor.rowcount != 1:
                 raise RuntimeError("No se pudo registrar una entrada")
 
-        for producto, cantidad in productos:
+        for item in productos:
+
+            producto = item["producto"]
+            cantidad = item["cantidad"]
+
             precio_producto = Decimal(str(producto["precio"])).quantize(CENTAVO, rounding=ROUND_HALF_UP)
             subtotal_producto = (precio_producto * cantidad).quantize(CENTAVO, rounding=ROUND_HALF_UP)
+            
             cursor.execute(
                 "INSERT INTO compra_productos "
                 "(id_compra, id_producto, cantidad, precio_unitario) "
                 "VALUES (%s, %s, %s, %s)",
                 (id_compra, producto["id_producto"], cantidad, precio_producto),
             )
+
             if cursor.rowcount != 1:
                 raise RuntimeError("No se pudo agregar un producto a la compra")
+
+            # Obtener el identificador del producto comprado
+            id_compra_producto = cursor.lastrowid
+
+            # Registrar el QR del producto
+            qr_registrado = False
+
+            for token, codigo in item["qrs"]:
+
+                if not qr_registrado:
+                    qr_registrado = qr_repositories.registrar_qr_producto(
+                        cursor,
+                        id_compra,
+                        id_compra_producto,
+                        token,
+                        codigo
+                    )
+
+            if not qr_registrado:
+                raise RuntimeError("No se pudo generar el QR del producto")
+
+            # Actualizar el total
             cursor.execute(
                 "UPDATE compras SET total = total + %s WHERE id_compra = %s",
                 (subtotal_producto, id_compra),
             )
+
             if cursor.rowcount != 1:
                 raise RuntimeError("No se pudo actualizar el total de la compra")
 
@@ -81,7 +118,6 @@ def registrar_compra(id_usuario, datos, productos, descuento=Decimal("0.00")):
         if cursor.rowcount != 1:
             raise RuntimeError("No se pudo asignar el número de factura")
 
-        
         return id_compra
 
 def butacas_disponibles(id_funcion, id_butacas):
@@ -192,3 +228,4 @@ def butacas_id(id_butaca):
         (id_butaca,)
     )
     return butaca[0] if butaca else None
+

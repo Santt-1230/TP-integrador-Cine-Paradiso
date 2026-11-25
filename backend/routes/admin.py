@@ -8,6 +8,9 @@ from repositories.admin import (
     obtener_cantidad_peliculas_activas,
     obtener_cantidad_funciones_programadas
 )
+from validators.admin import( 
+    validar_actualizacion_usuario
+)
 
 from utils import admin_requerido
 from constants import ROLES_VALIDOS
@@ -31,30 +34,25 @@ def get_usuario(id):
 
     return jsonify(usuario), 200
 
-
 @admin_bp.route("/usuarios/<int:id>/editar", methods=["PATCH"])
 @admin_requerido
 def update_usuario(id):
     data = request.get_json(silent=True)
+    datos, error = validar_actualizacion_usuario(data)
 
-    if not isinstance(data, dict):
-        data = {}
-
-    nombre = str(data.get("nombre") or "").strip()
-    email = str(data.get("email") or "").strip()
-    rol = str(data.get("rol") or "").strip()
-
-    if not nombre or not email or not rol:
-        return jsonify({"error": "Faltan datos requeridos"}), 400
-
-    if rol not in ROLES_VALIDOS:
-        return jsonify({"error": "El rol no es válido"}), 400
+    if error:
+        return jsonify({"error": error}), 400
 
     if not obtener_usuario_por_id(id):
         return jsonify({"error": "Usuario no encontrado"}), 404
 
     try:
-        actualizar_usuario(id, nombre, email, rol)
+        actualizar_usuario(
+            id,
+            datos["nombre"],
+            datos["email"],
+            datos["rol"]
+        )
     except IntegrityError:
         return jsonify({"error": "Ese correo ya está en uso"}), 409
 
@@ -68,6 +66,7 @@ def get_peliculas_activas():
     cantidad = obtener_cantidad_peliculas_activas()
 
     return jsonify({"total": cantidad}), 200
+
 
 
 @admin_bp.route("/funciones/programadas", methods=["GET"])

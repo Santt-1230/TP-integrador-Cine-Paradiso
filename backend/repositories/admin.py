@@ -1,104 +1,68 @@
-from db import obtener_conexion
+from db import ejecutar_consulta, ejecutar_mutacion
 
 
 def obtener_usuarios():
 
-    conexion = obtener_conexion()
-    cursor = None
+    sql = """
+        SELECT id_usuario, nombre, email, rol
+        FROM usuarios
+    """
 
-    try:
-        cursor = conexion.cursor(dictionary=True)
-
-        cursor.execute("""
-            SELECT id_usuario, nombre, email, rol
-            FROM usuarios
-        """)
-
-        return cursor.fetchall()
-
-    finally:
-        cursor.close()
-        conexion.close()
+    return ejecutar_consulta(sql)
 
 
+def obtener_usuario_por_id(id_usuario):
 
-def obtener_usuario_por_id(id):
-    conexion = obtener_conexion()
-    cursor = None
+    sql = """
+        SELECT id_usuario, nombre, email, rol
+        FROM usuarios
+        WHERE id_usuario = %s
+    """
 
-    try:
-        cursor = conexion.cursor(dictionary=True)
+    usuarios = ejecutar_consulta(sql, (id_usuario,))
 
-        cursor.execute("""
-            SELECT id_usuario, nombre, email, rol
-            FROM usuarios
-            WHERE id_usuario = %s
-        """, (id,))
-
-        return cursor.fetchone()
-
-    finally:
-        cursor.close()
-        conexion.close()
+    return usuarios[0] if usuarios else None
 
 
-def actualizar_usuario(id, nombre, email, rol):
-    conexion = obtener_conexion()
-    cursor = None
+def actualizar_usuario(id_usuario, nombre, email, rol):
 
-    try:
-        cursor = conexion.cursor()
+    sql = """
+        UPDATE usuarios
+        SET nombre = %s,
+            email = %s,
+            rol = %s
+        WHERE id_usuario = %s
+    """
 
-        cursor.execute("""
-            UPDATE usuarios
-            SET nombre = %s, email = %s, rol = %s
-            WHERE id_usuario = %s
-        """, (nombre, email, rol, id))
+    return ejecutar_mutacion(
+        sql,
+        (nombre, email, rol, id_usuario)
+    )
 
-        conexion.commit()
-
-    finally:
-        cursor.close()
-        conexion.close()
+from db import ejecutar_consulta
 
 
 def obtener_cantidad_peliculas_activas():
-    conexion = obtener_conexion()
-    cursor = conexion.cursor(dictionary=True)
 
-    try:
-        cursor.execute("""
-            SELECT
-                COUNT(*) AS total
-            FROM peliculas
-            WHERE activo = TRUE
-        """)
+    sql = """
+        SELECT COUNT(*) AS total
+        FROM peliculas
+        WHERE activo = TRUE
+    """
 
-        resultado = cursor.fetchone()
+    resultado = ejecutar_consulta(sql)
 
-        return resultado["total"]
-
-    finally:
-        cursor.close()
-        conexion.close()
+    return resultado[0]["total"] if resultado else 0
 
 
 def obtener_cantidad_funciones_programadas():
-    conexion = obtener_conexion()
-    cursor = conexion.cursor(dictionary=True)
 
-    try:
-            cursor.execute("""
-                SELECT
-                    COUNT(*) AS total
-                FROM funciones
-                WHERE estado = 'programada'
-            """)
-    
-            resultado = cursor.fetchone()
-    
-            return resultado["total"]
-    
-    finally:
-            cursor.close()
-            conexion.close()
+    sql = """
+        SELECT COUNT(*) AS total
+        FROM funciones
+        WHERE estado = 'programada'
+    """
+
+    resultado = ejecutar_consulta(sql)
+
+    return resultado[0]["total"] if resultado else 0

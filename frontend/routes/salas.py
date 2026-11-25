@@ -7,7 +7,6 @@ FILAS_INICIALES = [{'fila': 'A', 'cantidad': 10}]
 
 
 def datos_sala_desde_form(request_form):
-    id_local = request_form.get("id_local", type=int)
     numero_sala = request_form.get("numero_sala", "").strip()
     
     letras = request_form.getlist("fila")
@@ -16,7 +15,6 @@ def datos_sala_desde_form(request_form):
     filas_form = [{'fila': l, 'cantidad': c} for l, c in zip(letras, cantidades)] if letras else FILAS_INICIALES
 
     return {
-        "id_local": id_local,
         "numero_sala": numero_sala,
         "letras": letras,
         "cantidades": cantidades,
@@ -26,7 +24,7 @@ def datos_sala_desde_form(request_form):
 @salas_bp.route("/admin/salas/nueva", methods=["GET", "POST"])
 @api.admin_front_requerido
 def crear_sala():
-    id_local = request.args.get("id_local", type=int) or request.form.get("id_local", type=int)
+    id_local = request.args.get("id_local", type=int)
     filtro_estado = request.values.get("filtro_estado", "todas")
     filtro_local = request.values.get("filtro_local", type=int)
 
@@ -106,7 +104,7 @@ def editar_sala(id_sala):
         )
 
     datos, filas_form = datos_sala_desde_form(request.form)
-    datos.pop("id_local", None)
+    
 
     estado, resp = api.pedir('PATCH', f'/api/salas/{id_sala}', datos)
     estado_respuesta = api.verificar_estado(estado)
@@ -114,10 +112,9 @@ def editar_sala(id_sala):
         return estado_respuesta
 
     if estado != 200:
-        id_local = request.form.get("id_local", type=int)
         sala = {'id_sala': id_sala, 'numero_sala': datos['numero_sala']}
         
-        return render_template('admin_editar_sala.html', sala=sala, id_local=id_local,
+        return render_template('admin_editar_sala.html', sala=sala, id_local=None,
             numero_sala=datos['numero_sala'], filas=filas_form, filtro_estado=filtro_estado, 
             filtro_local=filtro_local, error=api.mensaje_error(resp)
         )

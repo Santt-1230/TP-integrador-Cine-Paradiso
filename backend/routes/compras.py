@@ -5,6 +5,7 @@ from services import compras as compras_services
 from services import pdf as pdf_services
 from validators import compras as compras_validators
 from services import mailer
+
 compras_bp = Blueprint('compras', __name__, url_prefix='/api')
 
 
@@ -32,6 +33,7 @@ def compra_id(id):
 @compras_bp.route('/compras', methods=['POST'])
 @login_requerido
 def registrar_compras():
+    
     datos = request.get_json()
     id_compra,error = compras_services.registrar_compra(session["id_usuario"], datos)
     if error == "FUNCION_INEXISTENTE":
@@ -92,16 +94,38 @@ def registrar_compras():
         return jsonify(error), 400
 
     factura, error = compras_services.obtener_factura(id_compra)
+
+    if error is not None:
+        return jsonify(construir_error_api(
+            code=error,
+            message="No se pudo obtener la factura",
+            description="La compra se registró, pero no se pudo generar su factura."
+        )), 500
+
+    
     pdf = pdf_services.generar_pdf_factura(factura)
     email_cliente = factura["cliente"]["email"]
     numero = factura["factura"].get("numero") or f"compra-{id_compra}"
+
+    # Obtener QR de entradas
     qrs, error_qr = compras_services.obtener_qr(id_compra, session["id_usuario"])
+
+    # Obtener QR de productos
+    qrs_productos, error_qr_productos = compras_services.obtener_qr_productos(id_compra, session["id_usuario"])
+
+    print("ID COMPRA:", id_compra, flush=True)
+    print("ERROR QR PRODUCTOS:", repr(error_qr_productos), flush=True)
+    print("QR RECUPERADOS:", len(qrs_productos or []), flush=True)
+
+    # Preparar los archivos adjuntos
     adjuntos = [{
         "contenido": pdf,
         "nombre": f"factura-{numero}.pdf",
         "tipo": "application",
         "subtipo": "pdf",
     }]
+
+    # Adjuntar PDF de entradas
     if not error_qr:
         adjuntos.append({
             "contenido": pdf_services.generar_pdf_entradas(factura, qrs),
@@ -109,6 +133,18 @@ def registrar_compras():
             "tipo": "application",
             "subtipo": "pdf",
         })
+
+    # Adjuntar PDF de productos
+    if not error_qr_productos and qrs_productos:
+        
+        adjuntos.append({
+            "contenido": pdf_services.generar_pdf_productos(qrs_productos),
+            "nombre": f"productos-{numero}.pdf",
+            "tipo": "application",
+            "subtipo": "pdf",
+        })
+
+        
     mailer.enviar_mail(
         destino=email_cliente,
         asunto="Factura de compra - Cine Paradiso",
@@ -117,9 +153,6 @@ def registrar_compras():
     )
     return jsonify({"message": "Compra registrada"}), 201
     
-
-    
-
 
 
 

@@ -1416,6 +1416,81 @@ a {
     background: var(--admin-rojo);
     border-radius: inherit;
 }
+.opiniones-admin h2 { margin: 0 0 1rem; font-size: 1.4rem; }
+
+.lista-opiniones {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-width: 900px;
+}
+
+.tarjeta-opinion {
+    background: #fff;
+    border-left: 5px solid #ff6464;
+    border-radius: 0.6rem;
+    padding: 1rem 1.2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.opinion-usuario { 
+    font-weight: 700; 
+    margin: 0.2rem 0;
+    }
+
+.opinion-email {
+    color: #555;
+    font-size: 0.85rem;
+    margin: 0.2rem 0;
+    overflow-wrap: anywhere;  
+}
+
+.opinion-fecha {
+    color: #777;
+    font-size: 0.85rem;
+    margin-top: 0.2rem;
+    margin-bottom: 0.6rem !important;
+}
+
+.opinion-texto {
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+    white-space: pre-line;
+}
+
+.sin-opiniones { color: #777; text-align: center; padding: 1.5rem; }
+
+.opinion-cabecera {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.opinion-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.opinion-estrellas i {
+    color: #CBD5E1;
+    font-size: 1rem;
+}
+
+.opinion-estrellas i.activa {
+    color: #E5A93D;
+}
+
+.badge-categoria-opinion {
+    background-color: #c9c9c9;
+    color: #000000;
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 999px;
+}
 
 /* =====================================================
    9. MÓDULO DE VALIDACIÓN QR
@@ -2873,6 +2948,18 @@ a {
     .panel-estadistico {
         padding: 16px 13px;
     }
+
+.servicios-admin .formulario-admin input[type="date"] {
+    width: 100%;
+    min-height: 40px;
+    padding: 0 12px;
+    border: 1px solid var(--admin-borde);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--admin-texto);
+    font: inherit;
+    font-size: 13px;
+}
 
     .tabla-barras__cabecera,
     .fila-barra--ocupacion {

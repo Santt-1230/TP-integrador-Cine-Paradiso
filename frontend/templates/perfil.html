@@ -282,25 +282,69 @@
             <h2>Merch</h2>
             <p>Aquí está tu merch.</p>
         </section>
-        <section id="tu-opinion" class="seccion-contenido {{ 'activa' if seccion == 'tu-opinion' }}">
+       <section id="tu-opinion" class="seccion-contenido {{ 'activa' if seccion == 'tu-opinion' }}">
             <div class="seccion-arrepentimiento">
                 <h2>Tu opinión</h2>
                 <p>Tu oportunidad para compartir tu opinión.</p>
 
-                <form method="post" action="{{ url_for('perfil.baja_cuenta') }}" onsubmit="return confirm('¿Estas seguro de enviar esta opinión?');">
+                <form method="post" action="{{ url_for('perfil.enviar_opinion') }}" onsubmit="return confirm('¿Estás seguro de enviar esta opinión?');">
+                    
+                    <!-- Puntuación con estrellas -->
                     <div class="form-group">
-                        <label for="comentario-baja">¿Que opinás de nuestros servicios?</label>
+                        <label for="puntuacion-numero">Puntuación (1 a 5) </label>
+
+                        <div class="selector-puntuacion">
+                            <div class="estrellas-interactivas" id="estrellas-interactivas">
+                                {% for i in range(1, 6) %}
+                                <button type="button" class="btn-estrella" data-valor="{{ i }}" aria-label="{{ i }} estrellas">★</button>
+                                {% endfor %}
+                            </div>
+
+                            <input
+                                type="number"
+                                id="puntuacion-numero"
+                                name="puntuacion"
+                                class="form-control input-puntuacion"
+                                min="1"
+                                max="5"
+                                step="1"
+                                placeholder="1-5"
+                                required
+                            >
+
+                            <span id="texto-puntuacion" class="texto-puntuacion">Elegí o escribí un puntaje</span>
+                        </div>
+                    </div>
+
+                    <!-- Categoría opcional -->
+                    <div class="form-group">
+                        <label for="categoria-opinion">Categoría (opcional)</label>
+                        <select id="categoria-opinion" name="categoria" class="form-control">
+                            <option value="">General (sin especificar)</option>
+                            <option value="cine">Por cine / Salas</option>
+                            <option value="servicio">Por servicio / Atención</option>
+                            <option value="combos">Combos y gastronomía</option>
+                            <option value="web">Experiencia en la web</option>
+                        </select>
+                    </div>
+
+                    <!-- Comentario -->
+                    <div class="form-group">
+                        <label for="comentario-opinion">¿Qué opinás de nuestros servicios? *</label>
                         <textarea 
-                            id="comentario-baja" 
+                            id="comentario-opinion" 
                             name="comentario" 
                             rows="4" 
                             class="form-control" 
+                            required
                             placeholder="Dejanos tu opinión para ayudarnos a mejorar..."
                         ></textarea>
                     </div>
+
                     <button type="submit" class="btn-cancelar">Enviar opinión</button>
                 </form>
             </div>
+
             <details class="seccion-arrepentimiento">
                 <summary><h3>Arrepentimiento / Baja del servicio</h3></summary>
 
