@@ -92,10 +92,6 @@ def registrar_compras():
     # Obtener QR de productos
     qrs_productos, error_qr_productos = compras_services.obtener_qr_productos(id_compra, session["id_usuario"])
 
-    print("ID COMPRA:", id_compra, flush=True)
-    print("ERROR QR PRODUCTOS:", repr(error_qr_productos), flush=True)
-    print("QR RECUPERADOS:", len(qrs_productos or []), flush=True)
-
     # Preparar los archivos adjuntos
     adjuntos = [{
         "contenido": pdf,
