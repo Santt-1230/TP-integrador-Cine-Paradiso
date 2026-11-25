@@ -1,6 +1,7 @@
 import string
 
 import utils as ut
+from validators import locales as locales_validators
 from constants import (
     ENTERO_POSITIVO_MINIMO,
     CAPACIDAD_MAXIMA,
@@ -10,18 +11,6 @@ from constants import (
 
 
 CAMPOS_EDITABLES = ('numero_sala', 'estado', 'letras', 'cantidades')
-
-
-def validar_id_local(id_local) -> int:
-    return ut.validar_entero_positivo(
-        id_local, ENTERO_POSITIVO_MINIMO, 'id_local'
-    )
-
-
-def validar_filtro_local(id_local) -> int | None:
-    if id_local is None or id_local == '':
-        return None
-    return validar_id_local(id_local)
 
 
 def validar_id_sala(id_sala) -> int:
@@ -152,7 +141,7 @@ def validar_creacion_sala(datos):
             raise error_datos(f"Falta el campo '{campo}'")
 
     return {
-        'id_local': validar_id_local(datos['id_local']),
+        'id_local': locales_validators.validar_id_local(datos['id_local']),
         'numero_sala': validar_numero_sala(datos['numero_sala']),
         'filas': validar_filas(datos['letras'], datos['cantidades']),
     }

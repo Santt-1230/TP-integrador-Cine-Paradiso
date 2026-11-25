@@ -18,7 +18,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const botonAgregar = document.getElementById('agregar-fila');
     const plantilla = document.getElementById('plantilla-fila');
 
-    // Con una sola fila, Eliminar queda deshabilitado
     function actualizarBotones() {
         const filas = contenedor.querySelectorAll('.fila-formulario');
         filas.forEach(fila => {

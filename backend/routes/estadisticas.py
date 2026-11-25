@@ -1,25 +1,15 @@
 from flask import Blueprint, jsonify, request
 
 from repositories.estadisticas import (
-    obtener_ventas_totales,
-    obtener_ventas_entradas,
-    obtener_ventas_productos,
-    obtener_ventas_por_genero,
-    obtener_cancelaciones,
-    obtener_entradas_vendidas_por_franja,
     obtener_ocupacion_por_funcion,
-    obtener_ocupacion_por_pelicula
+
 )
 
 from services.estadisticas import obtener_dashboard_estadisticas
 from utils import admin_requerido
 
 
-estadisticas_bp = Blueprint(
-    "estadisticas",
-    __name__,
-    url_prefix="/api/estadisticas"
-)
+estadisticas_bp = Blueprint("estadisticas", __name__, url_prefix="/api/estadisticas")
 
 
 def ejecutar_consulta_periodo(funcion, *args):
@@ -34,16 +24,12 @@ def ejecutar_consulta_periodo(funcion, *args):
         return jsonify({"mensaje": str(error)}), 400
 
 
-# DASHBOARD COMPLETO
-
 @estadisticas_bp.route("/dashboard", methods=["GET"])
 @admin_requerido
 def get_estadisticas_dashboard():
     return ejecutar_consulta_periodo(
         obtener_dashboard_estadisticas
     )
-
-# OCUPACIÓN Promedio
 
 @estadisticas_bp.route("/ocupacion", methods=["GET"])
 @admin_requerido

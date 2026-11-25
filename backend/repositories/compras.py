@@ -6,11 +6,6 @@ from decimal import Decimal, ROUND_HALF_UP
 
 CENTAVO = Decimal("0.01")
 
-def obtener_compras(id):
-    sql = "SELECT * FROM compras WHERE id_usuario = %s;"
-    params = [id]
-    compras = ejecutar_consulta(sql, params)
-    return compras
 
 
 def obtener_compra_id(id_compra, id_usuario):
@@ -30,7 +25,7 @@ def generar_numero_factura(id_compra):
 def registrar_compra(id_usuario, datos, productos, descuento=Decimal("0.00")):
     with transaccion() as cursor:
 
-        # Obtener el precio de las entradas
+  
         cursor.execute(
             "SELECT precio_entrada FROM funciones WHERE id_funcion = %s",
             (datos["id_funcion"],),
@@ -84,10 +79,8 @@ def registrar_compra(id_usuario, datos, productos, descuento=Decimal("0.00")):
             if cursor.rowcount != 1:
                 raise RuntimeError("No se pudo agregar un producto a la compra")
 
-            # Obtener el identificador del producto comprado
             id_compra_producto = cursor.lastrowid
 
-            # Registrar el QR del producto
             qr_registrado = False
 
             for token, codigo in item["qrs"]:
@@ -104,7 +97,6 @@ def registrar_compra(id_usuario, datos, productos, descuento=Decimal("0.00")):
             if not qr_registrado:
                 raise RuntimeError("No se pudo generar el QR del producto")
 
-            # Actualizar el total
             cursor.execute(
                 "UPDATE compras SET total = total + %s WHERE id_compra = %s",
                 (subtotal_producto, id_compra),
@@ -184,20 +176,7 @@ def butacas_disponibles(id_funcion, id_butacas):
 
     return "disponibles"
 
-def obtener_funcion_precio(id_funcion):
-    sql = "SELECT precio_entrada from funciones WHERE id_funcion = %s"
-    parametros = [id_funcion]
-    precio_unitario = ejecutar_consulta(sql, parametros)
-    return precio_unitario[0] if precio_unitario else None
 
-
-
-
-def obtener_entradas(id_compra):
-    sql = "SELECT * FROM entradas WHERE id_compra = %s"
-    parametros = [id_compra]
-    entradas = ejecutar_consulta(sql, parametros)
-    return entradas
 
 
 def obtener_entradas_factura(id_compra):
@@ -241,24 +220,6 @@ def obtener_producto_activo(id_producto):
     return filas[0] if filas else None
 
 
-def insertar_servicio_compra(id_compra, id_producto, cantidad, precio):
-    return ejecutar_mutacion(
-        "INSERT INTO compra_productos "
-        "(id_compra, id_producto, cantidad, precio_unitario) "
-        "VALUES (%s, %s, %s, %s)",
-        (id_compra, id_producto, cantidad, precio),
-    )
-
-
-def actualizar_total_compra(id_compra, subtotal):
-    ejecutar_mutacion(
-        "UPDATE compras SET total = total + %s WHERE id_compra = %s",
-        (subtotal, id_compra),
-    )
-    filas = ejecutar_consulta(
-        "SELECT total FROM compras WHERE id_compra = %s", (id_compra,)
-    )
-    return filas[0]["total"] if filas else None
 
 def butacas_id(id_butaca):
     butaca = ejecutar_consulta(

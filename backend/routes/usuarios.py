@@ -56,8 +56,8 @@ def login():
         estado = 403 if error[0] == "EMAIL_NO_VERIFICADO" else 401
         return jsonify(construir_error_api(*error)), estado
 
-    session.clear() #Borra cualquier dato de sesion previa antes de inicaiar una nueva
-    session["id_usuario"] = usuario["id_usuario"] #Guarda una cookie con el id de la persona autenticad
+    session.clear() 
+    session["id_usuario"] = usuario["id_usuario"] 
     session["rol"] = usuario["rol"] 
     return jsonify({"usuario": usuario}), 200
 
@@ -107,8 +107,8 @@ def editar_perfil():
     if error:
         if error[0] == "SESION_INVALIDA":
             session.clear()
-            return jsonify(construir_error_api(*error)), 401 #Unauthorized
-        return jsonify(construir_error_api(*error)), 409 #Cualquier otro error, 409 --> conflict
+            return jsonify(construir_error_api(*error)), 401 
+        return jsonify(construir_error_api(*error)), 409 
     return jsonify(usuario), 200
 
 @usuarios_bp.route("/usuarios/me", methods=["GET"])
@@ -116,7 +116,7 @@ def editar_perfil():
 def ver_perfil():
     usuario, error = usuarios_service.obtener_perfil(session["id_usuario"])
     if error:
-        session.clear() #--> El usuario fue dado de baja o desactivado, por lo tanto se cierra su sesion para evitar problemas
+        session.clear() 
         return jsonify(construir_error_api(*error)), 401
 
     return jsonify(usuario), 200

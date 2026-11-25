@@ -112,7 +112,6 @@ def datos_formulario_funcion(filtros=None):
 
 
 def _inicio_funcion():
-    # si se tilda "empieza ahora", el inicio es dentro de 2 minutos
     if request.form.get("empieza_ahora"):
         return (datetime.now() + timedelta(minutes=2)).strftime("%Y-%m-%dT%H:%M")
     return request.form.get("fecha_hora_inicio")
@@ -137,7 +136,6 @@ def _situacion_funcion(funcion):
 
 
 def _preparar_funciones_admin(funciones):
-    # las canceladas no se muestran; las demás van con su situación
     orden = {"En curso": 0, "Programada": 1, "Finalizada": 2}
     visibles = []
     for funcion in funciones:
@@ -259,7 +257,6 @@ def admin_historial_funciones():
     else:
         filtro = ""
 
-    # las más recientes primero
     funciones.sort(key=lambda f: str(f.get("fecha_hora_inicio")), reverse=True)
     return render_template(
         "admin_funciones_historial.html",

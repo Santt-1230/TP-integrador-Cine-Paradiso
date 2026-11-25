@@ -125,6 +125,7 @@ def crear_sala(id_local, numero_sala, filas):
 
     
 def actualizar_sala(id_sala, cambios):
+    cambios = cambios.copy()
     with transaccion() as cursor:
         if 'filas' in cambios:
             filas = cambios.pop('filas')

@@ -1,46 +1,12 @@
 from flask import Blueprint, jsonify, session, request, send_file
 from io import BytesIO
-from utils import construir_error_api, validar_entero_positivo,login_requerido
+from utils import construir_error_api,login_requerido
 from services import compras as compras_services
 from services import pdf as pdf_services
-from validators import compras as compras_validators
+
 from services import mailer
 
 compras_bp = Blueprint('compras', __name__, url_prefix='/api')
-
-
-@compras_bp.route('/compras', methods=['GET'])
-@login_requerido
-def listar_compras():
-    id_usuario = session["id_usuario"]
-    compras, error = compras_services.listar_compras(id_usuario)
- 
-    if error == "SIN_COMPRAS":
-        return jsonify(construir_error_api(
-            code="SIN_COMPRAS",
-            message="Usuario sin compras",
-            description=f"La compra del usuario de ID: {id_usuario} no existe o no le pertenece"
-        )), 404
-    return jsonify(compras), 200
-
-
-
-
-@compras_bp.route('/compras/<int:id>', methods=['GET'])
-@login_requerido
-def compra_id(id):
-    if session["rol"] == "administrador":
-        compra, error = compras_services.compra_id(id)
-    else:
-        compra, error = compras_services.compra_id(id, session["id_usuario"])
-    if error == "COMPRA_INEXISTENTE":
-        return jsonify(construir_error_api(
-            code="COMPRA_INEXISTENTE",
-            message="COMPRA NO ENCONTRADA",
-            description=f"La compra de ID: {id} no existe o no le pertenece"
-        )), 404
-    return jsonify(compra), 200
-
 
 
 @compras_bp.route('/compras', methods=['POST'])
@@ -120,17 +86,10 @@ def registrar_compras():
     email_cliente = factura["cliente"]["email"]
     numero = factura["factura"].get("numero") or f"compra-{id_compra}"
 
-    # Obtener QR de entradas
     qrs, error_qr = compras_services.obtener_qr(id_compra, session["id_usuario"])
 
-    # Obtener QR de productos
     qrs_productos, error_qr_productos = compras_services.obtener_qr_productos(id_compra, session["id_usuario"])
 
-    print("ID COMPRA:", id_compra, flush=True)
-    print("ERROR QR PRODUCTOS:", repr(error_qr_productos), flush=True)
-    print("QR RECUPERADOS:", len(qrs_productos or []), flush=True)
-
-    # Preparar los archivos adjuntos
     adjuntos = [{
         "contenido": pdf,
         "nombre": f"factura-{numero}.pdf",
@@ -138,7 +97,6 @@ def registrar_compras():
         "subtipo": "pdf",
     }]
 
-    # Adjuntar PDF de entradas
     if not error_qr:
         adjuntos.append({
             "contenido": pdf_services.generar_pdf_entradas(factura, qrs),
@@ -147,7 +105,6 @@ def registrar_compras():
             "subtipo": "pdf",
         })
 
-    # Adjuntar PDF de productos
     if not error_qr_productos and qrs_productos:
         
         adjuntos.append({

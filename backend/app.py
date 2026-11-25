@@ -21,10 +21,8 @@ from routes.opiniones import opiniones_bp
 
 
 
-# 1. Cargar variables de entorno
 load_dotenv()
 
-# 2. Inicializar la app UNA SOLA VEZ
 app = Flask(__name__)
 app.json.ensure_ascii = False
 app.secret_key = os.getenv("SECRET_KEY") 
@@ -50,7 +48,6 @@ app.register_blueprint(opiniones_bp)
 
 
 
-# 4. Manejador global de errores
 @app.errorhandler(RuntimeError)
 def error_de_conexion(error):
     respuesta = construir_error_api(

@@ -18,7 +18,7 @@ def obtener_locales():
 @locales_bp.route('/locales/<id_local>', methods = ['GET'])
 def obtener_local(id_local):
     try:
-        local = locales_services.obtener_local_activo(id_local)
+        local = locales_services.obtener_local(id_local)
         return jsonify({'local': local}), 200
 
     except ValueError as error:
@@ -27,6 +27,9 @@ def obtener_local(id_local):
 
         if codigo == ERROR_CODE_LOCAL_NOT_FOUND:
             return jsonify(respuesta), 404
+
+        if codigo == ERROR_CODE_LOCAL_INACTIVE:
+            return jsonify(respuesta), 409
 
         return jsonify(respuesta), 400
 

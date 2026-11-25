@@ -27,7 +27,6 @@ def generar_pdf_factura(factura):
     datos = factura["factura"]
     contenido.append(Paragraph(
         f"<b>Número:</b> {escape(str(datos.get('numero') or ''))}"
-        f" &nbsp;&nbsp; <b>Compra:</b> {escape(str(datos.get('id_compra') or ''))}"
         f" &nbsp;&nbsp; <b>Emisión:</b> {escape(str(datos.get('fecha_emision') or ''))}"
         f" &nbsp;&nbsp; <b>Estado:</b> {escape(str(datos.get('estado') or ''))}",
         estilos["BodyText"],
@@ -38,8 +37,7 @@ def generar_pdf_factura(factura):
         Paragraph("Cliente", estilos["Heading2"]),
         Paragraph(
             f"{escape(str(cliente.get('nombre') or ''))} — "
-            f"{escape(str(cliente.get('email') or ''))} "
-            f"(ID {escape(str(cliente.get('id_usuario') or ''))})",
+            f"{escape(str(cliente.get('email') or ''))}",
             estilos["BodyText"],
         ),
         Spacer(1, 4 * mm),
@@ -244,12 +242,10 @@ def generar_pdf_productos(qrs):
 
     estilos = getSampleStyleSheet()
 
-    # Colores de Cine Paradiso
     color_marca = colors.HexColor("#172B4D")
     color_acento = colors.HexColor("#E5A93D")
     color_fondo = colors.HexColor("#F3F6FA")
 
-    # Estilos
     estilo_marca = ParagraphStyle(
         "MarcaProducto",
         parent=estilos["Heading2"],
@@ -321,7 +317,6 @@ def generar_pdf_productos(qrs):
 
     for indice, qr in enumerate(qrs):
 
-        # Encabezado
         encabezado = Table(
             [[
                 Paragraph("CINE PARADISO", estilo_marca),
@@ -343,7 +338,6 @@ def generar_pdf_productos(qrs):
             ("LINEBELOW", (0, -1), (-1, -1), 3, color_acento),
         ]))
 
-        # Información del producto
         datos_producto = Table([
             [
                 Paragraph("CATEGORÍA", estilo_etiqueta),
@@ -386,7 +380,6 @@ def generar_pdf_productos(qrs):
             ("BOTTOMPADDING", (0, 0), (-1, -1), 7),
         ]))
 
-        # Construir contenido de la página
         contenido.extend([
             encabezado,
             Spacer(1, 12 * mm),
@@ -410,7 +403,6 @@ def generar_pdf_productos(qrs):
             Spacer(1, 10 * mm),
         ])
 
-        # Generar imagen QR
         imagen_qr = qrcode.make(qr["token"])
 
         buffer_qr = BytesIO()
@@ -424,7 +416,6 @@ def generar_pdf_productos(qrs):
             hAlign="CENTER"
         )
 
-        # Enmarcar QR
         tarjeta_qr = Table(
             [[imagen]],
             colWidths=[82 * mm],
@@ -469,7 +460,6 @@ def generar_pdf_productos(qrs):
             ),
         ])
 
-        # Una página por producto
         if indice < len(qrs) - 1:
             contenido.append(PageBreak())
 

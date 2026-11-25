@@ -13,7 +13,7 @@ def registrar_qr(id_compra, id_entrada, tipo, token, codigo_manual):
         parametros = [id_compra, id_entrada, tipo, token, codigo_manual]      
         ejecutar_mutacion(sql, parametros)
         return True
-    except IntegrityError: # False cuando no se cumple con las reglas de la base de datos, UNIQUE..
+    except IntegrityError: 
         return False
 
 def registrar_qr_producto(cursor, id_compra, id_compra_producto, token, codigo_manual):

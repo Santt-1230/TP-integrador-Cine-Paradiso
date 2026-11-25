@@ -1,10 +1,10 @@
-from werkzeug.security import generate_password_hash, check_password_hash #Importa funciones de la libreria Werkzeug para el cifrado y verificacion de contraseñas
+from werkzeug.security import generate_password_hash, check_password_hash 
 from repositories import usuarios as usuarios_repository
 from repositories import tokens as tokens_repository
 import hashlib
-import os #Permite interactuar con el sistema operativo y variables del entorno del servidor
-import secrets #Para generar tokens o numeros aleatorios
-from services import mailer #EPara armar y enviar correos electronicos
+import os 
+import secrets 
+from services import mailer 
 
 SESION_INVALIDA = ("SESION_INVALIDA","Sesion no valida", "La sesion no es valida")
 EMAIL_DUPLICADO = ("EMAIL_DUPLICADO", "Email en uso", "El email que quieres usar ya esta en uso")
@@ -32,8 +32,8 @@ def hashear_token(token):
     return hashlib.sha256(token.encode()).hexdigest()
 
 def enviar_verificacion(id_usuario, nombre, email):
-    token = secrets.token_urlsafe(32)  # el token real solo viaja por mail; en la base se guarda su hash
-    tokens_repository.invalidar_tokens(id_usuario, "verificar_email")  # el link anterior deja de servir
+    token = secrets.token_urlsafe(32)  
+    tokens_repository.invalidar_tokens(id_usuario, "verificar_email")  
     tokens_repository.crear_token(id_usuario, "verificar_email", hashear_token(token), MINUTOS_VALIDEZ_TOKEN)
 
     link = f"{os.getenv('FRONTEND_URL', 'http://localhost:5001')}/verificar-email?token={token}"

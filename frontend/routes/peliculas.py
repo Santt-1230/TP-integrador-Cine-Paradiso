@@ -19,14 +19,8 @@ DIAS = [
     "Domingo"
 ]
 
-# Pantalla de elección de butacas de una función.
-# Si cambia la ruta, se modifica solamente acá.
 URL_COMPRA = "/funciones/{id_funcion}/butacas"
 
-
-# ====================================
-# MANEJO DE ERRORES
-# ====================================
 
 def error_backend(estado, datos):
 
@@ -46,16 +40,8 @@ def error_formato():
     ), 502
 
 
-# ====================================
-# FILTROS DE FECHA Y PRECIO
-# ====================================
-
 @peliculas_front_bp.app_template_filter("fecha_ar")
 def fecha_ar(valor):
-    """
-    '2026-10-31' -> '31/10/2026'.
-    Si no es una fecha válida, devuelve el valor tal cual.
-    """
 
     try:
         return date.fromisoformat(valor).strftime("%d/%m/%Y")
@@ -66,10 +52,6 @@ def fecha_ar(valor):
 
 @peliculas_front_bp.app_template_filter("precio_ar")
 def precio_ar(valor):
-    """
-    5500.0 -> '$5.500'.
-    5500.5 -> '$5.500,50'.
-    """
 
     try:
         numero = float(valor)
@@ -86,9 +68,6 @@ def precio_ar(valor):
     return "$" + texto.replace(",", "X").replace(".", ",").replace("X", ".")
 
 
-# ====================================
-# AGRUPAR FUNCIONES POR DÍA
-# ====================================
 
 def agrupar_por_dia(funciones):
 
@@ -128,10 +107,6 @@ def agrupar_por_dia(funciones):
     ]
 
 
-# ====================================
-# OBTENER LISTA DE PELÍCULAS
-# ====================================
-
 def obtener_peliculas(params=None):
 
     estado, respuesta = api.get(
@@ -151,10 +126,6 @@ def obtener_peliculas(params=None):
     return respuesta["peliculas"], None
 
 
-# ====================================
-# PÁGINA DE INICIO
-# ====================================
-
 CANTIDAD_CARRUSEL = 4
 
 
@@ -166,7 +137,6 @@ def _fecha_funcion(texto):
 
 
 def _proximas_funciones():
-    # id de película -> fecha de su función más cercana que todavía no empezó
     proximas = {}
     ahora = datetime.now()
     filtros = {}
@@ -193,7 +163,6 @@ def _generos_texto(generos):
 
 
 def _destacadas(peliculas):
-    # primero las que tienen función (la más cercana primero), después las de estreno más reciente
     todas, _ = obtener_peliculas({"limite": 50})
     candidatas = todas or peliculas
     proximas = _proximas_funciones()
@@ -209,7 +178,6 @@ def _destacadas(peliculas):
     )
 
     destacadas = []
-    # con un cine elegido, solo las películas que tienen función ahí
     por_cine = bool(api.session.get("cine_id"))
     for p in con_funcion + ([] if por_cine else sin_funcion):
         item = dict(p)
@@ -234,9 +202,6 @@ def inicio():
 
     destacadas = _destacadas(peliculas)
 
-    # Si los endpoints de promociones o servicios fallan,
-    # las secciones simplemente se muestran vacías.
-
     promociones = api.get_lista(
         "/api/promociones",
         "promociones"
@@ -254,11 +219,6 @@ def inicio():
         promociones=promociones,
         productos=productos
     )
-
-
-# ====================================
-# LISTADO DE PELÍCULAS
-# ====================================
 
 @peliculas_front_bp.get("/buscar")
 def buscar():
@@ -297,17 +257,12 @@ def lista():
         if valor
     }
 
-    # Obtener películas aplicando los filtros.
     peliculas, error = obtener_peliculas(filtros)
 
     if error:
         return error
 
-    # Las opciones del selector salen de la lista sin filtrar,
-    # para no perder géneros al aplicar un filtro.
-
     if filtros:
-
         todas, error = obtener_peliculas()
 
         if error:
@@ -333,14 +288,8 @@ def lista():
     )
 
 
-# ====================================
-# DETALLE DE UNA PELÍCULA
-# ====================================
-
 @peliculas_front_bp.get("/peliculas/<int:id_pelicula>")
 def detalle(id_pelicula):
-
-    # Obtener película seleccionada.
 
     estado, pelicula = api.get(
         f"/api/peliculas/{id_pelicula}"
@@ -353,8 +302,6 @@ def detalle(id_pelicula):
         api.session["pelicula_pendiente_id"] = id_pelicula
         return redirect(url_for("locales.mostrar_locales"))
 
-    # Obtener otras películas para recomendar.
-
     otras = api.get_lista(
         "/api/peliculas",
         "peliculas",
@@ -366,9 +313,6 @@ def detalle(id_pelicula):
         for p in otras
         if p["id_pelicula"] != id_pelicula
     ][:3]
-
-    # Obtener funciones disponibles.
-    # Si el endpoint falla, se muestra la película igualmente.
 
     filtros_funciones = {
         "pelicula_id": id_pelicula

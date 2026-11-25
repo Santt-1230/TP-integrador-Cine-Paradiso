@@ -5,7 +5,6 @@ from validators import peliculas as validador
 
 
 def buscar(texto, pagina):
-    """Busca titulos en TMDB y marca cuales ya estan en el catalogo propio. Devuelve (resultado, error)."""
     texto, pagina, error = validador.validar_busqueda_externa(texto, pagina)
     if error:
         return None, (400, *error)

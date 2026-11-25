@@ -8,7 +8,7 @@
     <div class="inicio-admin__encabezado">
         <p>ADMINISTRACIÓN / INICIO</p>
 
-        <h1>Buen día, {{ nombre_admin|default('ADMIN', true) }}</h1>
+        <h1>Buen día, {{ session.get('nombre') }}</h1>
 
         <p>Este es el resumen de la actividad de Cine Paradiso.</p>
     </div>

@@ -31,7 +31,6 @@ def perfil_seccion(seccion):
     datos = {}
     historial = {"compras": [], "peliculas_vistas": []}
 
-    # 1. Datos personales del usuario
     estado, res_datos = pedir("GET", "/api/usuarios/me")
     redir = verificar_estado(estado)
     if redir:
@@ -42,7 +41,6 @@ def perfil_seccion(seccion):
     else:
         flash(mensaje_error(res_datos), "error")
 
-    # 2. Historial real desde el backend
     if seccion in ("mis-compras", "peliculas-vistas"):
         estado_h, res_hist = pedir("GET", "/api/usuarios/me/historial")
         redir_h = verificar_estado(estado_h)
@@ -65,7 +63,6 @@ def perfil_seccion(seccion):
                     for clave, valor in extra.get(compra["id_compra"], {}).items():
                         compra.setdefault(clave, valor)
 
-    # 3. Completar datos de película, póster, total y fecha de compra
     if seccion == 'mis-compras':
         zona_ar = ZoneInfo("America/Argentina/Buenos_Aires")
         ahora = datetime.now(zona_ar)
@@ -76,7 +73,6 @@ def perfil_seccion(seccion):
         for compra in (historial.get("compras") or []):
             es_cancelada = compra.get("estado") == "cancelada"
 
-            # Buscar datos de la función
             id_funcion = compra.get("id_funcion")
             if id_funcion and id_funcion not in cache_funciones:
                 est_f, res_f = pedir("GET", f"/api/funciones/{id_funcion}")
@@ -109,7 +105,6 @@ def perfil_seccion(seccion):
             )
             genero = pelicula.get("genero") or funcion.get("genero") or "CINE"
 
-            # Si la función no trajo el póster, buscarlo en /api/peliculas/<id_pelicula>
             id_pelicula = pelicula.get("id_pelicula") or funcion.get("id_pelicula") or compra.get("id_pelicula")
             if not poster_url and id_pelicula:
                 if id_pelicula not in cache_peliculas:
@@ -134,7 +129,6 @@ def perfil_seccion(seccion):
             compra["poster_url"] = poster_url
             compra["genero"] = genero
 
-            # Local, sala y butacas (conserva las de /api/historial si 'entradas' viene vacía)
             compra["local"] = compra.get("local") or local.get("nombre") or funcion.get("local_nombre") or funcion.get("local") or ""
             compra["numero_sala"] = compra.get("numero_sala") or sala.get("numero_sala") or sala.get("numero") or funcion.get("numero_sala") or ""
 
@@ -145,11 +139,9 @@ def perfil_seccion(seccion):
             else:
                 compra.setdefault("butacas", "")
 
-            # Formatear precio total
             total_num = float(compra.get("total") or 0)
             compra["total_formateado"] = f"${total_num:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
 
-            # Fecha de COMPRA
             fecha_compra_raw = compra.get("fecha_hora") or compra.get("fecha_creacion")
             if fecha_compra_raw:
                 try:
@@ -164,7 +156,6 @@ def perfil_seccion(seccion):
             else:
                 compra["fecha_formateada"] = ""
 
-            # Fecha de FUNCIÓN y permiso de cancelación
             fecha_funcion_raw = compra.get("fecha_hora_inicio") or funcion.get("fecha_hora_inicio")
             if fecha_funcion_raw:
                 try:
@@ -376,7 +367,7 @@ def enviar_opinion():
     try:
         puntuacion = int(request.form.get("puntuacion", ""))
     except ValueError:
-        puntuacion = 0  # el back la rechaza con su mensaje
+        puntuacion = 0  
 
     payload = {
         "texto": texto,

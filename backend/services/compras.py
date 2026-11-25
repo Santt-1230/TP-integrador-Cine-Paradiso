@@ -85,60 +85,9 @@ def generar_codigo_manual():
     return "".join(secrets.choice(const.ALFABETO_CODIGO) for _ in range(12))
 
 
-def construir_compra(compra, pelicula, entradas, productos):
-    compra = {
-        "id": compra["id_compra"],
-        "fecha": compra["fecha_creacion"],
-        "fecha_confirmacion": compra.get("fecha_confirmacion"),
-        "estado": compra["estado"],
-        "pelicula": {"id": pelicula["id_pelicula"],
-                     "titulo": pelicula["nombre"],
-                     "imagen_url": pelicula["poster_url"]},
-        "entrada": [],
-        "productos": productos,
-        "total": compra["total"]
-    }
-    for entrada in entradas:
-        butaca = compras_repositories.butacas_id(entrada["id_butaca"])
-        entrada_dict = {
-            "id_entrada": entrada["id_entrada"],
-            "fila": butaca["fila"],
-            "numero": butaca["numero"],
-            "estado": entrada["estado"]
-        }
-        compra["entrada"].append(entrada_dict)
-    return compra
-
-
-def listar_compras(id_usuario):
-    compras = compras_repositories.obtener_compras(id_usuario)
-    if not compras:
-        return None, "SIN_COMPRAS"
-    resultado = []
-    
-    for compra in compras:
-        funcion = compras_repositories.obtener_funcion(compra["id_funcion"])
-        pelicula = peliculas_repositories.buscar_por_id(funcion["id_pelicula"])
-        entradas  = compras_repositories.obtener_entradas(compra["id_compra"])
-        productos = compras_repositories.obtener_productos_compra(compra["id_compra"])
-        resultado.append(construir_compra(compra, pelicula, entradas, productos))
-    return resultado, None
-
-
-def compra_id(id_compra, id_usuario=None):
-    compra = compras_repositories.obtener_compra_id(id_compra, id_usuario)
-    if not compra:
-        return None, "COMPRA_INEXISTENTE"
-    funcion = compras_repositories.obtener_funcion(compra["id_funcion"])
-    pelicula = peliculas_repositories.buscar_por_id(funcion["id_pelicula"])
-    entradas  = compras_repositories.obtener_entradas(compra["id_compra"])
-    productos = compras_repositories.obtener_productos_compra(compra["id_compra"])
-
-    return construir_compra(compra,pelicula,entradas,productos), None
 
 def registrar_compra(id_usuario, datos):
 
-    # Validar los datos recibidos
     error = compras_validators.validar_datos(datos)
 
     if error is not None:
@@ -152,7 +101,6 @@ def registrar_compra(id_usuario, datos):
     if funcion["estado"] != "programada":
         return None, "FUNCION_NO_DISPONIBLE"
 
-    # Comprobar disponibilidad de butacas
     estado_butacas = compras_repositories.butacas_disponibles(
         funcion["id_funcion"],
         datos["butacas"]
@@ -167,7 +115,6 @@ def registrar_compra(id_usuario, datos):
     if estado_butacas != "disponibles":
         return None, "BUTACA_NO_DISPONIBLE"
 
-    # Preparar productos y sus futuros QR
     productos = []
 
     for item in datos.get("productos", []):
@@ -188,7 +135,6 @@ def registrar_compra(id_usuario, datos):
             ]
         })
 
-    # Calcular subtotal de entradas
     precio_entrada = Decimal(
         str(funcion["precio_entrada"])
     ).quantize(CENTAVO, rounding=ROUND_HALF_UP)
@@ -197,7 +143,6 @@ def registrar_compra(id_usuario, datos):
         precio_entrada * len(datos["butacas"])
     ).quantize(CENTAVO, rounding=ROUND_HALF_UP)
 
-    # Calcular subtotal de productos
     subtotal_productos = sum(
         (
             Decimal(str(item["producto"]["precio"]))
@@ -207,12 +152,10 @@ def registrar_compra(id_usuario, datos):
         Decimal("0.00")
     ).quantize(CENTAVO, rounding=ROUND_HALF_UP)
 
-    # Calcular subtotal general
     subtotal_compra = (
         subtotal_entradas + subtotal_productos
     ).quantize(CENTAVO, rounding=ROUND_HALF_UP)
 
-    # Calcular descuentos de promociones
     descuento, error_promocion = calcular_descuentos_compra(
         datos.get("id_promociones", []),
         len(datos["butacas"]),
@@ -223,7 +166,6 @@ def registrar_compra(id_usuario, datos):
     if error_promocion:
         return None, error_promocion
 
-    # Registrar la compra
     try:
         id_compra = compras_repositories.registrar_compra(
             id_usuario,
@@ -241,13 +183,6 @@ def registrar_compra(id_usuario, datos):
     return id_compra, None
 
 
-def cancelar_compra(id_compra, id_usuario):
-    compra = compras_repositories.obtener_compra_id(id_compra, id_usuario)
-    if not compra:
-        return "COMPRA_INEXISTENTE"
-    if not compras_repositories.cancelacion_de_compra(id_compra, id_usuario):
-        return "ERROR_CANCELACION"
-    return None
 
 def construir_factura(compra, cliente, funcion, entradas, productos, sala, pelicula, local):
     subtotal_entradas = sum((Decimal(str(entrada["precio_unitario"])) for entrada in entradas), Decimal("0.00"))
