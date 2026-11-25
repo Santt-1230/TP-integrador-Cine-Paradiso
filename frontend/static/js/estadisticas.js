@@ -1,7 +1,6 @@
 'use strict';
 
 document.addEventListener('DOMContentLoaded', () => {
-    animarBarrasOcupacion();
     dimensionarBarrasComparativas();
     configurarFiltroPeriodo();
 });
@@ -9,25 +8,6 @@ document.addEventListener('DOMContentLoaded', () => {
 function limitarPorcentaje(valor) {
     if (!Number.isFinite(valor)) return 0;
     return Math.min(100, Math.max(0, valor));
-}
-function animarBarrasOcupacion() {
-    const rellenos = document.querySelectorAll(
-        '.tabla-barras--ocupacion .fila-barra__relleno'
-    );
-
-    rellenos.forEach((relleno) => {
-
-        const anchoOriginal = Number.parseFloat(relleno.style.width);
-        const anchoFinal = limitarPorcentaje(
-            Number.isFinite(anchoOriginal) ? anchoOriginal : 0
-        );
-
-        const pista = relleno.closest('.fila-barra__pista');
-
-        if (pista) {
-            pista.setAttribute('aria-valuenow', String(anchoFinal));
-        }
-    });
 }
 
 function dimensionarBarrasComparativas() {
