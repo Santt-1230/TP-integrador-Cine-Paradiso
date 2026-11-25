@@ -67,7 +67,7 @@ def modificar_promocion_route(id_promocion):
 
     datos_completos = actual.copy()
     datos_completos["activa"] = bool(datos_completos["activa"])
-    datos_completos.update(datos or {})
+    datos_completos.update(datos)
     
     mensaje = validar_modificacion(datos_completos)
     if mensaje:
