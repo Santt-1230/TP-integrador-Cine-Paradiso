@@ -9,27 +9,6 @@ from services import mailer
 compras_bp = Blueprint('compras', __name__, url_prefix='/api')
 
 
-
-
-
-
-@compras_bp.route('/compras/<int:id>', methods=['GET'])
-@login_requerido
-def compra_id(id):
-    if session["rol"] == "administrador":
-        compra, error = compras_services.compra_id(id)
-    else:
-        compra, error = compras_services.compra_id(id, session["id_usuario"])
-    if error == "COMPRA_INEXISTENTE":
-        return jsonify(construir_error_api(
-            code="COMPRA_INEXISTENTE",
-            message="COMPRA NO ENCONTRADA",
-            description=f"La compra de ID: {id} no existe o no le pertenece"
-        )), 404
-    return jsonify(compra), 200
-
-
-
 @compras_bp.route('/compras', methods=['POST'])
 @login_requerido
 def registrar_compras():

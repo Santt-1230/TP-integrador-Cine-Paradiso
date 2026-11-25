@@ -8,6 +8,15 @@ CENTAVO = Decimal("0.01")
 
 
 
+def obtener_compra_id(id_compra, id_usuario):
+    sql = "SELECT * FROM compras WHERE id_compra = %s"
+    parametros = [id_compra]
+    if id_usuario is not None:
+        sql += " AND id_usuario = %s"
+        parametros.append(id_usuario)
+    compra = ejecutar_consulta(sql, parametros)
+    return  compra[0] if compra else None
+
 
 def generar_numero_factura(id_compra):
     anio = datetime.now().year
@@ -173,11 +182,7 @@ def butacas_disponibles(id_funcion, id_butacas):
 
 
 
-def obtener_entradas(id_compra):
-    sql = "SELECT * FROM entradas WHERE id_compra = %s"
-    parametros = [id_compra]
-    entradas = ejecutar_consulta(sql, parametros)
-    return entradas
+
 
 
 def obtener_entradas_factura(id_compra):

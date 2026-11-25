@@ -198,13 +198,7 @@ def registrar_compra(id_usuario, datos):
     return id_compra, None
 
 
-def cancelar_compra(id_compra, id_usuario):
-    compra = compras_repositories.obtener_compra_id(id_compra, id_usuario)
-    if not compra:
-        return "COMPRA_INEXISTENTE"
-    if not compras_repositories.cancelacion_de_compra(id_compra, id_usuario):
-        return "ERROR_CANCELACION"
-    return None
+
 
 def construir_factura(compra, cliente, funcion, entradas, productos, sala, pelicula, local):
     subtotal_entradas = sum((Decimal(str(entrada["precio_unitario"])) for entrada in entradas), Decimal("0.00"))
